@@ -1,4 +1,4 @@
-import Boton_Landing from "../Components/Boton_Landig"
+import Boton_Landing from "../Components/Boton_Landing"
 import Header from "../Components/Header"
 
 function Home() {
