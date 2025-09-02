@@ -1,5 +1,5 @@
 import Headers from "../Components/Header"
-import Boton_Landing from "../Components/Boton_Landig"
+import Boton_Landing from "../Components/Boton_Landing"
 
 function Practicas (){
 
