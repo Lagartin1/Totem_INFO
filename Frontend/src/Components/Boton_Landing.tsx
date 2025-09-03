@@ -1,12 +1,16 @@
-import { useNavigate,Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 
 function Boton_Landing({Title,Link}: {Title: string, Link: string}) {
+    const navigate = useNavigate();
+
+    const handleClick = () => {
+        navigate(Link);
+    };
+
     return (
-    <div className="flex flex-row items-center rounded-2xl p-10 w-60 h-40 bg-blue-200 " >
-        <a href={Link} className="text-justify">
-            <h3 className="text-2xl p-5">{Title}</h3>
-        </a>
+    <div className="flex items-center justify-center rounded-2xl p-10 w-60 h-40 bg-blue-200 shadow-2xl" onClick={handleClick}>
+        <h3 className="text-justify text-2xl p-5">{Title}</h3>
     </div>
 
     )
