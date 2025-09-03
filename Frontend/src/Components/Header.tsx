@@ -11,7 +11,7 @@ function Header(){
             </header>
             <div className="px-30 -mt-4">
                 <Breadcrumbs/>
-            <hr className="border-gray-300" />    
+            <hr className="border-gray-400" />    
             </div>
         </>
     )

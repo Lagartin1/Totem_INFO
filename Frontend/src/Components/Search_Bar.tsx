@@ -1,7 +1,7 @@
 function Search_Bar() {
   return (
     <div className="flex justify-center mb-8">
-      <div className="relative w-full max-w-md">
+      <div className="relative w-full max-w-md bg-white rounded-md">
         <input
           type="text"
           placeholder="Buscar"

@@ -2,7 +2,7 @@ function Card_Proyectos({card} : {card: number}) {
   return (
     <div
       key={card}
-      className="min-w-[250px] max-w-[250px] border rounded-xl shadow-sm p-4 flex-shrink-0 snap-center"
+      className="min-w-[250px] max-w-[250px] border rounded-xl shadow-sm p-4 flex-shrink-0 snap-center bg-white"
     >
       {/* Imagen */}
       <div className="w-full h-40 bg-gray-200 rounded-lg mb-4"></div>
