@@ -6,14 +6,14 @@ import Carousel from "../Components/Carousel";
 
 export default function ProyectosDocentes() {
   return (
-    <div className="min-h-screen bg-white p-6">
+    <main className="min-h-screen p-6">
       {/* Header */}
       <Header />
       <div className="py-10">
         {/* Barra de búsqueda */}
         <Search_Bar />
         {/* Carrusel de tarjetas */}
-        <div className="relative">
+        <div className="relative ">
           <div className="flex overflow-x-auto gap-6 pb-4 py-20 scroll-smooth snap-x snap-mandatory">
             {[1, 2, 3, 4, 5, 6].map((card) => (
               <Card_Proyectos key={card} card={card} />
@@ -22,6 +22,6 @@ export default function ProyectosDocentes() {
         </div>
       </div>
       
-    </div>
+    </main>
   );
 }

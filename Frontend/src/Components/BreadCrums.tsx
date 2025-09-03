@@ -15,7 +15,7 @@ function Breadcrumbs() {
 
   return (
     <nav aria-label="breadcrumb" className="p-3">
-      <ol className="flex items-center gap-2 text-gray-500">
+      <ol className="flex items-center gap-2 text-gray-800">
         <li>
           <Link to="/">Inicio</Link>
         </li>
@@ -29,7 +29,7 @@ function Breadcrumbs() {
               {!isLast ? (
                 <Link to={to}>{value}</Link>
               ) : (
-                <span className="text-gray-500">{value}</span>
+                <span className="text-gray-800 font-medium">{value}</span>
               )}
             </li>
             
