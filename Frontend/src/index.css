@@ -7,3 +7,12 @@
 body {
     @apply bg-gradient-to-b from-[#C9F5BC] to-[#B8D6F2];
 }
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari y Opera */
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE y Edge */
+  scrollbar-width: none;     /* Firefox */
+}
