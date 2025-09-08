@@ -23,13 +23,15 @@ function Breadcrumbs() {
           const to = "/" + pathnames.slice(0, index + 1).join("/");
           const isLast = index === pathnames.length - 1;
 
+          const label = value.charAt(0).toUpperCase() + value.slice(1);
+
           return (
             <li key={to} className="flex items-center gap-2">
               <ChevronRightIcon className="w-4 h-4" />
               {!isLast ? (
-                <Link to={to}>{value}</Link>
+                <Link to={to}>{label}</Link>
               ) : (
-                <span className="text-gray-800 font-medium">{value}</span>
+                <span className="text-gray-800 font-medium">{label}</span>
               )}
             </li>
             

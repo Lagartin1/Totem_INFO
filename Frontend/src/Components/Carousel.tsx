@@ -6,7 +6,7 @@ function Carousel({ images } : { images: string[] }) {
   const [touchEnd, setTouchEnd] = useState(null);
 
   const length = images.length;
-  const minSwipeDistance = 50; // distancia mínima para considerar swipe
+  const minSwipeDistance = 50; 
 
   const handleTouchStart = (e) => {
     setTouchEnd(null);
