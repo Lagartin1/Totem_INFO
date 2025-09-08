@@ -14,7 +14,7 @@ export default function ProyectosDocentes() {
         <Search_Bar />
         {/* Carrusel de tarjetas */}
         <div className="relative ">
-          <div className="flex overflow-x-auto gap-6 pb-4 py-20 scroll-smooth snap-x snap-mandatory">
+          <div className="flex overflow-x-auto gap-6 pb-3 scroll-smooth snap-x snap-mandatory scrollbar-hide">
             {[1, 2, 3, 4, 5, 6].map((card) => (
               <Card_Proyectos key={card} card={card} />
             ))}

@@ -46,7 +46,7 @@ function Carousel({ images } : { images: string[] }) {
             key={index}
             src={img}
             alt={`Slide ${index}`}
-            className="w-full flex-shrink-0"
+            className="w-full flex-shrink-0 "
           />
         ))}
       </div>
