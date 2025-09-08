@@ -1,6 +1,9 @@
-export async function GET() {
-  const data = [{ id: 1, titulo: "Practica A" }];
-  return Response.json(data, { status: 200 });
+export async function GET(_req: Request, { params }: { params: { id: string } }) {
+  const {searchParams} = new URL(_req.url);
+  const pagina = searchParams.get('pagina') || '1';
+  const indice = Number(pagina) > 1 ? (Number(pagina) - 1)*10: 0;
+  console.log(indice);
+  return Response.json({Pagina: pagina, Indice: indice});
 }
 
 export async function POST(req: Request) {

@@ -1,7 +1,5 @@
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
-  const { seachParams } = new URL(_req.url);
-  console.log(params.id);
-  return Response.json({ id, titulo: "Practica A" });
+  const 
 }
 
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
