@@ -7,7 +7,7 @@ dotenv.config({path: './.env'});
 
 const node = process.env.ELASTIC_NODE;
 if (!node) {
-  throw new Error("❌ Falta ELASTIC_NODE en .env.local");
+  throw new Error("Falta ELASTIC_NODE en .env.local");
 }
 let client: Client;
 
