@@ -20,7 +20,7 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 Copia ese token y en tu `.env` (que debe ser agregado en la carpeta que se encuentra el docker compose) agrega por:
 
 ```
-ELASTICSEARCH_SERVICEACCOUNT_TOKEN=eyJhbGciOi...
+KIBANA_SA_TOKEN= <aqui el token>
 ```
 
 Reinicia tus contenedores:
