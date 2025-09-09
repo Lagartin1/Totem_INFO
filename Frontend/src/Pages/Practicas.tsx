@@ -11,7 +11,7 @@ function Practicas (){
                 <Nav_button Title="Volver" Link="/"/>
             </div>
             <div className="flex flex-col items-center text-justify m-5 gap-20 ">
-                <Boton_Landing Title="Practicas Profesionales" Link="/practica-profesional"/>
+                <Boton_Landing Title="Practicas Profesionales" Link="/practicas/practicas-profesionales"/>
                 <Boton_Landing Title="Practica Inicial" Link="/practica-inicial"/>
             </div>
 
