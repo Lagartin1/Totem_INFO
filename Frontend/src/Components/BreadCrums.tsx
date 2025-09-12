@@ -1,7 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { ChevronRightIcon } from "@heroicons/react/24/outline"
 
-
 function Breadcrumbs() {
   const location = useLocation();
 

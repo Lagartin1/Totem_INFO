@@ -27,23 +27,25 @@ interface PracticasData {
 
 
 
-export default function PracticasProfesionales() {
+export default function PracticasIniciales() {
 const [searchParams, setSearchParams] = useSearchParams();
   const paginaActual = Number(searchParams.get("pagina") ?? 1);
   const [data, setData] = useState<PracticasData>({ practicas: [], total: 0 });
-
-  const n_pages = Math.max(1, Math.ceil(data.total / 10));
-
+  
+  
+  
   useEffect(() => {
-    fetch(`http://localhost:3000/api/practicas/practicaProfesional?pagina=${paginaActual}`)
+      fetch(`http://localhost:3000/api/practicas/practicaInicial?pagina=${paginaActual}`)
       .then(res => res.json())
       .then(json => setData(json));
-  }, [paginaActual]);
-
-  const setPagina = (newPagina: number) => {
-    const bounded = Math.min(Math.max(newPagina, 1), n_pages);
-    setSearchParams({ pagina: String(bounded) });
-  };
+    }, [paginaActual]);
+    console.log(data)
+    const n_pages = Math.max(1, Math.ceil(data.total / 10));
+    
+    const setPagina = (newPagina: number) => {
+        const bounded = Math.min(Math.max(newPagina, 1), n_pages);
+        setSearchParams({ pagina: String(bounded) });
+    };
     return (
         <main className="min-h-screen p-6">
             <Header />

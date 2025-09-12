@@ -1,11 +1,15 @@
 import { useNavigate } from "react-router-dom";
 
 
-function Boton_Landing({Title,Link}: {Title: string, Link: string}) {
+function Boton_Landing({Title,Link, page}: {Title: string, Link: string, page?: number}) {
     const navigate = useNavigate();
 
     const handleClick = () => {
-        navigate(Link);
+        if (page !== undefined) {
+            navigate(Link, { state: { n_pagina: page } });
+        } else {
+            navigate(Link);
+        }
     };
 
     return (
