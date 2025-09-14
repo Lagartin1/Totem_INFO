@@ -2,7 +2,18 @@ import {es} from "../../../../database/elastic.ts";
 
 const client = es(); // seteo cliente general
 
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(_req: Request, { params }: { params: { id: string; type: string }}) {
+  const { type } = await params;
+  let tipo_practica:any;
+  if (type === "profesional") {
+    tipo_practica = "Profesional";
+  } else if (type === "inicial") {
+    tipo_practica = "Inicial";
+  }else {
+    return Response.json({ error: "Tipo no soportado" }, { status: 400 });
+  }
+
+
 
   // Funcion extrae los parametros de la URL (numero de pagina ) y realiza la consulta a elasticsearch devolviendo
   // 10 resultados por pagina, ademas de comenzar con un indice adecuado para cada pagina
@@ -23,15 +34,19 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
         query: {
           bool :{
             must :[
-              {term :{
-                tipo_practica : "Inicial"
-              }},
-              {range:{
-                created_at :{
-                  gte: `${año}-01-01`,
-                  lte: `${año}-12-31`
+              {
+                term :{
+                  tipo_practica : `${tipo_practica}`
                 }
-              }}
+              },
+              {
+                range:{
+                  created_at :{
+                    gte: `${año}-01-01`,
+                    lte: `${año}-12-31`
+                  }
+                }
+              }
             ]
           },
         },
@@ -47,7 +62,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
       body: {
         query: {
           match :{
-            tipo_practica : "Inicial"
+            tipo_practica : `${tipo_practica}`
           }
         },
         _source: true // utilizando este parametro la query entrega los datos completos
@@ -64,6 +79,7 @@ export async function POST(req: Request) {
   // guardar body...
   return Response.json({ creado: body }, { status: 201 });
 }
+
 
 
 export function OPTIONS() {
