@@ -9,7 +9,7 @@ const ALLOWED_ORIGINS = new Set([
 
 export function middleware(req: NextRequest) {
   
-  console.log("👉 Middleware ejecutado para:", req.url);
+  console.log("Middleware ejecutado para:", req.url);
 
 
   const origin = req.headers.get("origin") ?? "";
