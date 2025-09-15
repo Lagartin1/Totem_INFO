@@ -1,4 +1,4 @@
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import CardPracticas from "../Components/CardPracticas";
 import Header from "../Components/Header";
