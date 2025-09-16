@@ -81,3 +81,86 @@ ELASTIC_API_KEY=VVBHV1hB...==
 ```
 
 
+
+
+Perfecto 🙌, ahora tienes tu backup `es_snapshots.tar.gz` dentro de `Backend/database/backup/`.
+Para **cargarlo en tu Elasticsearch** tienes que hacer estos pasos:
+
+---
+
+## 🔹 1. Descomprimir el backup en el host
+
+Desde la raíz del proyecto:
+
+```bash
+cd Backend/database/backup
+tar -xzvf es_snapshots.tar.gz -C .
+```
+
+Esto te dejará una carpeta `es_snapshots/` con la estructura de índices, metadatos, etc.
+
+---
+
+## 🔹 2. Dar permisos correctos
+
+```bash
+sudo chown -R 1000:0 Backend/database/backup/es_snapshots
+```
+
+---
+
+```bash
+cd Backend/database
+docker compose up -d --force-recreate
+```
+
+---
+
+## 🔹 4. Registrar el repositorio de snapshots
+
+Una vez que el contenedor esté arriba:
+
+```bash
+curl -u elastic:test123 \
+  -H 'Content-Type: application/json' \
+  -X PUT http://localhost:9200/_snapshot/local_backup \
+  -d '{
+    "type": "fs",
+    "settings": {
+      "location": "/snapshots",
+      "compress": true
+    }
+  }'
+```
+
+Verifica:
+
+```bash
+curl -u elastic:test123 http://localhost:9200/_snapshot/_all?pretty
+```
+
+Deberías ver tu repo `local_backup`.
+
+---
+
+## 🔹 5. Listar los snapshots disponibles
+
+```bash
+curl -u elastic:test123 http://localhost:9200/_snapshot/local_backup/_all?pretty
+```
+
+---
+
+## 🔹 6. Restaurar un snapshot
+
+Ejemplo (restaurar todo el contenido de `snap-2025-09-16-1535`):
+
+```bash
+curl -u elastic:test123 \
+  -H 'Content-Type: application/json' \
+  -X POST http://localhost:9200/_snapshot/local_backup/snap-2025-09-16-1535/_restore \
+  -d '{
+    "indices": "*",
+    "include_global_state": true
+  }'
+```
