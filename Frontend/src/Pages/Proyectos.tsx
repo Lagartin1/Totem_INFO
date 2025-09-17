@@ -1,17 +1,23 @@
 import Header from "../Components/Header";
 import Card_Proyectos from "../Components/Card_Proyect";
 import Search_Bar from "../Components/Search_Bar";
-import Carousel from "../Components/Carousel";
+//import Carousel from "../Components/Carousel";
+
+
 
 
 export default function ProyectosDocentes() {
+  const onSearch = (query: string) => {
+    console.log("Searching for:", query);
+    // Aquí puedes agregar la lógica para manejar la búsqueda
+  }
   return (
     <main className="min-h-screen p-6">
       {/* Header */}
       <Header />
       <div className="py-10">
         {/* Barra de búsqueda */}
-        <Search_Bar />
+        <Search_Bar onSearch={onSearch} />
         {/* Carrusel de tarjetas */}
         <div className="relative ">
           <div className="flex overflow-x-auto gap-6 pb-3 scroll-smooth snap-x snap-mandatory scrollbar-hide">

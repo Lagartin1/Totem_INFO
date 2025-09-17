@@ -1,8 +1,9 @@
-import {es} from "../../../../database/elastic.ts";
+import {es} from "@/database/elastic";
+import { NextRequest,NextResponse } from "next/server";
 
 const client = es(); // seteo cliente general
 
-export async function GET(_req: Request, { params }: { params: { id: string; type: string }}) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ type: string }> }) {
   const { type } = await params;
   let tipo_practica:any;
   if (type === "profesional") {
@@ -10,7 +11,7 @@ export async function GET(_req: Request, { params }: { params: { id: string; typ
   } else if (type === "inicial") {
     tipo_practica = "Inicial";
   }else {
-    return Response.json({ error: "Tipo no soportado" }, { status: 400 });
+    return NextResponse.json({ error: "Tipo no soportado" }, { status: 400 });
   }
 
 
@@ -71,7 +72,7 @@ export async function GET(_req: Request, { params }: { params: { id: string; typ
   }
   const hits = response.hits.hits.map((hit: any) => hit._source);
   const total = response.hits.total as { value: number; relation: string };
-  return Response.json({ practicas: hits, total: total.value }, { status: 200 }); 
+  return NextResponse.json({ practicas: hits, total: total.value }, { status: 200 });
 }
 
 export async function POST(req: Request) {
