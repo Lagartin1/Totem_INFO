@@ -1,3 +1,9 @@
+networks:
+  totem_network_static:
+    driver: bridge
+
+
+
 services:
   es01:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
@@ -11,6 +17,10 @@ services:
       - "9200:9200"
     volumes:
       - esdata:/usr/share/elasticsearch/data
-      - ./backup/es_snapshots:/snapshots 
+      - ./database/backup/es_snapshots:/snapshots 
+    networks:
+      - totem_network_static
+    container_name: database-es01-1
 volumes:
   esdata:
+

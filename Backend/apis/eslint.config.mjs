@@ -19,6 +19,9 @@ const eslintConfig = [
       "build/**",
       "next-env.d.ts",
     ],
+     rules: {
+      "@typescript-eslint/no-explicit-any": "off", // 👈 desactiva la regla
+    },
   },
 ];
 

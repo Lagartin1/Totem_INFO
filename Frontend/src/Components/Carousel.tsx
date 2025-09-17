@@ -8,12 +8,12 @@ function Carousel({ images } : { images: string[] }) {
   const length = images.length;
   const minSwipeDistance = 50; 
 
-  const handleTouchStart = (e) => {
+  const handleTouchStart = (e: any) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
   };
 
-  const handleTouchMove = (e) => {
+  const handleTouchMove = (e: any) => {
     setTouchEnd(e.targetTouches[0].clientX);
   };
 

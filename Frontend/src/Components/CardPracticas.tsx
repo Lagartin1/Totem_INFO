@@ -20,7 +20,6 @@ interface CardPracticasProps {
 }
 
 export default function CardPracticas({
-    id,
     Titulo,
     lugar,
     nombre_contacto,
