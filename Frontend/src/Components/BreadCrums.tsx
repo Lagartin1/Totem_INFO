@@ -4,6 +4,12 @@ import { ChevronRightIcon } from "@heroicons/react/24/outline"
 function Breadcrumbs() {
   const location = useLocation();
 
+  // Diccionario para reemplazar palabras por su versión con tildes o caracteres especiales
+  const translations: Record<string, string> = {
+    practicas: "Prácticas",
+    "practicas-profesionales": "Prácticas Profesionales",
+  };
+
   // Dividimos la URL en partes
   const pathnames = location.pathname.split("/").filter((x) => x);
 
@@ -22,19 +28,22 @@ function Breadcrumbs() {
           const to = "/" + pathnames.slice(0, index + 1).join("/");
           const isLast = index === pathnames.length - 1;
 
-          const label = value;
-          const formattedLabel = label.replace(/-/g, ' ').charAt(0).toUpperCase() + label.replace(/-/g, ' ').slice(1);
+          // Formateamos la etiqueta con espacios y mayúsculas
+          const label = value.replace(/-/g, " ");
+          const formattedLabel = label.charAt(0).toUpperCase() + label.slice(1);
+
+          // Si existe traducción, la usamos
+          const finalLabel = translations[value.toLowerCase()] || formattedLabel;
 
           return (
             <li key={to} className="flex items-center gap-2">
               <ChevronRightIcon className="w-4 h-4" />
               {!isLast ? (
-                <Link to={to}>{formattedLabel}</Link>
+                <Link to={to}>{finalLabel}</Link>
               ) : (
-                <span className="text-gray-800 font-medium">{formattedLabel}</span>
+                <span className="text-gray-800 font-medium">{finalLabel}</span>
               )}
             </li>
-            
           );
         })}
       </ol>
