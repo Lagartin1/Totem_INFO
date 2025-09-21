@@ -17,7 +17,7 @@ services:
       - "9200:9200"
     volumes:
       - esdata:/usr/share/elasticsearch/data
-      - ./database/backup/es_snapshots:/snapshots 
+      - ./backup/es_snapshots:/snapshots
     networks:
       - totem_network_static
     container_name: database-es01-1
