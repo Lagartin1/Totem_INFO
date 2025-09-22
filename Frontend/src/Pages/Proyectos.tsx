@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import Header from "../Components/Header";
 import Card_Proyectos from "../Components/Card_Proyect";
 import Search_Bar from "../Components/Search_Bar";
-//import Carousel from "../Components/Carousel";
+import Nav_button from "../Components/nav_button";
+import Carousel from "../Components/Carousel";
 
 
 
