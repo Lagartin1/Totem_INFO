@@ -2,14 +2,9 @@ import { useEffect, useState } from "react";
 import Header from "../Components/Header";
 import Card_Proyectos from "../Components/Card_Proyect";
 import Search_Bar from "../Components/Search_Bar";
-<<<<<<< HEAD
-import Carousel from "../Components/Carousel";
-import Nav_button from "../Components/nav_button"
-=======
 //import Carousel from "../Components/Carousel";
 
 
->>>>>>> 75459b5f509f243177d683e2171289d786472a30
 
 interface ProyectoProps {
   id: string;
