@@ -1,7 +1,16 @@
 import { Client } from "@elastic/elasticsearch";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 
-dotenv.config({ path: "./.env" }); // o quita path si ya estás en el root correcto
+// 1. Convierte import.meta.url en ruta de archivo
+const __filename = fileURLToPath(import.meta.url);
+
+// 2. Obtén el directorio del archivo
+const __dirname = path.dirname(__filename);
+
+// 3. Carga el .env ubicado fuera de Backend
+dotenv.config({ path: path.resolve(__dirname, "../../../../.env") });
 
 const node =
   process.env.ELASTIC_NODE ||

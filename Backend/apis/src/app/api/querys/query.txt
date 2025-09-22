@@ -1,0 +1,22 @@
+curl -u elastic:test123 -X POST "http://localhost:9200/proyects/_bulk" -H "Content-Type: application/json" -d '
+{ "index": { "_index": "proyects", "_id": 1 } }
+{ "id": 1, "created_at": "2025-09-21T10:00:00", "marca_temporal": "2025-09-21 10:00", "profesores": "Dr. Juan Pérez", "titulo": "Sistema de Riego Automatizado", "area_desarrollo": "IoT", "descripcion": "Un sistema con sensores IoT para optimizar el uso de agua en cultivos.", "correo_contacto": "juan.perez@universidad.cl", "telefono_contacto": "987654321" }
+{ "index": { "_index": "proyects", "_id": 2 } }
+{ "id": 2, "created_at": "2025-09-21T10:05:00", "marca_temporal": "2025-09-21 10:05", "profesores": "Ing. María González", "titulo": "App de Transporte Universitario", "area_desarrollo": "Aplicaciones Móviles", "descripcion": "Aplicación móvil para coordinar viajes compartidos entre estudiantes.", "correo_contacto": "maria.gonzalez@universidad.cl", "telefono_contacto": "912345678" }
+{ "index": { "_index": "proyects", "_id": 3 } }
+{ "id": 3, "created_at": "2025-09-21T10:10:00", "marca_temporal": "2025-09-21 10:10", "profesores": "Dr. Carlos Muñoz", "titulo": "Totem Informativo Interactivo", "area_desarrollo": "Frontend/Backend", "descripcion": "Pantalla táctil con buscador de prácticas y proyectos académicos.", "correo_contacto": "carlos.munoz@universidad.cl", "telefono_contacto": "923456789" }
+{ "index": { "_index": "proyects", "_id": 4 } }
+{ "id": 4, "created_at": "2025-09-21T10:15:00", "marca_temporal": "2025-09-21 10:15", "profesores": "MSc. Ana Torres", "titulo": "Clasificador de Especies", "area_desarrollo": "Inteligencia Artificial", "descripcion": "Modelo de IA que identifica anfibios y reptiles a partir de fotografías.", "correo_contacto": "ana.torres@universidad.cl", "telefono_contacto": "934567890" }
+{ "index": { "_index": "proyects", "_id": 5 } }
+{ "id": 5, "created_at": "2025-09-21T10:20:00", "marca_temporal": "2025-09-21 10:20", "profesores": "Dr. Luis Fernández", "titulo": "Gestor de Prácticas Profesionales", "area_desarrollo": "Web", "descripcion": "Plataforma web para administrar postulaciones a prácticas universitarias.", "correo_contacto": "luis.fernandez@universidad.cl", "telefono_contacto": "945678901" }
+{ "index": { "_index": "proyects", "_id": 6 } }
+{ "id": 6, "created_at": "2025-09-21T10:25:00", "marca_temporal": "2025-09-21 10:25", "profesores": "Ing. Daniela Rojas", "titulo": "Sistema de Detección de Incendios", "area_desarrollo": "IoT", "descripcion": "Red de sensores conectados a un servidor central para alertar emergencias.", "correo_contacto": "daniela.rojas@universidad.cl", "telefono_contacto": "956789012" }
+{ "index": { "_index": "proyects", "_id": 7 } }
+{ "id": 7, "created_at": "2025-09-21T10:30:00", "marca_temporal": "2025-09-21 10:30", "profesores": "Dr. Andrés Silva", "titulo": "Asistente Virtual Académico", "area_desarrollo": "NLP", "descripcion": "Chatbot que responde dudas frecuentes de los estudiantes.", "correo_contacto": "andres.silva@universidad.cl", "telefono_contacto": "967890123" }
+{ "index": { "_index": "proyects", "_id": 8 } }
+{ "id": 8, "created_at": "2025-09-21T10:35:00", "marca_temporal": "2025-09-21 10:35", "profesores": "MSc. Paula Méndez", "titulo": "Plataforma de Fumigación Inteligente", "area_desarrollo": "Web", "descripcion": "Sistema que agenda y monitorea servicios de fumigación en empresas.", "correo_contacto": "paula.mendez@universidad.cl", "telefono_contacto": "978901234" }
+{ "index": { "_index": "proyects", "_id": 9 } }
+{ "id": 9, "created_at": "2025-09-21T10:40:00", "marca_temporal": "2025-09-21 10:40", "profesores": "Dr. Sergio Castro", "titulo": "Simulación de Vehículo Autónomo", "area_desarrollo": "Robótica", "descripcion": "Prototipo con ESP32 para navegación autónoma en entornos controlados.", "correo_contacto": "sergio.castro@universidad.cl", "telefono_contacto": "989012345" }
+{ "index": { "_index": "proyects", "_id": 10 } }
+{ "id": 10, "created_at": "2025-09-21T10:45:00", "marca_temporal": "2025-09-21 10:45", "profesores": "Ing. Carolina Vega", "titulo": "Análisis de Datos de Ventas", "area_desarrollo": "Ciencia de Datos", "descripcion": "Proyecto de ciencia de datos que estudia tendencias de ventas en retail.", "correo_contacto": "carolina.vega@universidad.cl", "telefono_contacto": "990123456" }
+'
