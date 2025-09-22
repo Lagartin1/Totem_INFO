@@ -164,3 +164,13 @@ curl -u elastic:test123 \
     "include_global_state": true
   }'
 ```
+"""
+"""
+curl -u elastic:test123 \
+  -H 'Content-Type: application/json' \
+  -X POST "http://localhost:9200/_snapshot/local_backup/snap-2025-09-16-1849/_restore" \
+  -d '{
+    "indices": "forms,practicas",
+    "include_global_state": false
+  }'
+"""
