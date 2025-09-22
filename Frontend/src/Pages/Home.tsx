@@ -14,7 +14,7 @@ function Home() {
             <Boton_Landing Title="Proyectos" Link="/proyectos"/>
             <Boton_Landing Title="Becados" Link="/becados"/>
           </div>
-          <Carousel images={["/UACH1.jpg", "/UACH2.jpg", "/UACH3.jpg"]} />
+          <Carousel slides={["/UACH1.jpg", "/UACH2.jpg", "/UACH3.jpg"]} />
         </div>
     </main>
   )

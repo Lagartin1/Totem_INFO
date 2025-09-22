@@ -8,7 +8,7 @@ app.use(express.json());
 app.use(cors());
 
 const PORT = 4000;
-const INDEX = "practicas"; // nombre del índice existente
+const INDEX = process.env.PRACTICA_INDEX|| "practicas";
 
 // Configura tu cliente de Elastic 8.14
 const esClient = new Client({
@@ -46,6 +46,8 @@ app.get("/api/practicas", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+  
+
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);

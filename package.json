@@ -1,0 +1,12 @@
+{
+  "name": "totem-info",
+  "version": "1.0.0",
+  "scripts": {
+    "start:frontend": "cd Frontend && npm run dev",
+    "start:api": "cd Backend/apis && npm run dev",
+    "dev": "concurrently \"npm run start:frontend\" \"npm run start:api\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}

@@ -1,6 +1,6 @@
 import { es } from "./elastic.ts";
 
-const INDEX = process.env.FORMS_INDEX || "forms";
+const INDEX = process.env.PRACTICA_INDEX || "practicas";
 
 async function ensureIndex() {
   const client = es();

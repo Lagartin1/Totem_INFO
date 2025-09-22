@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import {es} from "../../../../../database/elastic.ts";
+import { es } from "@database/elastic";
 
 const client = es(); // seteo cliente general
 
