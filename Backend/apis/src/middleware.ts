@@ -3,16 +3,20 @@ import type { NextRequest } from "next/server";
 
 // Lista blanca de orígenes permitidos
 const ALLOWED_ORIGINS = new Set([
+  "",
+  "http://localhost:9080",
+  "http://127.0.0.1:9080",
   "http://127.0.0.1:5173",
   "http://localhost:5173",
 ]);
 
 export function middleware(req: NextRequest) {
-  
+
   console.log("Middleware ejecutado para:", req.url);
 
 
   const origin = req.headers.get("origin") ?? "";
+  console.log("Origin:", origin);
   const isAllowed = ALLOWED_ORIGINS.has(origin);
 
   // Si es preflight OPTIONS, responde aquí mismo
@@ -31,6 +35,7 @@ export function middleware(req: NextRequest) {
   // Para el resto de métodos, deja pasar y agrega headers
   const res = NextResponse.next();
   if (isAllowed) {
+    console.log("Permitiendo origen:", origin);
     res.headers.set("Access-Control-Allow-Origin", origin);
   }
   res.headers.set("Vary", "Origin");

@@ -3,7 +3,7 @@ import { es } from "@database/elastic";
 
 const client = es(); // seteo cliente general
 
-export async function GET(req: NextRequest, { params }: { params: { type: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ type: string }> }) {
   const { type } = await params; // aquí tendrás "profesional"
 
   // Ejemplo: ejecutar búsqueda según el tipo
@@ -44,7 +44,7 @@ export async function GET(req: NextRequest, { params }: { params: { type: string
 
     const hits = response.hits.hits.map((hit: any) => hit._source);
     const total = response.hits.total as { value: number; relation: string };
-    return Response.json({ practicas: hits, total: total.value }, { status: 200 }); 
+    return NextResponse.json({ practicas: hits, total: total.value }, { status: 200 });
   }
   else if (type === "inicial") {
     const searchParams = req.nextUrl.searchParams;
@@ -78,7 +78,7 @@ export async function GET(req: NextRequest, { params }: { params: { type: string
 
     const hits = response.hits.hits.map((hit: any) => hit._source);
     const total = response.hits.total as { value: number; relation: string };
-    return Response.json({ practicas: hits, total: total.value }, { status: 200 });
+    return NextResponse.json({ practicas: hits, total: total.value }, { status: 200 });
   }
 
   return NextResponse.json({ error: "Tipo no soportado" }, { status: 400 });

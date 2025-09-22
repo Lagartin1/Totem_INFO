@@ -1,0 +1,57 @@
+networks:
+  totem_network_static:
+    driver: bridge
+services:
+  backend:
+    build:
+      context: ../Backend/apis
+      dockerfile: ../../Docker/Backend/dockerfile
+    environment:
+      NODE_ENV: production
+      ELASTIC_NODE: http://database:9200
+      # Si usas seguridad en ES, habilita una de estas:
+      # ELASTIC_API_KEY: ${ELASTIC_API_KEY}
+      # ELASTIC_API_KEY_ID: ${ELASTIC_API_KEY_ID}
+      # ELASTIC_API_KEY_VALUE: "MldLSUxKa0I4dk5pN0lhZjZDMUI6VGpBVG1CUXFRcENHbVJyRVFlZE1Mdw=="
+      ELASTIC_USERNAME: elastic
+      ELASTIC_PASSWORD: test123
+    ports:
+      - "3000:3000"
+    networks:
+      - totem_network_static
+    restart: unless-stopped
+
+  database:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+      - ELASTICS_USERNAME=elastic
+      - ELASTIC_PASSWORD=test123
+      - path.repo=/snapshots
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+      - ./Database/backup/es_snapshots:/snapshots 
+    ports:
+      - "9200:9200"
+    networks:
+      - totem_network_static
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ../Frontend
+      dockerfile: ../Docker/Frontend/dockerfile
+      args:
+        VITE_API_BASE_URL: "http://backend:3000"
+    ports:
+      - "9080:80"
+    networks:
+      - totem_network_static
+    depends_on: [ backend ]
+    restart: unless-stopped
+
+volumes:
+  esdata:
+

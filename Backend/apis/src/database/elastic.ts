@@ -49,7 +49,7 @@ export function es() {
       // Puedes forzar aquí el error para que sea claro.
       throw new Error("No se encontraron credenciales (API Key o USER/PASS) para ES");
     }
-
+    console.log("Conectando a ES en", node);
     client = new Client({ node, auth });
   }
   return client;
