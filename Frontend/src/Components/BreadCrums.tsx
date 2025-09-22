@@ -8,6 +8,7 @@ function Breadcrumbs() {
   const translations: Record<string, string> = {
     practicas: "Prácticas",
     "practicas-profesionales": "Prácticas Profesionales",
+    "practicas-iniciales": "Prácticas Iniciales",
   };
 
   // Dividimos la URL en partes
