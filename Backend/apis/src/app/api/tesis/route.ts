@@ -9,11 +9,13 @@ export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams;
     const searchTerm = searchParams.get("q") || ""; // Parámetro q para buscar
     
-    // Consulta a Elasticsearch
     console.log("Buscando:", searchTerm);
-    const response = await client.search({
+
+    // Primera búsqueda con scroll
+    const initialResponse = await client.search({
       index: INDEX,
-      size: 10, // número de resultados
+      scroll: "1m", // tiempo que mantiene el contexto de búsqueda
+      size: 15,     // tamaño de cada batch
       body: {
         query: searchTerm
           ? {
@@ -28,19 +30,35 @@ export async function GET(req: NextRequest) {
                   "universidad",
                   "facultad",
                   "palabras_clave",
-                  "resumen"
+                  "resumen",
                 ],
-                fuzziness: "AUTO"
-              }
+                fuzziness: "AUTO",
+              },
             }
           : { match_all: {} },
         _source: true,
       },
     });
 
-    // Procesar resultados
-    const hits = response.hits.hits.map((hit: any) => hit._source);
-    const total = (response.hits.total as { value: number }).value;
+    let hits = initialResponse.hits.hits.map((hit: any) => hit._source);
+    let total = (initialResponse.hits.total as { value: number }).value;
+    let scrollId = initialResponse._scroll_id;
+
+    // Traer los siguientes lotes con scroll
+    while (true) {
+      const scrollResponse = await client.scroll({
+        scroll_id: scrollId,
+        scroll: "1m",
+      });
+
+      if (scrollResponse.hits.hits.length === 0) break; // fin de resultados
+
+      hits = hits.concat(scrollResponse.hits.hits.map((hit: any) => hit._source));
+      scrollId = scrollResponse._scroll_id;
+    }
+
+    // Liberar recursos del scroll
+    await client.clearScroll({ scroll_id: scrollId });
 
     return NextResponse.json({ tesis: hits, total }, { status: 200 });
   } catch (error) {
