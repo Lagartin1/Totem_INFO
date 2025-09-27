@@ -20,8 +20,9 @@ export async function GET(req: NextRequest) {
           ? {
               multi_match: {
                 query: searchTerm,
-                fields: ["titulo","profesores","area_desarrollo","descripcion"],
-                fuzziness: "AUTO"
+                fields: ["titulo^3","profesores^2","area_desarrollo","descripcion"], /*Los campos que tienen un "^" es basicamente un boost en la prioridad de lo buscado*/
+                fuzziness: 1,
+                prefix_length: 2,
               }
             }
           : { match_all: {} },
