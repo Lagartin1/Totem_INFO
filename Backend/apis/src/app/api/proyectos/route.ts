@@ -14,21 +14,36 @@ export async function GET(req: NextRequest) {
     console.log(searchTerm);
     const response = await client.search({
       index: INDEX,
-      size: 10, // número de resultados
+      size: 10,
       body: {
-        query: searchTerm
-          ? {
-              multi_match: {
-                query: searchTerm,
-                fields: ["titulo^3","profesores^2","area_desarrollo","descripcion"], /*Los campos que tienen un "^" es basicamente un boost en la prioridad de lo buscado*/
-                fuzziness: 1,
-                prefix_length: 2,
+        query: {
+          bool: {
+            should: [
+              // 1. Coincidencia exacta (frase completa, sin dividir en tokens)
+              {
+                multi_match: {
+                  query: searchTerm,
+                  type: "phrase",
+                  fields: ["titulo^4", "profesores^3", "area_desarrollo", "descripcion"]
+                }
+              },
+              // 2. Coincidencia aproximada (para semejanza)
+              {
+                multi_match: {
+                  query: searchTerm,
+                  fields: ["titulo^3", "profesores^2", "area_desarrollo", "descripcion"],
+                  fuzziness: "AUTO",   // similaridad flexible
+                  prefix_length: 1     // al menos 1 letra exacta antes de aplicar fuzzy
+                }
               }
-            }
-          : { match_all: {} },
-        _source: true,
-      },
+            ],
+            minimum_should_match: 1 // debe cumplirse al menos una
+          }
+        },
+        _source: true
+      }
     });
+
 
     // Procesar resultados
     const hits = response.hits.hits.map((hit: any) => hit._source);
