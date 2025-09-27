@@ -8,6 +8,7 @@ import Becados from './Pages/Becados';
 import Proyectos from './Pages/Proyectos';
 import PracticasProfesionales from './Pages/PracticasProfesionales';
 import PracticasIniciales from './Pages/PracticaInicial';
+import Tesis from './Pages/Tesis';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -19,6 +20,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/proyectos" element={<Proyectos />} />
         <Route path="/practicas/practicas-profesionales" element={<PracticasProfesionales/>} />
         <Route path="/practicas/practicas-iniciales" element={<PracticasIniciales/>} />
+        <Route path="/tesis" element={<Tesis />} />
         
       </Routes>
     </Router>
