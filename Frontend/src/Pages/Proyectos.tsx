@@ -23,47 +23,71 @@ export default function ProyectosDocentes() {
   // 🔹 Cargar lista inicial
   useEffect(() => {
     setLoading(true);
+    console.log("📡 Fetch inicial → /api/proyectos");
+
     fetch("http://localhost:3000/api/proyectos")
       .then((res) => res.json())
-      .then((json) => setData(json.proyectos ?? []))
-      .finally(() => setLoading(false));
+      .then((json) => {
+        console.log("✅ Datos iniciales recibidos:", json);
+        setData(json.proyectos ?? []);
+      })
+      .catch((err) => console.error("❌ Error en fetch inicial:", err))
+      .finally(() => {
+        setLoading(false);
+        console.log("⏹️ Fetch inicial completado");
+      });
   }, []);
 
   // 🔹 Búsqueda
   const handleSearch = (searchTerm: string) => {
     setHasSearched(true);
     setLoading(true);
+
+    console.log("🔍 Búsqueda iniciada con término:", searchTerm);
+
     fetch(
       `http://localhost:3000/api/proyectos?q=${encodeURIComponent(searchTerm)}`
     )
       .then((res) => res.json())
-      .then((json) => setSData(json.proyectos ?? []))
-      .finally(() => setLoading(false));
+      .then((json) => {
+        console.log("✅ Resultados búsqueda recibidos:", json);
+        setSData(json.proyectos ?? []);
+      })
+      .catch((err) => console.error("❌ Error en búsqueda:", err))
+      .finally(() => {
+        setLoading(false);
+        console.log("⏹️ Búsqueda completada");
+      });
   };
 
   const handleVolver = () => {
+    console.log("↩️ Volviendo a la lista inicial");
     setSData([]);
     setHasSearched(false);
   };
 
   // Datos a mostrar
   const displayedData = hasSearched ? sData : data;
+  console.log("📊 Datos renderizados (displayedData):", displayedData);
 
   // Generamos los slides para el carrusel
-  const slides = displayedData.map((proyecto) => (
-    <Card_Proyectos
-      key={proyecto.id}
-      titulo={proyecto.titulo}
-      area={proyecto.area_desarrollo}
-      correo={proyecto.correo_contacto}
-      telefono={proyecto.telefono_contacto}
-      profesores={
-        Array.isArray(proyecto.profesores)
-          ? proyecto.profesores.join(", ")
-          : proyecto.profesores
-      }
-    />
-  ));
+  const slides = displayedData.map((proyecto) => {
+    console.log("🎴 Renderizando card:", proyecto);
+    return (
+      <Card_Proyectos
+        key={proyecto.id}
+        titulo={proyecto.titulo}
+        area={proyecto.area_desarrollo}
+        correo={proyecto.correo_contacto}
+        telefono={proyecto.telefono_contacto}
+        profesores={
+          Array.isArray(proyecto.profesores)
+            ? proyecto.profesores.join(", ")
+            : proyecto.profesores
+        }
+      />
+    );
+  });
 
   return (
     <main className="min-h-screen p-6">
