@@ -31,9 +31,7 @@ export default function ProyectosDocentes() {
   const handleSearch = (searchTerm: string) => {
     setHasSearched(true);
     setLoading(true);
-    fetch(
-      `http://localhost:3000/api/tesis?q=${encodeURIComponent(searchTerm)}`
-    )
+    fetch(`http://localhost:3000/api/tesis?q=${encodeURIComponent(searchTerm)}`)
       .then((res) => res.json())
       .then((json) => setSData(json.tesis ?? []))
       .catch((err) => console.error("Error en búsqueda:", err))
@@ -88,7 +86,6 @@ export default function ProyectosDocentes() {
                   Resultados de la búsqueda:
                 </div>
               )}
-
               {slides.length > 0 ? (
                 <Carousel slides={slides} />
               ) : (
@@ -102,8 +99,7 @@ export default function ProyectosDocentes() {
           <div className="flex flex-col mt-10 items-center rounded-3xl">
             <div
               className="flex items-center justify-center rounded-2xl p-10 w-60 h-40 bg-gray-700 shadow-2xl shadow-gray-500 cursor-pointer"
-              onClick={handleVolver}
-            >
+              onClick={handleVolver}>
               <h3 className="text-balance text-2xl p-5 text-white">
                 Volver a la lista
               </h3>
