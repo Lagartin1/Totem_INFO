@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import React, { useState } from "react";
-=======
-import { useState, useEffect } from "react";
->>>>>>> refs/remotes/origin/develop
+import React,{ useState, useEffect } from "react";
 
 interface SearchBarProps {
   onSearch: (searchTerm: string) => void;
