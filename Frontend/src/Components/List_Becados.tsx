@@ -1,3 +1,5 @@
+import { useState } from "react";
+import Modal_becados from "../Components/Modal_becados";
 type CardBecadosProps = {
   nombre: string;
   titulo: string;
@@ -5,6 +7,8 @@ type CardBecadosProps = {
 };
 
 function CardBecados({ nombre, titulo, exp }: CardBecadosProps) {
+
+  const [open, setOpen] = useState(false);
   return (
     <div className="flex flex-row items-start gap-4 p-4 border-b border-gray-300">
       {/* Imagen / avatar cuadrado */}
@@ -24,11 +28,21 @@ function CardBecados({ nombre, titulo, exp }: CardBecadosProps) {
       {/* Columna derecha: descripción */}
       <div className="flex-1">
         <p className="text-sm text-gray-700 leading-relaxed">{exp}</p>
-        <a className="text-blue-600 hover:underline text-sm cursor-pointer">
+        <button
+          onClick={() => setOpen(true)}
+          className="text-blue-500 font-medium hover:underline mt-auto"
+        >
           Leer más
-        </a>
+        </button>
       </div>
+          <Modal_becados
+            isOpen={open}
+            onClose={() => setOpen(false)}
+            descripcion={exp} // se usa solo en el modal
+          />
     </div>
+
+
   );
 }
 
