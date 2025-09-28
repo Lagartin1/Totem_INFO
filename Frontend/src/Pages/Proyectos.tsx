@@ -38,9 +38,7 @@ export default function ProyectosDocentes() {
     setHasSearched(true);
     setLoading(true);
 
-    fetch(
-      `http://localhost:3000/api/proyectos?q=${encodeURIComponent(searchTerm)}`
-    )
+    fetch(`http://localhost:3000/api/proyectos?q=${encodeURIComponent(searchTerm)}`)
       .then((res) => res.json())
       .then((json) => {
         setSData(json.proyectos ?? []);
