@@ -46,7 +46,7 @@ export default function Becados() {
     setHasSearched(true);
     setLoading(true);
 
-    fetch(`http://localhost:3000/api/becados?q=${encodeURIComponent(searchTerm)}`)
+    fetch(`${baseUrl}/api/becados?q=${encodeURIComponent(searchTerm)}`)
       .then((res) => res.json())
       .then((json) => {
         setSData(json.becados ?? []);
