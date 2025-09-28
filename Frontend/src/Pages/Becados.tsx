@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import Headers from "../Components/Header";
-import CardBecados from "../Components/CardBecados";
+import CardBecados from "../Components/List_Becados";
 import Search_Bar from "../Components/Search_Bar";
 import Nav_button from "../Components/nav_button";
-import Carousel from "../Components/Carousel";
 
 interface Becado {
   id: number;
@@ -60,16 +59,6 @@ export default function Becados() {
   // Datos a mostrar
   const displayedData = hasSearched ? sData : data;
 
-  // Slides para el carrusel
-  const slides = displayedData.map((b) => (
-    <CardBecados
-      key={b.id}
-      nombre={b.nombre}
-      titulo={b.titulo}
-      exp={b.descripcion}
-    />
-  ));
-
   return (
     <main className="min-h-screen p-6">
       <Headers />
@@ -114,9 +103,18 @@ export default function Becados() {
           </>
         )}
 
-        {/* Carrusel de resultados */}
-        {!loading && slides.length > 0 && (
-          <Carousel key={displayedData.map((b) => b.id).join("-")} slides={slides} />
+        {/* Lista de resultados */}
+        {!loading && displayedData.length > 0 && (
+          <div className="flex flex-col gap-4 w-full max-w-6xl">
+            {displayedData.map((b) => (
+              <CardBecados
+                key={b.id}
+                nombre={b.nombre}
+                titulo={b.titulo}
+                exp={b.descripcion}
+              />
+            ))}
+          </div>
         )}
       </div>
     </main>
