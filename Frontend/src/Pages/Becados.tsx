@@ -6,6 +6,8 @@ import Nav_button from "../Components/nav_button";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 interface Becado {
   id: number;
   nombre: string;
