@@ -2,8 +2,6 @@ networks:
   totem_network_static:
     driver: bridge
 
-
-
 services:
   es01:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3

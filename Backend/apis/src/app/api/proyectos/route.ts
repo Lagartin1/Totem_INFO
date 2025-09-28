@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { es } from "@/database/elastic"; 
+import { es } from "@database/elastic";
 
 const client = es(); // Cliente Elasticsearch
 const INDEX = process.env.PROYECTS_INDEX || "proyects";
@@ -8,24 +8,43 @@ export async function GET(req: NextRequest) {
   try {
     const searchParams = req.nextUrl.searchParams;
     const searchTerm = searchParams.get("q") || ""; // Parámetro q para buscar
-    
-    // Consulta a Elasticsearch
-    console.log(searchTerm);
-    const response = await client.search({
-      index: INDEX,
-      size: 10, // número de resultados
-      body: {
-        query: searchTerm
-          ? {
+
+    let query: any;
+
+    if (searchTerm.trim() === "") {
+      // 🔹 Caso inicial: traer todos los proyectos
+      query = { match_all: {} };
+    } else {
+      // 🔹 Caso con búsqueda: exactitud + semejanza
+      query = {
+        bool: {
+          should: [
+            {
               multi_match: {
                 query: searchTerm,
-                fields: ["titulo","profesores","area_desarrollo","descripcion"],
-                fuzziness: "AUTO"
+                type: "phrase",
+                fields: ["titulo", "profesores", "area_desarrollo"]
+              }
+            },
+            {
+              multi_match: {
+                query: searchTerm,
+                fields: ["titulo", "profesores", "area_desarrollo"],
+                fuzziness: "AUTO",
+                prefix_length: 1
               }
             }
-          : { match_all: {} },
-        _source: true,
-      },
+          ],
+          minimum_should_match: 1
+        }
+      };
+    }
+
+    // Consulta a Elasticsearch
+    const response = await client.search({
+      index: INDEX,
+      size: 10,
+      body: { query, _source: true }
     });
 
     // Procesar resultados
