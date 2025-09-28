@@ -24,8 +24,6 @@ export default function ProyectosDocentes() {
   // 🔹 Cargar lista inicial
   useEffect(() => {
     setLoading(true);
-    console.log("📡 Fetch inicial → /api/proyectos");
-
     fetch("http://localhost:3000/api/proyectos")
       .then((res) => res.json())
       .then((json) => {setData(json.proyectos ?? []);})

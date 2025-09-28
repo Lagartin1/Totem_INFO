@@ -1,4 +1,3 @@
-import { ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 interface ModalProyectoProps {
@@ -59,6 +58,6 @@ export default function ModalProyecto({
         </div>
       </div>
     </div>,
-    document.body // 👈 ahora se renderiza directamente en <body>
+    document.body
   );
 }

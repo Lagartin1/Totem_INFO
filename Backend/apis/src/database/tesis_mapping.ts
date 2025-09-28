@@ -1,6 +1,6 @@
 import { es } from "./elastic.ts";
 
-const INDEX = process.env.PROYECTS_INDEX || "tesis";
+const INDEX = process.env.TESIS_INDEX || "tesis";
 
 async function ensureIndex() {
   const client = es();

@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import Headers from "../Components/Header";
 import CardBecados from "../Components/CardBecados";
 import Search_Bar from "../Components/Search_Bar";
+import Nav_button from "../Components/nav_button";
+import Carousel from "../Components/Carousel";
 
 interface Becado {
   id: number;
@@ -10,49 +12,105 @@ interface Becado {
   descripcion: string;
 }
 
-function Becados() {
-  const [becados, setBecados] = useState<Becado[]>([]);
-  const [filtered, setFiltered] = useState<Becado[]>([]);
+export default function Becados() {
+  const [data, setData] = useState<Becado[]>([]);
+  const [sData, setSData] = useState<Becado[]>([]);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [loading, setLoading] = useState(false);
 
+  // 🔹 Cargar lista inicial
   useEffect(() => {
+    setLoading(true);
     fetch("http://localhost:3001/api/becados")
-      .then(res => res.json())
-      .then((data: Becado[]) => {
-        setBecados(data);
-        setFiltered(data);
-      });
+      .then((res) => res.json())
+      .then((json: Becado[]) => {
+        setData(json ?? []);
+      })
+      .catch((err) => console.error("Error en fetch inicial:", err))
+      .finally(() => setLoading(false));
   }, []);
 
-  const handleSearch = (query: string) => {
-    if (!query) {
-      setFiltered(becados);
-    } else {
-      setFiltered(
-        becados.filter(b =>
-          b.nombre.toLowerCase().includes(query.toLowerCase()) ||
-          b.titulo.toLowerCase().includes(query.toLowerCase()) ||
-          b.descripcion.toLowerCase().includes(query.toLowerCase())
-        )
-      );
-    }
+  // 🔹 Búsqueda
+  const handleSearch = (searchTerm: string) => {
+    setHasSearched(true);
+    setLoading(true);
+
+    fetch(`http://localhost:3001/api/becados?q=${encodeURIComponent(searchTerm)}`)
+      .then((res) => res.json())
+      .then((json: Becado[]) => {
+        setSData(json ?? []);
+      })
+      .catch((err) => console.error("Error en búsqueda:", err))
+      .finally(() => setLoading(false));
   };
 
+  const handleVolver = () => {
+    setSData([]);
+    setHasSearched(false);
+  };
+
+  // Datos a mostrar
+  const displayedData = hasSearched ? sData : data;
+
+  // Slides para el carrusel
+  const slides = displayedData.map((b) => (
+    <CardBecados
+      key={b.id}
+      nombre={b.nombre}
+      titulo={b.titulo}
+      exp={b.descripcion}
+    />
+  ));
+
   return (
-    <main className="min-h-screen w-full flex flex-col bg-white-500">
+    <main className="min-h-screen p-6">
       <Headers />
-      <div className="flex flex-col p-10 gap-10 items-center">
+      <div className="px-30 py-10">
+        <Nav_button Title="Volver" Link="/" />
+      </div>
+
+      <div className="py-10 flex flex-col items-center gap-6">
         <Search_Bar onSearch={handleSearch} />
-        {filtered.map(b => (
-          <CardBecados
-            key={b.id}
-            Name={b.nombre}
-            Title={b.titulo}
-            Tease={b.descripcion}
-          />
-        ))}
+
+        {/* 🔹 Loading Spinner */}
+        {loading && (
+          <div className="flex flex-col items-center justify-center mt-20">
+            <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+            <p className="mt-4 text-lg text-gray-600">Cargando...</p>
+          </div>
+        )}
+
+        {/* Resultados de la búsqueda */}
+        {!loading && hasSearched && sData.length > 0 && (
+          <div className="text-2xl font-bold text-gray-700 mb-4">
+            Resultados de la búsqueda:
+          </div>
+        )}
+
+        {/* No hay resultados */}
+        {!loading && hasSearched && sData.length === 0 && (
+          <>
+            <div className="text-xl font-semibold text-red-600 my-6">
+              No se encontraron resultados
+            </div>
+            <div className="flex flex-col mt-30 bg-gray-800/20 items-center rounded-3xl">
+              <div
+                className="flex items-center justify-center rounded-2xl p-10 w-60 h-40 bg-gray-700 shadow-2xl shadow-gray-500 cursor-pointer"
+                onClick={handleVolver}
+              >
+                <h3 className="text-balance text-2xl p-5 text-white">
+                  Volver a la lista
+                </h3>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Carrusel de resultados */}
+        {!loading && slides.length > 0 && (
+          <Carousel key={displayedData.length + sData.length} slides={slides} />
+        )}
       </div>
     </main>
   );
 }
-
-export default Becados;
