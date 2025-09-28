@@ -11,10 +11,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ type
     const searchParams = req.nextUrl.searchParams;
     const searchTerm = searchParams.get('q') || '';
     // Si el searchTerm viene en el body como JSON
-    if (req.method === 'POST' && req.headers.get('content-type')?.includes('application/json')) {
-      const body = await req.json();
-      const searchTerm = body.searchTerm || body.q || '';
-    }
     console.log(searchTerm, type);
     const response = await client.search({
       index: 'practicas',

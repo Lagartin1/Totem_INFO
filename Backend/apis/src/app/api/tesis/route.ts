@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
     });
 
     let hits = initialResponse.hits.hits.map((hit: any) => hit._source);
-    let total = (initialResponse.hits.total as { value: number }).value;
+    const total = (initialResponse.hits.total as { value: number }).value;
     let scrollId = initialResponse._scroll_id;
 
     // Traer los siguientes lotes con scroll

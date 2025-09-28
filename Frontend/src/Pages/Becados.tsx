@@ -4,6 +4,8 @@ import CardBecados from "../Components/List_Becados";
 import Search_Bar from "../Components/Search_Bar";
 import Nav_button from "../Components/nav_button";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 interface Becado {
   id: number;
   nombre: string;
@@ -22,10 +24,12 @@ export default function Becados() {
   const [hasSearched, setHasSearched] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // 🔹 Cargar lista inicial
+  const baseUrl = API_BASE_URL || 'http://localhost:3000';
+
+
   useEffect(() => {
     setLoading(true);
-    fetch("http://localhost:3000/api/becados")
+    fetch(`${baseUrl}/api/becados`)
       .then((res) => res.json())
       .then((json: BecadosResponse) => {
         setData(json.becados ?? []);
@@ -34,7 +38,6 @@ export default function Becados() {
       .finally(() => setLoading(false));
   }, []);
 
-  // 🔹 Búsqueda
   const handleSearch = (searchTerm: string) => {
     if (!searchTerm.trim()) return;
 
