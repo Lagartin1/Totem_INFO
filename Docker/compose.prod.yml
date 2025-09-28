@@ -16,7 +16,7 @@ services:
       ELASTIC_USERNAME: elastic
       ELASTIC_PASSWORD: test123
     ports:
-      - "3000:3000"
+      - "4004:4004"
     networks:
       - totem_network_static
     restart: unless-stopped
@@ -25,7 +25,8 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
     environment:
       - discovery.type=single-node
-      - xpack.security.enabled=false
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=false
       - ES_JAVA_OPTS=-Xms1g -Xmx1g
       - ELASTICS_USERNAME=elastic
       - ELASTIC_PASSWORD=test123
@@ -34,7 +35,7 @@ services:
       - esdata:/usr/share/elasticsearch/data
       - ./Database/backup/es_snapshots:/snapshots 
     ports:
-      - "9200:9200"
+      - "5004:9200"
     networks:
       - totem_network_static
     restart: unless-stopped
@@ -44,9 +45,9 @@ services:
       context: ../Frontend
       dockerfile: ../Docker/Frontend/dockerfile
       args:
-        VITE_API_BASE_URL: "http://backend:3000"
+        VITE_API_BASE_URL: "http://localhost:4004"
     ports:
-      - "9080:80"
+      - "3004:3004"
     networks:
       - totem_network_static
     depends_on: [ backend ]
