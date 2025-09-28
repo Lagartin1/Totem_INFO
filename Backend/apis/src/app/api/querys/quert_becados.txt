@@ -1,0 +1,22 @@
+curl -u elastic:test123 -X POST "http://localhost:9200/becados/_bulk" -H "Content-Type: application/json" -d '
+{"index": {"_index": "becados", "_id": 1}}
+{"id": 1, "created_at": "2025-01-01T10:00:00Z", "nombre": "Ana González", "titulo": "Beca de Investigación en IA", "descripcion": "Proyecto de investigación sobre procesamiento de lenguaje natural."}
+{"index": {"_index": "becados", "_id": 2}}
+{"id": 2, "created_at": "2025-01-05T15:20:00Z", "nombre": "Luis Martínez", "titulo": "Beca de Innovación Tecnológica", "descripcion": "Desarrollo de prototipo de vehículo autónomo con sensores IoT."}
+{"index": {"_index": "becados", "_id": 3}}
+{"id": 3, "created_at": "2025-01-10T08:30:00Z", "nombre": "María López", "titulo": "Beca de Ciencias de Datos", "descripcion": "Análisis de grandes volúmenes de datos climáticos con modelos predictivos."}
+{"index": {"_index": "becados", "_id": 4}}
+{"id": 4, "created_at": "2025-01-15T09:10:00Z", "nombre": "Pedro Ramírez", "titulo": "Beca de Ciberseguridad", "descripcion": "Implementación de protocolos de seguridad en redes distribuidas."}
+{"index": {"_index": "becados", "_id": 5}}
+{"id": 5, "created_at": "2025-01-20T14:45:00Z", "nombre": "Carolina Torres", "titulo": "Beca en Robótica", "descripcion": "Construcción y programación de un robot bípedo autónomo."}
+{"index": {"_index": "becados", "_id": 6}}
+{"id": 6, "created_at": "2025-01-25T11:00:00Z", "nombre": "Diego Fuentes", "titulo": "Beca de Inteligencia Artificial", "descripcion": "Optimización de redes neuronales convolucionales para visión computacional."}
+{"index": {"_index": "becados", "_id": 7}}
+{"id": 7, "created_at": "2025-02-01T17:30:00Z", "nombre": "Isabel Vargas", "titulo": "Beca de Biotecnología", "descripcion": "Aplicación de técnicas bioinformáticas para análisis genómico."}
+{"index": {"_index": "becados", "_id": 8}}
+{"id": 8, "created_at": "2025-02-05T12:15:00Z", "nombre": "Andrés Silva", "titulo": "Beca de Energías Renovables", "descripcion": "Investigación sobre paneles solares de alta eficiencia."}
+{"index": {"_index": "becados", "_id": 9}}
+{"id": 9, "created_at": "2025-02-10T09:50:00Z", "nombre": "Valentina Herrera", "titulo": "Beca de Educación Digital", "descripcion": "Desarrollo de plataformas interactivas para enseñanza virtual."}
+{"index": {"_index": "becados", "_id": 10}}
+{"id": 10, "created_at": "2025-02-15T16:40:00Z", "nombre": "Javier Castro", "titulo": "Beca de Computación Cuántica", "descripcion": "Simulación de algoritmos cuánticos en entornos híbridos."}
+'

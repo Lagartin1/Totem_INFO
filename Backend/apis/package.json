@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "es:setup": "ts-node --esm src/database/practicas.mapping.ts"
+    "es:setup": "ts-node --esm src/database/practicas_mapping.ts"
   },
   "dependencies": {
     "@elastic/elasticsearch": "^8.19.1",
@@ -25,5 +25,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
     "typescript": "^5"
-  }
+  },
+
+  "type": "module"
 }

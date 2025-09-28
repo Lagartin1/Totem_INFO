@@ -9,6 +9,8 @@ function Breadcrumbs() {
     practicas: "Prácticas",
     "practicas-profesionales": "Prácticas Profesionales",
     "practicas-iniciales": "Prácticas Iniciales",
+    tesis: "Tésis",
+    proyectos: "Proyectos",
   };
 
   // Dividimos la URL en partes
