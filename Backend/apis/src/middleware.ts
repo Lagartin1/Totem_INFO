@@ -4,6 +4,7 @@ import type { NextRequest } from "next/server";
 // Lista blanca de orígenes permitidos
 const ALLOWED_ORIGINS = new Set([
   "",
+  "http://localhost:3004",
   "http://localhost:9080",
   "http://127.0.0.1:9080",
   "http://127.0.0.1:5173",

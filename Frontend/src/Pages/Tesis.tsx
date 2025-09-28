@@ -5,6 +5,8 @@ import Header from "../Components/Header";
 import Search_Bar from "../Components/Search_Bar";
 import Nav_button from "../Components/nav_button";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 interface TesisProps {
   id: string;
   titulo: string;
@@ -19,9 +21,11 @@ export default function ProyectosDocentes() {
   const [hasSearched, setHasSearched] = useState(false);
   const [loading, setLoading] = useState(false); // 🔹 nuevo estado de carga
 
+  const baseUrl = API_BASE_URL || 'http://localhost:3000';
+
   useEffect(() => {
     setLoading(true);
-    fetch("http://localhost:3000/api/tesis")
+    fetch(`${baseUrl}/api/tesis`)
       .then((res) => res.json())
       .then((json) => setData(json.tesis ?? []))
       .catch((err) => console.error("Error cargando tésis:", err))
@@ -31,7 +35,7 @@ export default function ProyectosDocentes() {
   const handleSearch = (searchTerm: string) => {
     setHasSearched(true);
     setLoading(true);
-    fetch(`http://localhost:3000/api/tesis?q=${encodeURIComponent(searchTerm)}`)
+    fetch(`${baseUrl}/api/tesis?q=${encodeURIComponent(searchTerm)}`)
       .then((res) => res.json())
       .then((json) => setSData(json.tesis ?? []))
       .catch((err) => console.error("Error en búsqueda:", err))

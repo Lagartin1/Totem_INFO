@@ -5,6 +5,9 @@ import Search_Bar from "../Components/Search_Bar";
 import Nav_button from "../Components/nav_button";
 import Carousel from "../Components/Carousel";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+
 interface ProyectoProps {
   id: string;
   titulo: string;
@@ -21,10 +24,10 @@ export default function ProyectosDocentes() {
   const [hasSearched, setHasSearched] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // 🔹 Cargar lista inicial
+  const baseUrl = API_BASE_URL || 'http://localhost:3000';
   useEffect(() => {
     setLoading(true);
-    fetch("http://localhost:3000/api/proyectos")
+    fetch(`${baseUrl}/api/proyectos`)
       .then((res) => res.json())
       .then((json) => {setData(json.proyectos ?? []);})
       .catch((err) => console.error("Error en fetch inicial:", err))
@@ -33,12 +36,14 @@ export default function ProyectosDocentes() {
       });
   }, []);
 
-  // 🔹 Búsqueda
+  //
   const handleSearch = (searchTerm: string) => {
     setHasSearched(true);
     setLoading(true);
 
-    fetch(`http://localhost:3000/api/proyectos?q=${encodeURIComponent(searchTerm)}`)
+    fetch(
+      `${baseUrl}/api/proyectos?q=${encodeURIComponent(searchTerm)}`
+    )
       .then((res) => res.json())
       .then((json) => {
         setSData(json.proyectos ?? []);
