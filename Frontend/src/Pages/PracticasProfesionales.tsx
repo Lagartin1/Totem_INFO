@@ -5,6 +5,9 @@ import Header from "../Components/Header";
 import Search_Bar from "../Components/Search_Bar";
 import Nav_button from "../Components/nav_button";
 
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 interface CardPracticasProps {
   id: string;
   labores: string;
@@ -37,10 +40,11 @@ export default function PracticasProfesionales() {
 
   const n_pages = Math.max(1, Math.ceil(data.total / 10));
 
+  const baseUrl = API_BASE_URL || 'http://localhost:3000';
   // 🔹 Cargar lista general
   useEffect(() => {
     setLoading(true);
-    fetch(`http://localhost:3000/api/practicas/profesional?pagina=${paginaActual}`)
+    fetch(`${baseUrl}/api/practicas/profesional?pagina=${paginaActual}`)
       .then((res) => res.json())
       .then((json) => setData(json))
       .finally(() => setLoading(false));
@@ -56,7 +60,7 @@ export default function PracticasProfesionales() {
     setHasSearched(true);
     setLoading(true);
     fetch(
-      `http://localhost:3000/api/practicas/getSearch/profesional?q=${encodeURIComponent(
+      `${baseUrl}/api/practicas/getSearch/profesional?q=${encodeURIComponent(
         searchTerm
       )}`
     )
