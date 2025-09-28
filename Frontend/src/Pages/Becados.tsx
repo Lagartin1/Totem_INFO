@@ -21,7 +21,7 @@ export default function Becados() {
   // 🔹 Cargar lista inicial
   useEffect(() => {
     setLoading(true);
-    fetch("http://localhost:3001/api/becados")
+    fetch("http://localhost:3000/api/becados")
       .then((res) => res.json())
       .then((json: Becado[]) => {
         setData(json ?? []);
@@ -35,7 +35,7 @@ export default function Becados() {
     setHasSearched(true);
     setLoading(true);
 
-    fetch(`http://localhost:3001/api/becados?q=${encodeURIComponent(searchTerm)}`)
+    fetch(`http://localhost:3000/api/becados?q=${encodeURIComponent(searchTerm)}`)
       .then((res) => res.json())
       .then((json: Becado[]) => {
         setSData(json ?? []);
