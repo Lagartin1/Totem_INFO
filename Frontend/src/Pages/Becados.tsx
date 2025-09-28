@@ -27,11 +27,11 @@ export default function Becados() {
     setLoading(true);
     fetch("http://localhost:3000/api/becados")
       .then((res) => res.json())
-      .then((json: BecadosResponse) => {
-        setData(json.becados ?? []);
-      })
+      .then((json) => {setData(json.becados ?? []);})
       .catch((err) => console.error("Error en fetch inicial:", err))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   // 🔹 Búsqueda
@@ -43,12 +43,15 @@ export default function Becados() {
 
     fetch(`http://localhost:3000/api/becados?q=${encodeURIComponent(searchTerm)}`)
       .then((res) => res.json())
-      .then((json: BecadosResponse) => {
+      .then((json) => {
         setSData(json.becados ?? []);
       })
       .catch((err) => console.error("Error en búsqueda:", err))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+      });
   };
+
 
   // 🔹 Volver a la lista inicial
   const handleVolver = () => {
