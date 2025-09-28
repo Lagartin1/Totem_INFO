@@ -21,7 +21,6 @@ ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=builder /app/.next/standalone ./
 
 # Puerto interno (puedes dejarlo en 3000, o cambiarlo si prefieres)
-EXPOSE 3000
-
+EXPOSE 4004
 # Ejecuta el server standalone generado por Next
 CMD ["node", "server.js"]

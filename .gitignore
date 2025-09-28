@@ -116,6 +116,9 @@ dist
 # DynamoDB Local files
 .dynamodb/
 
+# Database backup
+Docker/Database/backup/es_snapshots/*
+
 # Firebase cache directory
 .firebase/
 

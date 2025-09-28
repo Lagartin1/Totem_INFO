@@ -32,7 +32,7 @@ tar -xvzf ./Database/backup/es_snapshots.tar.gz -C ./Database/backup/
 ```
 y luego darle permisos pertinentes con:
 ```bash
-sudo chmod -R 1000:0 ./Database/backup/es_snapshots 
+sudo chown -R 1000:0 ./Database/backup/es_snapshots 
 ```
 
 #### Restaurar el Snapshot
