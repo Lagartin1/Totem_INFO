@@ -11,6 +11,7 @@ interface ProyectoProps {
   area_desarrollo: string;
   correo_contacto: string;
   telefono_contacto: string;
+  descripcion: string;
   profesores: string[] | string;
 }
 
@@ -27,14 +28,10 @@ export default function ProyectosDocentes() {
 
     fetch("http://localhost:3000/api/proyectos")
       .then((res) => res.json())
-      .then((json) => {
-        console.log("✅ Datos iniciales recibidos:", json);
-        setData(json.proyectos ?? []);
-      })
-      .catch((err) => console.error("❌ Error en fetch inicial:", err))
+      .then((json) => {setData(json.proyectos ?? []);})
+      .catch((err) => console.error("Error en fetch inicial:", err))
       .finally(() => {
         setLoading(false);
-        console.log("⏹️ Fetch inicial completado");
       });
   }, []);
 
@@ -43,36 +40,29 @@ export default function ProyectosDocentes() {
     setHasSearched(true);
     setLoading(true);
 
-    console.log("🔍 Búsqueda iniciada con término:", searchTerm);
-
     fetch(
       `http://localhost:3000/api/proyectos?q=${encodeURIComponent(searchTerm)}`
     )
       .then((res) => res.json())
       .then((json) => {
-        console.log("✅ Resultados búsqueda recibidos:", json);
         setSData(json.proyectos ?? []);
       })
-      .catch((err) => console.error("❌ Error en búsqueda:", err))
+      .catch((err) => console.error("Error en búsqueda:", err))
       .finally(() => {
         setLoading(false);
-        console.log("⏹️ Búsqueda completada");
       });
   };
 
   const handleVolver = () => {
-    console.log("↩️ Volviendo a la lista inicial");
     setSData([]);
     setHasSearched(false);
   };
 
   // Datos a mostrar
   const displayedData = hasSearched ? sData : data;
-  console.log("📊 Datos renderizados (displayedData):", displayedData);
 
   // Generamos los slides para el carrusel
   const slides = displayedData.map((proyecto) => {
-    console.log("🎴 Renderizando card:", proyecto);
     return (
       <Card_Proyectos
         key={proyecto.id}
@@ -80,6 +70,7 @@ export default function ProyectosDocentes() {
         area={proyecto.area_desarrollo}
         correo={proyecto.correo_contacto}
         telefono={proyecto.telefono_contacto}
+        descripcion={proyecto.descripcion} 
         profesores={
           Array.isArray(proyecto.profesores)
             ? proyecto.profesores.join(", ")
