@@ -12,6 +12,11 @@ interface Becado {
   descripcion: string;
 }
 
+interface BecadosResponse {
+  becados: Becado[];
+  total: number;
+}
+
 export default function Becados() {
   const [data, setData] = useState<Becado[]>([]);
   const [sData, setSData] = useState<Becado[]>([]);
@@ -23,8 +28,8 @@ export default function Becados() {
     setLoading(true);
     fetch("http://localhost:3000/api/becados")
       .then((res) => res.json())
-      .then((json: Becado[]) => {
-        setData(json ?? []);
+      .then((json: BecadosResponse) => {
+        setData(json.becados ?? []);
       })
       .catch((err) => console.error("Error en fetch inicial:", err))
       .finally(() => setLoading(false));
@@ -32,18 +37,21 @@ export default function Becados() {
 
   // 🔹 Búsqueda
   const handleSearch = (searchTerm: string) => {
+    if (!searchTerm.trim()) return;
+
     setHasSearched(true);
     setLoading(true);
 
     fetch(`http://localhost:3000/api/becados?q=${encodeURIComponent(searchTerm)}`)
       .then((res) => res.json())
-      .then((json: Becado[]) => {
-        setSData(json ?? []);
+      .then((json: BecadosResponse) => {
+        setSData(json.becados ?? []);
       })
       .catch((err) => console.error("Error en búsqueda:", err))
       .finally(() => setLoading(false));
   };
 
+  // 🔹 Volver a la lista inicial
   const handleVolver = () => {
     setSData([]);
     setHasSearched(false);
@@ -93,7 +101,7 @@ export default function Becados() {
             <div className="text-xl font-semibold text-red-600 my-6">
               No se encontraron resultados
             </div>
-            <div className="flex flex-col mt-30 bg-gray-800/20 items-center rounded-3xl">
+            <div className="flex flex-col mt-8 bg-gray-800/20 items-center rounded-3xl">
               <div
                 className="flex items-center justify-center rounded-2xl p-10 w-60 h-40 bg-gray-700 shadow-2xl shadow-gray-500 cursor-pointer"
                 onClick={handleVolver}
@@ -108,7 +116,7 @@ export default function Becados() {
 
         {/* Carrusel de resultados */}
         {!loading && slides.length > 0 && (
-          <Carousel key={displayedData.length + sData.length} slides={slides} />
+          <Carousel key={displayedData.map((b) => b.id).join("-")} slides={slides} />
         )}
       </div>
     </main>
