@@ -119,6 +119,9 @@ dist
 # Database backup
 Docker/Database/backup/es_snapshots/*
 
+# Docker/images
+Docker/build/*
+
 # Firebase cache directory
 .firebase/
 
