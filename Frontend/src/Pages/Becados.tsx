@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import Headers from "../Components/Header";
-import CardBecados from "../Components/CardBecados";
+import CardBecados from "../Components/List_Becados";
 import Search_Bar from "../Components/Search_Bar";
 import Nav_button from "../Components/nav_button";
-import Carousel from "../Components/Carousel";
+
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 interface Becado {
   id: number;
@@ -23,33 +25,37 @@ export default function Becados() {
   const [hasSearched, setHasSearched] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // 🔹 Cargar lista inicial
+  const baseUrl = API_BASE_URL || 'http://localhost:3000';
+
+
   useEffect(() => {
     setLoading(true);
-    fetch("http://localhost:3000/api/becados")
+    fetch(`${baseUrl}/api/becados`)
       .then((res) => res.json())
-      .then((json: BecadosResponse) => {
-        setData(json.becados ?? []);
-      })
+      .then((json) => {setData(json.becados ?? []);})
       .catch((err) => console.error("Error en fetch inicial:", err))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
-  // 🔹 Búsqueda
   const handleSearch = (searchTerm: string) => {
     if (!searchTerm.trim()) return;
 
     setHasSearched(true);
     setLoading(true);
 
-    fetch(`http://localhost:3000/api/becados?q=${encodeURIComponent(searchTerm)}`)
+    fetch(`${baseUrl}/api/becados?q=${encodeURIComponent(searchTerm)}`)
       .then((res) => res.json())
-      .then((json: BecadosResponse) => {
+      .then((json) => {
         setSData(json.becados ?? []);
       })
       .catch((err) => console.error("Error en búsqueda:", err))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+      });
   };
+
 
   // 🔹 Volver a la lista inicial
   const handleVolver = () => {
@@ -59,16 +65,6 @@ export default function Becados() {
 
   // Datos a mostrar
   const displayedData = hasSearched ? sData : data;
-
-  // Slides para el carrusel
-  const slides = displayedData.map((b) => (
-    <CardBecados
-      key={b.id}
-      nombre={b.nombre}
-      titulo={b.titulo}
-      exp={b.descripcion}
-    />
-  ));
 
   return (
     <main className="min-h-screen p-6">
@@ -114,9 +110,18 @@ export default function Becados() {
           </>
         )}
 
-        {/* Carrusel de resultados */}
-        {!loading && slides.length > 0 && (
-          <Carousel key={displayedData.map((b) => b.id).join("-")} slides={slides} />
+        {/* Lista de resultados */}
+        {!loading && displayedData.length > 0 && (
+          <div className="flex flex-col gap-4 w-full max-w-6xl">
+            {displayedData.map((b) => (
+              <CardBecados
+                key={b.id}
+                nombre={b.nombre}
+                titulo={b.titulo}
+                exp={b.descripcion}
+              />
+            ))}
+          </div>
         )}
       </div>
     </main>

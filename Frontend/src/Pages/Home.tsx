@@ -1,6 +1,6 @@
 import Boton_Landing from "../Components/Boton_Landing"
 import Header from "../Components/Header"
-import Carousel from "../Components/Carousel"
+import Carousel from "../Components/Carousel_img"
 
 function Home() {
 
