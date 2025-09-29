@@ -21,12 +21,13 @@ export default function NoticiaModal({ isOpen, onClose, noticia }: NoticiaModalP
   return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-      onClick={onClose} 
+      onClick={onClose} // 👈 click fuera cierra
     >
       <div
         className="bg-white rounded-2xl shadow-xl w-full max-w-3xl p-6 max-h-[80vh] overflow-y-auto relative"
-        onClick={(e) => e.stopPropagation()} 
+        onClick={(e) => e.stopPropagation()} // 👈 evita que el click dentro cierre
       >
+
         {/* Imagen de la noticia */}
         {noticia.imagen && (
           <img

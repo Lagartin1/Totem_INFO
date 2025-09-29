@@ -13,6 +13,8 @@ interface Noticia {
 
 interface NoticiaCardProps {
   noticia: Noticia;
+  loading?: boolean;
+  onClick?: () => void;
 }
 
 export default function NoticiaCard({ noticia }: NoticiaCardProps) {
@@ -22,10 +24,10 @@ export default function NoticiaCard({ noticia }: NoticiaCardProps) {
     <>
       {/* Tarjeta */}
       <div
-        className="min-w-[250px] max-w-[300px] bg-white shadow-md rounded-lg overflow-hidden cursor-pointer hover:shadow-lg transition"
+        className="min-w-[250px] max-w-[300px] bg-white rounded-xl shadow-md hover:shadow-xl transform hover:-translate-y-1 transition duration-300 cursor-pointer"
         onClick={() => setOpen(true)}
       >
-        <div className="w-full h-40 bg-gray-200 rounded-lg mb-4"></div> 
+      <div className="w-full h-40 bg-gray-200 rounded-lg mb-4"></div> 
         <div className="p-4">
           <h3 className="font-semibold text-lg">{noticia.titulo}</h3>
         </div>

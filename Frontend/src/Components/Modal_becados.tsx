@@ -2,7 +2,6 @@ import { createPortal } from "react-dom";
 
 interface ModalBecadosProps {
   descripcion: string;
-
   isOpen: boolean;
   onClose: () => void;
 }
@@ -16,11 +15,11 @@ export default function ModalBecados({
   return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-      onClick={onClose} // 👈 click fuera cierra
+      onClick={onClose}
     >
       <div
         className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 max-h-[80vh] overflow-y-auto relative"
-        onClick={(e) => e.stopPropagation()} // 👈 evita que el click dentro cierre
+        onClick={(e) => e.stopPropagation()} 
       >
         {/* Contenido */}
         <div className="space-y-3 text-gray-700">
