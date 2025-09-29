@@ -1,0 +1,20 @@
+:3004 {
+	# --- Normaliza /api/api/... -> /api/... (sin 301) ---
+	@double path /api/api/*
+	handle @double {
+		uri strip_prefix /api   # quita 1 "api" => /api/xxx
+		reverse_proxy backend:4004
+	}
+
+	# --- API normal: /api/... -> backend ---
+	@api path /api/*
+	handle @api {
+		# Tu backend expone rutas con prefijo /api, así que NO strip aquí
+		reverse_proxy backend:4004
+	}
+
+	# --- Frontend estático: resto de rutas ---
+	handle {
+		reverse_proxy frontend:3004
+	}
+}
