@@ -11,6 +11,7 @@ interface Becado {
   nombre: string;
   titulo: string;
   descripcion: string;
+  created_at: string;
 }
 
 export default function Becados() {
@@ -114,6 +115,7 @@ export default function Becados() {
                   nombre={b.nombre}
                   titulo={b.titulo}
                   exp={b.descripcion}
+                  anio={new Date(b.created_at).getFullYear().toString()}
                 />
               ))}
             </div>

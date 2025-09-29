@@ -4,9 +4,10 @@ type CardBecadosProps = {
   nombre: string;
   titulo: string;
   exp: string;
+  anio: string;
 };
 
-function CardBecados({ nombre, titulo, exp }: CardBecadosProps) {
+function CardBecados({ nombre, titulo, exp, anio }: CardBecadosProps) {
 
   const [open, setOpen] = useState(false);
   return (
@@ -21,6 +22,9 @@ function CardBecados({ nombre, titulo, exp }: CardBecadosProps) {
         <h2 className="text-lg font-bold">{nombre}</h2>
         <p className="text-sm text-gray-600">{titulo}</p>
       </div>
+
+      <div className="text-sm text-gray-500">{anio}</div>
+
 
       {/* Separador */}
       <div className="w-[0.1rem] bg-gray-400 mx-2" />
