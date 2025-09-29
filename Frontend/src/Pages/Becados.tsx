@@ -4,7 +4,6 @@ import CardBecados from "../Components/List_Becados";
 import Search_Bar from "../Components/Search_Bar";
 import Nav_button from "../Components/nav_button";
 
-
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 interface Becado {
@@ -14,25 +13,21 @@ interface Becado {
   descripcion: string;
 }
 
-interface BecadosResponse {
-  becados: Becado[];
-  total: number;
-}
-
 export default function Becados() {
   const [data, setData] = useState<Becado[]>([]);
   const [sData, setSData] = useState<Becado[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const baseUrl = API_BASE_URL || 'http://localhost:3000';
-
+  const baseUrl = API_BASE_URL || "http://localhost:3000";
 
   useEffect(() => {
     setLoading(true);
     fetch(`${baseUrl}/api/becados`)
       .then((res) => res.json())
-      .then((json) => {setData(json.becados ?? []);})
+      .then((json) => {
+        setData(json.becados ?? []);
+      })
       .catch((err) => console.error("Error en fetch inicial:", err))
       .finally(() => {
         setLoading(false);
@@ -100,8 +95,7 @@ export default function Becados() {
             <div className="flex flex-col mt-8 bg-gray-800/20 items-center rounded-3xl">
               <div
                 className="flex items-center justify-center rounded-2xl p-10 w-60 h-40 bg-gray-700 shadow-2xl shadow-gray-500 cursor-pointer"
-                onClick={handleVolver}
-              >
+                onClick={handleVolver}>
                 <h3 className="text-balance text-2xl p-5 text-white">
                   Volver a la lista
                 </h3>
@@ -112,16 +106,31 @@ export default function Becados() {
 
         {/* Lista de resultados */}
         {!loading && displayedData.length > 0 && (
-          <div className="flex flex-col gap-4 w-full max-w-6xl">
-            {displayedData.map((b) => (
-              <CardBecados
-                key={b.id}
-                nombre={b.nombre}
-                titulo={b.titulo}
-                exp={b.descripcion}
-              />
-            ))}
-          </div>
+          <>
+            <div className="flex flex-col gap-4 w-full max-w-6xl bg-white rounded-2xl shadow-md p-6">
+              {displayedData.map((b) => (
+                <CardBecados
+                  key={b.id}
+                  nombre={b.nombre}
+                  titulo={b.titulo}
+                  exp={b.descripcion}
+                />
+              ))}
+            </div>
+
+            {/* 🔹 Botón "Volver" solo si se hizo una búsqueda */}
+            {hasSearched && (
+              <div className="flex flex-col mt-8 bg-gray-800/20 items-center rounded-3xl">
+                <div
+                  className="flex items-center justify-center rounded-2xl p-10 w-60 h-40 bg-gray-700 shadow-2xl shadow-gray-500 cursor-pointer"
+                  onClick={handleVolver}>
+                  <h3 className="text-balance text-2xl p-5 text-white">
+                    Volver a la lista
+                  </h3>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </main>
