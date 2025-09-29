@@ -7,25 +7,37 @@ const INDEX = process.env.BECADOS_INDEX || "becados";
 export async function GET(req: NextRequest) {
   try {
     const searchParams = req.nextUrl.searchParams;
-    const searchTerm = searchParams.get("q") || "";
+    const searchTerm = (searchParams.get("q") || "").trim();
 
     let query: any;
 
-    if (searchTerm.trim() === "") {
+    if (!searchTerm) {
       query = { match_all: {} };
     } else {
       const year = Number(searchTerm);
       const should: any[] = [
+        // 🔹 Búsqueda exacta con analyzer spanish
         {
           multi_match: {
             query: searchTerm,
             type: "phrase",
             fields: ["nombre", "titulo", "descripcion"],
+            analyzer: "spanish",
+          },
+        },
+        // 🔹 Búsqueda con fuzziness
+        {
+          multi_match: {
+            query: searchTerm,
+            fields: ["nombre", "titulo", "descripcion"],
+            fuzziness: "AUTO",
+            prefix_length: 1,
+            analyzer: "spanish",
           },
         },
       ];
 
-      // 🔹 Si el término es un año válido (ej: 2023, 2024, etc.)
+      // 🔹 Si el término es un año válido, filtrar por created_at
       if (!isNaN(year) && year > 1900 && year < 2100) {
         should.push({
           range: {

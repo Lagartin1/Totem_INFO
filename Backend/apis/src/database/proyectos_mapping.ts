@@ -15,15 +15,15 @@ async function ensureIndex() {
             created_at: { type: "date", format: "strict_date_optional_time||epoch_millis" },
             marca_temporal: { type: "text" },
             profesores: { type: "keyword" },
-            titulo: { type: "text" },
-            area_desarrollo: { type: "text" },
-            descripcion: { type: "text" },
+            titulo: { type: "text", analyzer: "spanish" },
+            area_desarrollo: { type: "text", analyzer: "spanish" },
+            descripcion: { type: "text", analyzer: "spanish" },
             correo_contacto: { type: "keyword" },
             telefono_contacto: { type: "keyword" }
           }
         }
       }
-    }as any);
+    } as any);
     console.log(`Index ${INDEX} creado`);
   } else {
     console.log(`Index ${INDEX} ya existe`);
