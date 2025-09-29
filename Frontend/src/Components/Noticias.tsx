@@ -18,6 +18,7 @@ export default function NoticiasSection() {
   const [loading, setLoading] = useState(false);
   const [selectedNoticia, setSelectedNoticia] = useState<Noticia | null>(null);
 
+
   const carouselRef = useRef<HTMLDivElement>(null);
 
   const baseUrl = API_BASE_URL || "http://localhost:3000";
@@ -30,6 +31,11 @@ export default function NoticiasSection() {
       .catch((err) => console.error("Error en fetch inicial:", err))
       .finally(() => setLoading(false));
   }, []);
+
+  const onClick = (noticia: Noticia) => {
+    setSelectedNoticia(noticia);
+    selectedNoticia && console.log("Noticia seleccionada:", selectedNoticia);
+  }
 
 
   return (
@@ -55,7 +61,7 @@ export default function NoticiasSection() {
             <NoticiaCard
               key={n.id}
               noticia={n}
-              onClick={() => setSelectedNoticia(n)}
+              onClick={() => onClick(n)}
             />
           ))}
         </div>
