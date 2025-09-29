@@ -14,12 +14,12 @@ async function ensureIndex() {
             id: { type: "integer" },
             created_at: { type: "date", format: "strict_date_optional_time||epoch_millis" },
             nombre: { type: "keyword" },
-            titulo: { type: "text" },
-            descripcion: { type: "text" }
+            titulo: { type: "text", analyzer: "spanish" },
+            descripcion: { type: "text", analyzer: "spanish" }
           }
         }
       }
-    }as any);
+    } as any);
     console.log(`Index ${INDEX} creado`);
   } else {
     console.log(`Index ${INDEX} ya existe`);
