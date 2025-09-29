@@ -11,16 +11,7 @@ interface ModalProyectoProps {
   onClose: () => void;
 }
 
-export default function ModalProyecto({
-  titulo,
-  area,
-  correo,
-  telefono,
-  profesores,
-  descripcion,
-  isOpen,
-  onClose,
-}: ModalProyectoProps) {
+export default function ModalProyecto({titulo,area,correo,telefono,profesores,descripcion,isOpen,onClose,}: ModalProyectoProps) {
   if (!isOpen) return null;
 
   return createPortal(
