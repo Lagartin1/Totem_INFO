@@ -1,6 +1,6 @@
 import Boton_Landing from "../Components/Boton_Landing"
 import Header from "../Components/Header"
-import Carousel_img from "../Components/Carousel_img"
+import NoticiasSection from "../Components/Noticias";
 
 function Home() {
 
@@ -14,7 +14,7 @@ function Home() {
             <Boton_Landing Title="Proyectos" Link="/proyectos"/>
             <Boton_Landing Title="Becados" Link="/becados"/>
           </div>
-          <Carousel_img slides={["/UACH1.jpg", "/UACH2.jpg", "/UACH3.jpg"]} />
+          <NoticiasSection/>
         </div>
     </main>
   )
