@@ -10,7 +10,7 @@ function Home() {
       <div className="container flex flex-col">
           <div className="items-center grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-10 p-20">
             <Boton_Landing Title="Prácticas" Link="/practicas"/>
-            <Boton_Landing Title="Tésis" Link="/tesis"/>
+            <Boton_Landing Title="Tesis" Link="/tesis"/>
             <Boton_Landing Title="Proyectos" Link="/proyectos"/>
             <Boton_Landing Title="Becados" Link="/becados"/>
           </div>

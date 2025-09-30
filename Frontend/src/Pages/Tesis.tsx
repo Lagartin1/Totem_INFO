@@ -28,7 +28,7 @@ export default function ProyectosDocentes() {
     fetch(`${baseUrl}/api/tesis`)
       .then((res) => res.json())
       .then((json) => setData(json.tesis ?? []))
-      .catch((err) => console.error("Error cargando tésis:", err))
+      .catch((err) => console.error("Error cargando tesis:", err))
       .finally(() => setLoading(false));
   }, []);
 
@@ -93,7 +93,7 @@ export default function ProyectosDocentes() {
               {slides.length > 0 ? (
                 <Carousel slides={slides} />
               ) : (
-                <p>No hay tésis disponibles</p>
+                <p>No hay tesis disponibles</p>
               )}
             </>
           )
