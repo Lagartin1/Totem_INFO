@@ -9,7 +9,7 @@ function Breadcrumbs() {
     practicas: "Prácticas",
     "practicas-profesionales": "Prácticas Profesionales",
     "practicas-iniciales": "Prácticas Iniciales",
-    tesis: "Tésis",
+    tesis: "Tesis",
     proyectos: "Proyectos",
   };
 
