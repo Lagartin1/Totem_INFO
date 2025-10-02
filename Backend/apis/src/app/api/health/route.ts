@@ -1,8 +1,13 @@
+import { NextRequest } from "next/server";
+import { HealthController } from "@modules/health/controllers/HealthController";
+import { toNextResponse } from "@modules/shared/http/ControllerResponse";
+
 export async function GET() {
-  return Response.json([{ id: 1, nombre: "Estudiante X" }]);
+  const response = HealthController.status();
+  return toNextResponse(response);
 }
 
-export async function POST(req: Request) {
-  const body = await req.json();
-  return Response.json({ creado: body }, { status: 201 });
+export async function POST(req: NextRequest) {
+  const response = await HealthController.create(req);
+  return toNextResponse(response);
 }

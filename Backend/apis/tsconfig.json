@@ -20,9 +20,10 @@
     "baseUrl": "./",
     "paths": {
       "@/*": ["./src/*"],
-      "@database/*": ["./src/database/*"]
+      "@database/*": ["./src/database/*"],
+      "@modules/*": ["./src/modules/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/api/becados/route.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }
