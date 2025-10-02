@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import {SearchTermPracticas} from "@/controllers/practicas/practicasController";
 import { es } from "@database/elastic";
 
-const client = es(); // seteo cliente general
-
 export async function GET(req: NextRequest, { params }: { params: Promise<{ type: string }> }) {
   const { type } = await params; // aquí tendrás "profesional"
   try{
@@ -13,7 +11,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ type
       return NextResponse.json({ error: "Falta el parámetro 'q'" }, { status: 400 });
     }
     if (!type) {
-      return NextResponse.json({ error: "Falta el parámetro 'q'" }, { status: 400 });
+      return NextResponse.json({ error: "Falta el parámetro 'type'" }, { status: 400 });
     }
     let tipo_practica:any;
     if (type === "profesional") {
