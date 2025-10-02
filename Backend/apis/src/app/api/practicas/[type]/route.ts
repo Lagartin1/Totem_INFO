@@ -1,78 +1,30 @@
 import {es} from "@/database/elastic";
 import { NextRequest,NextResponse } from "next/server";
+import { fetchPracticas } from "@/controllers/practicas/practicasController";
 
-const client = es(); // seteo cliente general
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ type: string }> }) {
   const { type } = await params;
-  let tipo_practica:any;
-  if (type === "profesional") {
-    tipo_practica = "Profesional";
-  } else if (type === "inicial") {
-    tipo_practica = "Inicial";
-  }else {
-    return NextResponse.json({ error: "Tipo no soportado" }, { status: 400 });
-  }
-
-
-
-  // Funcion extrae los parametros de la URL (numero de pagina ) y realiza la consulta a elasticsearch devolviendo
-  // 10 resultados por pagina, ademas de comenzar con un indice adecuado para cada pagina
-
-  const {searchParams} = new URL(_req.url);
+  const searchParams = _req.nextUrl.searchParams;
   const pagina = searchParams.get('pagina') || '1';
-  const año = searchParams.get('year') || false;
+  const year = searchParams.get('year') || false;
   const indice = Number(pagina) > 1 ? (Number(pagina) - 1)*10: 0;
-  console.log(indice);
+  
+  try{
+    let tipo_practica:any;
+    if (type === "profesional") {
+      tipo_practica = "Profesional";
+    } else if (type === "inicial") {
+      tipo_practica = "Inicial";
+    } else {
+      return NextResponse.json({ error: 'Tipo de práctica no válido' }, { status: 400 });
+    }  
+    return NextResponse.json(await fetchPracticas(year, indice, tipo_practica), { status: 200 });
 
-  let response: any;
-  if (año){
-    response = await client.search({
-      index: 'practicas',   // desde que index o "tabla" se extraen los datos
-      from: indice,
-      size: 10,
-      body: {
-        query: {
-          bool :{
-            must :[
-              {
-                term :{
-                  tipo_practica : `${tipo_practica}`
-                }
-              },
-              {
-                range:{
-                  created_at :{
-                    gte: `${año}-01-01`,
-                    lte: `${año}-12-31`
-                  }
-                }
-              }
-            ]
-          },
-        },
-        _source: true // utilizando este parametro la query entrega los datos completos
-      }
-    });
+  }catch(error){
+    return NextResponse.json({ error: 'Error al obtener las prácticas' }, { status: 500 });
   }
-  else{
-      response = await client.search({
-      index: 'practicas',   // desde que index o "tabla" se extraen los datos
-      from: indice,
-      size: 10,
-      body: {
-        query: {
-          match :{
-            tipo_practica : `${tipo_practica}`
-          }
-        },
-        _source: true // utilizando este parametro la query entrega los datos completos
-      }
-    });
-  }
-  const hits = response.hits.hits.map((hit: any) => hit._source);
-  const total = response.hits.total as { value: number; relation: string };
-  return NextResponse.json({ practicas: hits, total: total.value }, { status: 200 });
+  
 }
 
 export async function POST(req: Request) {
