@@ -1,7 +1,6 @@
 // pages/api/noticias.ts
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { listarNoticas } from "@/controllers/noticias/noticasControllers";
-const INDEX = process.env.NOTICIAS_INDEX || "noticias";
 
 
 export async function GET() {

@@ -1,6 +1,4 @@
 import {es} from "@database/elastic";
-import client from "node_modules/@elastic/elasticsearch/lib/client";
-
 export interface Tesis {
     id: string;
     title: string;

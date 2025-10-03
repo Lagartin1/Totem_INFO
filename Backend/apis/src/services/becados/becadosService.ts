@@ -3,9 +3,7 @@ import { BecadosResult, GetBecados,SearchBecado,SearchBecadoYear} from "@/models
 
 
 export async function listBecados(): Promise<BecadosResult> {
-    let becadosData: BecadosResult;
-    
-    becadosData = await GetBecados();   
+    const becadosData: BecadosResult = await GetBecados();
     if (!becadosData) {
         throw new Error('No se encontraron becados');
     }

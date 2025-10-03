@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import {fetchBecados} from "@/controllers/becados/becadosController";
 
-const INDEX = process.env.BECADOS_INDEX || "becados";
 
 export async function GET(req: NextRequest) {
   try {

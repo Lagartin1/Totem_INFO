@@ -26,6 +26,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ type
 
   }
   catch(error){
+    console.error(error);
     return NextResponse.json({ error: "Error en el servidor" }, { status: 500 });
   }
 }

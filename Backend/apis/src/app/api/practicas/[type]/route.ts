@@ -1,4 +1,3 @@
-import {es} from "@/database/elastic";
 import { NextRequest,NextResponse } from "next/server";
 import { fetchPracticas } from "@/controllers/practicas/practicasController";
 
@@ -22,6 +21,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ typ
     return NextResponse.json(await fetchPracticas(year, indice, tipo_practica), { status: 200 });
 
   }catch(error){
+    console.log(error)
     return NextResponse.json({ error: 'Error al obtener las prácticas' }, { status: 500 });
   }
   

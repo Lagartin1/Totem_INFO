@@ -1,4 +1,4 @@
-import { es } from "../../database/elastic.ts";
+import { es } from "@/database/elastic";
 
 const INDEX = process.env.TESIS_INDEX || "tesis";
 

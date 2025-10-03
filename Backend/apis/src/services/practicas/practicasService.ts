@@ -18,10 +18,8 @@ export async function listPracticas(year: string | false,indice: number, type: s
 }
 
 export async function BuscarPracticas(term: string, type: string): Promise<PracticasResult>{
-    let practicasData: PracticasResult;
+    const practicasData: PracticasResult = await SearchTermPracticas(term, type);
 
-    practicasData = await SearchTermPracticas(term, type);
-    
     if (!practicasData) {
         throw new Error('No se encontraron prácticas');
     }
