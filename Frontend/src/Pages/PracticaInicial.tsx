@@ -6,6 +6,7 @@ import Search_Bar from "../Components/Search_Bar";
 import Nav_button from "../Components/nav_button";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 
 interface CardPracticasProps {
   id: string;
@@ -38,7 +39,7 @@ export default function PracticasIniciales() {
   const [loading, setLoading] = useState(false); // 👈 nuevo estado
 
   const n_pages = Math.max(1, Math.ceil(data.total / 10));
-  const baseUrl = API_BASE_URL || 'http://localhost:3000';
+  const baseUrl = BUILD_MODE ? API_BASE_URL : 'http://localhost:3000';
 
   useEffect(() => {
     setLoading(true);

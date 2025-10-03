@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import NoticiaCard from "./Card_Noticias";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 
 export interface Noticia {
   id: string;
@@ -21,7 +22,7 @@ export default function NoticiasSection() {
 
   const carouselRef = useRef<HTMLDivElement>(null);
 
-  const baseUrl = API_BASE_URL || "http://localhost:3000";
+  const baseUrl = BUILD_MODE ? API_BASE_URL : "http://localhost:3000";
 
   useEffect(() => {
     setLoading(true);
