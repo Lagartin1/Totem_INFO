@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import {proyectosController} from "@/controllers/proyectos/proyectosController"
-const INDEX = process.env.PROYCTS_INDEX || "proyects";
 
 export async function GET(req: NextRequest) {
   try {
