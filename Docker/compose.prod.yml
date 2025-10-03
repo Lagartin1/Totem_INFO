@@ -15,6 +15,8 @@ services:
       # ELASTIC_API_KEY_VALUE: "MldLSUxKa0I4dk5pN0lhZjZDMUI6VGpBVG1CUXFRcENHbVJyRVFlZE1Mdw=="
       ELASTIC_USERNAME: elastic
       ELASTIC_PASSWORD: test123
+    ports:
+      - "4004:4004"
     networks:
       - totem_network_static
     restart: unless-stopped
@@ -43,22 +45,14 @@ services:
       context: ../Frontend
       dockerfile: ../Docker/Frontend/dockerfile
       args:
-        VITE_API_BASE_URL: "/api"
+        VITE_API_BASE_URL: "http://localhost:4004"
+    ports:
+      - "3004:3004"
     networks:
       - totem_network_static
     depends_on: [ backend ]
     restart: unless-stopped
-  
-  caddy:
-    image: caddy:latest
-    ports:
-      - "3004:3004"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-    networks:
-      - totem_network_static
-    depends_on: [ frontend ,backend]
-    restart: unless-stopped
+
 
 volumes:
   esdata:
