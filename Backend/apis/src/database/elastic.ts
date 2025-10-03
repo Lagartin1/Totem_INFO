@@ -9,8 +9,12 @@ const __filename = fileURLToPath(import.meta.url);
 // 2. Obtén el directorio del archivo
 const __dirname = path.dirname(__filename);
 
-// 3. Carga el .env ubicado fuera de Backend
-dotenv.config({ path: path.resolve(__dirname, "../../../../.env") });
+const envPath = path.resolve(__dirname, "../config/.env");
+console.log("Cargando .env desde:", envPath);
+
+// Indica a dotenv que cargue el .env desde esa ruta
+dotenv.config({ path: envPath });
+
 
 const node =
   process.env.ELASTIC_NODE ||
