@@ -83,11 +83,8 @@ Para ejecutar el proyecto en modo desarrollo, sigue estos pasos:
     ```
 
 4.  Crea dentro del contenedor la ruta donde se encuentran los snapshots. En este caso, la ruta es `/snapshots`, que está mapeada a `./Database/backup/es_snapshots` en el host.
-
     ```bash
-    docker exec -it <nombre_del_contenedor> mkdir -p /snapshots
-            ```bash
-            curl -u USERNAME:PASSWORD \  -H 'Content-Type: application/    json' \              
+    curl -u USERNAME:PASSWORD \  -H 'Content-Type: application/    json' \              
             -X PUT http://localhost:PUERTO/_snapshot/local_backup
             \
             -d '{
@@ -97,7 +94,7 @@ Para ejecutar el proyecto en modo desarrollo, sigue estos pasos:
                 "compress": true
                 }
             }'
-            ```
+    ```
 5. Verifica que el snapshot se haya registrado correctamente:
 
     ```bash
