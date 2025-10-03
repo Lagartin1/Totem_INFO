@@ -6,7 +6,7 @@ export interface Tesis {
 }
 
 export interface TesisResponse  {
-    Tesis: Tesis[];
+    tesis: Tesis[];
     total: number;
 }
 
@@ -51,7 +51,7 @@ export async function listarTesis(index: string,): Promise<TesisResponse> {
     await es().clearScroll({ scroll_id: scrollId });
     
     const result: TesisResponse = {
-        Tesis: hits,
+        tesis: hits,
         total
     };
     return result;
@@ -102,7 +102,7 @@ export async function SearchTermTesis( index: string, searchTerm: string) {
     await es().clearScroll({ scroll_id: scrollId });
 
     const result: TesisResponse = {
-        Tesis: hits,
+        tesis: hits,
         total
     };
     return result;
@@ -166,7 +166,7 @@ export async function SearchTermTesisValidYear(term: number, index: string) {
     await es().clearScroll({ scroll_id: scrollId });
 
     const result: TesisResponse = {
-        Tesis: hits,
+        tesis: hits,
         total
     };
     return result;
