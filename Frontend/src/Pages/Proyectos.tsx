@@ -6,6 +6,7 @@ import Nav_button from "../Components/nav_button";
 import Carousel from "../Components/Carousel";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 
 
 interface ProyectoProps {
@@ -24,7 +25,8 @@ export default function ProyectosDocentes() {
   const [hasSearched, setHasSearched] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const baseUrl = API_BASE_URL || 'http://localhost:3000';
+  const baseUrl = BUILD_MODE ? API_BASE_URL : 'http://localhost:3000';
+
   useEffect(() => {
     setLoading(true);
     fetch(`${baseUrl}/api/proyectos`)
