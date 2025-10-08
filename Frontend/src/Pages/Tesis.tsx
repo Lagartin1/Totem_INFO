@@ -80,7 +80,7 @@ export default function ProyectosDocentes() {
         {/* Resultados / Mensajes */}
         {!loading && hasSearched && sData.length === 0 ? (
           <div className="text-2xl font-bold text-red-600">
-            No se encontraron resultados para tu búsqueda
+            No se encontraron resultados
           </div>
         ) : (
           !loading && (
