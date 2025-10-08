@@ -1,0 +1,28 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGODB_URL")
+}
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Usuario {
+  id        String   @id @default(cuid()) @map("_id")
+  nombre    String
+  apellido  String
+  email     String  @unique
+  username  String  @unique
+  password  String
+  createdAt DateTime @default(now())
+
+  registros Registro[]
+}
+
+model Registro {
+  id         String   @id @default(cuid()) @map("_id") 
+  action     String
+  id_change  String
+  timestamp  DateTime @default(now())
+  usuarioId  String
+  usuario    Usuario  @relation(fields: [usuarioId], references: [id])
+}

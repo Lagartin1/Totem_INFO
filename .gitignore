@@ -121,6 +121,8 @@ Docker/Database/backup/es_snapshots/*
 
 # Docker/images
 Docker/build/*
+Docker/Database/backup/mongo*
+
 
 # Firebase cache directory
 .firebase/
