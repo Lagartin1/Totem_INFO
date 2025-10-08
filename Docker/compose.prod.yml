@@ -21,7 +21,7 @@ services:
       - totem_network_static
     restart: unless-stopped
 
-  database:
+  database_es:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
     environment:
       - discovery.type=single-node
@@ -36,6 +36,21 @@ services:
       - ./Database/backup/es_snapshots:/snapshots 
     ports:
       - "5004:9200"
+    networks:
+      - totem_network_static
+    restart: unless-stopped
+  
+  database_mongo:
+    image: mongo:7.0
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: test123
+      MONGO_INITDB_DATABASE: totem_admins
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./Database/backup/mongo_data:/data/db
+      - ./Database/backup/mongo_init:/docker-entrypoint-initdb.d:ro
     networks:
       - totem_network_static
     restart: unless-stopped

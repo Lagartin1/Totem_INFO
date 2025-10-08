@@ -7,11 +7,17 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "es:setup": "ts-node --esm src/database/practicas_mapping.ts"
+    "db:push": "dotenv -e src/config/.env -- npx prisma db push",
+    "es:setup": "ts-node --esm src/database/practicas_mapping.ts",
+    "prisma:push": "dotenv -e src/config/.env -- npx prisma db push"
   },
   "dependencies": {
     "@elastic/elasticsearch": "^8.19.1",
+    "@prisma/client": "^6.17.0",
+    "cookie": "^1.0.2",
     "dotenv": "^17.2.2",
+    "jose": "^6.1.0",
+    "mongodb": "^6.20.0",
     "next": "15.5.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
@@ -19,13 +25,16 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/mongodb": "^4.0.6",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv-cli": "^10.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
+    "prisma": "^6.17.0",
+    "tsx": "^4.20.6",
     "typescript": "^5"
   },
-
   "type": "module"
 }
