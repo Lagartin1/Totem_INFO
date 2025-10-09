@@ -1,0 +1,20 @@
+usar con la imagen docker de la carpeta Docker
+
+para solo correr la imagen de mongo hacer :
+
+  sudo docker compose -f componse.prod.yml up -d mongo
+
+
+
+docker exec -it docker-database_mongo-1 mongosh \
+  -u admin -p test123 --authenticationDatabase admin \
+  --eval "use totem_admins" \
+  --eval 'db.Usuario.insertOne({
+    nombre: "Admin",
+    apellido: "Principal",
+    email: "admin@example.com",
+    username: "admin",
+    password: "admin",
+    createdAt: new Date(),
+    updatedAt: new Date()
+  })'

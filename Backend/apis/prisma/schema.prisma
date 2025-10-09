@@ -2,27 +2,59 @@ datasource db {
   provider = "mongodb"
   url      = env("MONGODB_URL")
 }
+
 generator client {
   provider = "prisma-client-js"
 }
 
 model Usuario {
-  id        String   @id @default(cuid()) @map("_id")
-  nombre    String
-  apellido  String
-  email     String  @unique
-  username  String  @unique
-  password  String
-  createdAt DateTime @default(now())
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  nombre      String
+  apellido    String
+  email       String   @unique
+  username    String   @unique
+  password    String   // hash bcrypt/argon2
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  isActive            Boolean  @default(true)
+  failedLoginAttempts Int      @default(0)
+  lastFailedLogin     DateTime?
+  lockedUntil         DateTime?
 
   registros Registro[]
+  sesiones  Session[]
+
+  @@index([lockedUntil])
 }
 
 model Registro {
-  id         String   @id @default(cuid()) @map("_id") 
-  action     String
-  id_change  String
-  timestamp  DateTime @default(now())
-  usuarioId  String
-  usuario    Usuario  @relation(fields: [usuarioId], references: [id])
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  action    String
+  resource  String?
+  details   Json?       // <— JSON real
+  userAgent String?
+  timestamp DateTime @default(now())
+
+  usuarioId String   @db.ObjectId
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId, timestamp])
+  @@index([action])
+}
+
+model Session {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String   @db.ObjectId
+  sessionIdHash String   @unique
+  createdAt     DateTime @default(now())
+  lastActivity  DateTime @default(now())
+  expiresAt     DateTime
+  revokedAt     DateTime?
+  replacedBy    String?
+
+  usuario       Usuario  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, revokedAt, expiresAt])
+  @@index([expiresAt])
 }

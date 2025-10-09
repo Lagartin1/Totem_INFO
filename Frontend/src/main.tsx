@@ -21,7 +21,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/practicas/practicas-profesionales" element={<PracticasProfesionales/>} />
         <Route path="/practicas/practicas-iniciales" element={<PracticasIniciales/>} />
         <Route path="/tesis" element={<Tesis />} />
-        
+  
       </Routes>
     </Router>
     
