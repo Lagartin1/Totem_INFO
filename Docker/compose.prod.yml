@@ -50,10 +50,35 @@ services:
       - "27017:27017"
     volumes:
       - ./Database/backup/mongo_data:/data/db
+      - ./Database/backup/mongo_keyfile:/data/keyfile:ro
       - ./Database/backup/mongo_init:/docker-entrypoint-initdb.d:ro
     networks:
       - totem_network_static
     restart: unless-stopped
+    entrypoint:
+      - bash
+      - -c
+      - |
+        openssl rand -base64 756 > /data/mongodb-keyfile
+        chmod 400 /data/mongodb-keyfile
+        chown 999:999 /data/mongodb-keyfile
+        exec docker-entrypoint.sh mongod --replSet rs0 --bind_ip_all --keyFile /data/mongodb-keyfile
+    healthcheck:
+      test: |
+        mongosh -u admin -p test123 --authenticationDatabase admin --eval "
+        try {
+          rs.status();
+        } catch(e) {
+          rs.initiate({
+            _id: 'rs0',
+            members: [{ _id: 0, host: 'localhost:27017' }]
+          });
+        }
+        " || exit 1
+      interval: 10s
+      timeout: 10s
+      start_period: 40s
+      retries: 5
 
   frontend:
     build:

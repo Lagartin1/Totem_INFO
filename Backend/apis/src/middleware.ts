@@ -12,34 +12,39 @@ const ALLOWED_ORIGINS = new Set([
 ]);
 
 export function middleware(req: NextRequest) {
-
-  console.log("Middleware ejecutado para:", req.url);
-
+  console.log("Middleware CORS activado para:", req.url);
 
   const origin = req.headers.get("origin") ?? "";
-  console.log("Origin:", origin);
   const isAllowed = ALLOWED_ORIGINS.has(origin);
+  console.log("Origen de la solicitud:", origin, "Permitido:", isAllowed? "Sí" : "No");
 
   // Si es preflight OPTIONS, responde aquí mismo
-  if (req.method === "OPTIONS") {
-    const res = new NextResponse(null, { status: 204 });
-    if (isAllowed) {
-      res.headers.set("Access-Control-Allow-Origin", origin);
+  if (req.method === 'OPTIONS') {
+    if (!isAllowed) {
+      return new NextResponse('CORS origin not allowed', { status: 403 });
     }
-    res.headers.set("Vary", "Origin");
-    res.headers.set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
-    res.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    res.headers.set("Access-Control-Max-Age", "86400");
+
+    // Reflejar exactamente lo que pide el navegador
+    const reqHeaders =
+      req.headers.get('access-control-request-headers') ?? '';
+
+    const res = new NextResponse(null, { status: 204 });
+    res.headers.set('Access-Control-Allow-Origin', origin || '*'); // si origin vacío, es same-origin; no hay credenciales
+    res.headers.set('Access-Control-Allow-Credentials', 'true');
+    res.headers.set('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+    res.headers.set('Access-Control-Allow-Headers', reqHeaders);
+    res.headers.set('Access-Control-Max-Age', '86400');
+    res.headers.set('Vary', 'Origin');
     return res;
   }
-
   // Para el resto de métodos, deja pasar y agrega headers
   const res = NextResponse.next();
   if (isAllowed) {
     console.log("Permitiendo origen:", origin);
     res.headers.set("Access-Control-Allow-Origin", origin);
+    res.headers.set('Access-Control-Allow-Credentials', 'true');
+    res.headers.set("Vary", "Origin");
   }
-  res.headers.set("Vary", "Origin");
   return res;
 
 }
