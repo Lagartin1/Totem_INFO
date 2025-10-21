@@ -1,11 +1,11 @@
 // pages/api/noticias.ts
 import { NextResponse } from "next/server";
-import { listarNoticas } from "@/controllers/noticias/noticasControllers";
+import { listarNoticias } from "@/controllers/noticias/noticiasControllers";
 
 
 export async function GET() {
   try {
-    const response = await listarNoticas();
+    const response = await listarNoticias();
     return NextResponse.json( response, { status: 200 });
   } catch (error) {
     console.error("Error en GET /noticias:", error);
