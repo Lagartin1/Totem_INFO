@@ -1,4 +1,4 @@
-import { fetchNoticias } from "@/services/noticias/noticasService";
+import { fetchNoticias } from "@/services/noticias/noticiasService";
 
 
 export async function listarNoticias () {
