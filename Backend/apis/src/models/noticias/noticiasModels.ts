@@ -1,7 +1,4 @@
-
 import {es} from "@database/elastic";
-
-
 
 export interface Noticia {
     id: string;
@@ -32,4 +29,37 @@ export async function GetNoticias(){
     };
     return result ;
 
+}
+
+export async function UpdateNoticia(id: string, data: Record<string, any>) {
+  const response = await es().update({
+    index: "noticias",
+    id,
+    body: {
+      doc: data, // solo actualiza los campos enviados
+    },
+  });
+  return response;
+}
+
+export async function CreateNoticia(data: Record<string, any>) {
+  if (!data) throw new Error("Datos vacíos");
+
+  const response = await es().index({
+    index: "noticias",
+    body: data,
+  });
+
+  return response;
+}
+
+export async function DeleteNoticia(id: string) {
+  if (!id) throw new Error("Debe proporcionar un ID válido");
+
+  const response = await es().delete({
+    index: "noticias",
+    id,
+  });
+
+  return response;
 }
