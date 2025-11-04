@@ -40,7 +40,11 @@ export async function signAccessToken(payload: Record<string, any>) {
 // verifica el token del cliente con el secreto
 export async function verifyAccessToken(token: string) {
   const secret = getJwtSecret();
-  return await jwtVerify(token, secret);
+  const res = await jwtVerify(token, secret);
+  if (!res) {
+    throw new Error('Token inválido');
+  }
+  return true;
 }
 
 // establece una cookie segura, httpOnly, sameSite=lax
@@ -128,15 +132,16 @@ function newOpaqueToken() {
 function refreshExpiryDate(from = new Date()) {
   return new Date(from.getTime() + REFRESH_TTL_SEC * 1000);
 }
-
-
 // Main functions
 export async function createRefreshSession(userId: string, meta?: { ip?: string; ua?: string }) {
   const token     = newOpaqueToken();
   const tokenHash = await bcrypt.hash(token, 12);
   const expiresAt = refreshExpiryDate();
 
-  await createSessionInDB(userId, tokenHash, expiresAt, meta);
+  const session = await createSessionInDB(userId, tokenHash, expiresAt, meta);
+  if (!session) {
+    throw new Error('No se pudo crear la sesión de refresh');
+  }
 
   return { refreshToken: token, expiresAt };
 }
@@ -145,25 +150,49 @@ export async function createRefreshSession(userId: string, meta?: { ip?: string;
  * Verifica un refresh, lo rota y devuelve nuevo refresh + nuevo access.
  * Devuelve null si no existe/expiró/está revocado.
  */
-export async function verifyAndRotateRefresh(oldToken: string, accessPayload?: Record<string, any>, meta?: { ip?: string; ua?: string }) {
+
+export async function verifyAndRotateRefresh(
+  oldToken: string,
+  accessPayload?: Record<string, any>,
+  meta?: { ip?: string; ua?: string }
+) {
+  // Ideal: que findActiveSessions ya filtre por no revocadas y no expiradas
   const candidates = await findActiveSessions();
-
+  console.log('Active sessions found:', candidates.length); // --- IGNORE ---
   let match: (typeof candidates)[number] | null = null;
-  for (const s of candidates) {
-    if (await bcrypt.compare(oldToken, s.sessionIdHash)) { match = s; break; }
-  }
-  if (!match) return null;
 
+  for (const s of candidates) {
+    // ✅ compara token plano vs hash almacenado
+    if (await bcrypt.compare(oldToken, s.sessionIdHash)) {
+      // (Opcional) validación de expiración defensiva si el filtro no la hace:
+      if (s.expiresAt && new Date(s.expiresAt).getTime() <= Date.now()) {
+        continue; // expiró → no es válida
+      }
+      match = s;
+      break;
+    }
+  }
+
+  if (!match) {
+    console.log('No matching session found');
+    return null;
+  }
+    
+
+  // Rota refresh
   const newToken     = newOpaqueToken();
   const newHash      = await bcrypt.hash(newToken, 12);
   const newExpiresAt = refreshExpiryDate();
 
   await rotateSessionInDB(match.id, match.userId, newHash, newExpiresAt, meta);
 
+  // Access nuevo (incluye payload si lo pasas)
   const accessToken = await signAccessToken(accessPayload ?? { sub: match.userId });
 
   return { accessToken, refreshToken: newToken, refreshExpiresAt: newExpiresAt };
 }
+
+
 
 /** Revoca sesión por token (logout). */
 export async function revokeRefreshByToken(token: string) {

@@ -13,7 +13,8 @@ model Usuario {
   apellido    String
   email       String   @unique
   username    String   @unique
-  password    String   // hash bcrypt/argon2
+  authoriced  Boolean   @default(false)
+  password    String   //hash bcrypt/argon2
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

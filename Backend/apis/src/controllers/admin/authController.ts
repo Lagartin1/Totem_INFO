@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { setCookie, deleteCookie} from '@/lib/auth/login_tools';
 import { loginService, refreshService, logoutService } from '@/services/admin/authService';
 // import { requireCsrf } from '@/lib/auth/login_tools'; // si lo activas después
 
@@ -51,12 +52,12 @@ export async function loginController(req: Request) {
     if (!username || !password) {
       return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
     }
-    console.log("IDENTIFICADOR:",username);
-    console.log("PASSWORD:",password);
     const data = await loginService(username, password);
     if (!data) {
       return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 });
     }
+
+
 
     await setAccessCookie(data.accessToken);
     await setRefreshCookie(data.refreshToken);
@@ -83,21 +84,49 @@ export async function loginController(req: Request) {
 // ============================
 // REFRESH
 // ============================
-export async function refreshController() {
+export async function refreshController(req: NextRequest) {
   try {
+    // 1) leer refresh actual desde cookie httpOnly
     const jar = await cookies();
-    const old = jar.get(REFRESH_COOKIE)?.value;
-    if (!old) return NextResponse.json({ error: 'Sin refresh token' }, { status: 401 });
+    const oldRefresh = jar.get(REFRESH_COOKIE)?.value;
+    if (!oldRefresh) {
+      return NextResponse.json({ error: 'Sin refresh token' }, { status: 401 });
+    }
+    console.log("OLD REFRESH TOKEN:",oldRefresh); // --- IGNORE ---
+    // 2) rotar sesión (genera nuevo refresh + nuevo access)
+    const data = await refreshService(oldRefresh);
+    if (!data) {
+      // Invalida cookies si el refresh es inválido/expirado/revocado
+      await deleteCookie(ACCESS_COOKIE);
+      await deleteCookie(REFRESH_COOKIE);
+      return NextResponse.json({ error: 'Refresh inválido' }, { status: 401 });
+    }
 
-    const data = await refreshService(old);
-    if (!data) return NextResponse.json({ error: 'Refresh inválido' }, { status: 401 });
+    // 3) setear cookies usando login_tools.setCookie
+    await setCookie(ACCESS_COOKIE, data.accessToken, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: ACCESS_TTL_SEC,
+    });
 
-    await setAccessCookie(data.accessToken);
-    await setRefreshCookie(data.refreshToken);
+    await setCookie(REFRESH_COOKIE, data.refreshToken, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: 'strict',  // si algún día usas subdominios, quizá 'lax'/'none'
+      path: '/',
+      maxAge: REFRESH_TTL_SEC,
+    });
 
-    return NextResponse.json({ exp: data.refreshExpiresAt });
-  } catch (e) {
-    console.error('refreshController error:', e);
+    // 4) respuesta
+    return NextResponse.json({
+      ok: true,
+      refresh_expires_at: data.refreshExpiresAt,
+    });
+
+  } catch (err) {
+    console.error('refreshController error:', err);
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }

@@ -118,7 +118,7 @@ export const AuthProvider = ( {children}:{children: ReactNode}) => {
     (async () => {
       try {
         // intenta recuperar sesión (cookie HttpOnly via credentials)
-        const res = await fetch('/api/auth/me', { credentials: 'include' });
+        const res = await fetch('/api/admin/auth/refresh', { method: 'POST', credentials: 'include' });
         if (!alive) return;
 
         if (res.ok) {

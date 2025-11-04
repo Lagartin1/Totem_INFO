@@ -9,8 +9,7 @@ export default function LoadData() {
           <p>Por favor, espera mientras se cargan los datos necesarios.</p> 
         </div>
         <div className='flex flex-col justify-center items-center'>
-          
-        </div>
+      </div>
       </div>
     
     </main>

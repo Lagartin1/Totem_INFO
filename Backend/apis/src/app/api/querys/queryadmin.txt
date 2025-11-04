@@ -8,13 +8,21 @@ para solo correr la imagen de mongo hacer :
 
 docker exec -it docker-database_mongo-1 mongosh \
   -u admin -p test123 --authenticationDatabase admin \
-  --eval "use totem_admins" \
-  --eval 'db.Usuario.insertOne({
-    nombre: "Admin",
-    apellido: "Principal",
-    email: "admin@example.com",
-    username: "admin",
-    password: "admin",
-    createdAt: new Date(),
-    updatedAt: new Date()
-  })'
+  --eval "db.getSiblingDB('totem_admins').Usuario.updateOne(
+    { username: 'admin' },
+    {
+      \$setOnInsert: {
+        nombre: 'Admin',
+        apellido: 'Principal',
+        email: 'admin@example.com',
+        username: 'admin',
+        authoriced: true,
+        password: '\$2b\$10\$rD9O4AsOI86kzAJNb0sDo.qKkwuyo13N00JSwH8AimBgsZ1SRCZKa',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isActive: true,
+        failedLoginAttempts: 0
+      }
+    },
+    { upsert: true }
+  )"

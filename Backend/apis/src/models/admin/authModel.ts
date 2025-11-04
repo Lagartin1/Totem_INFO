@@ -4,18 +4,25 @@ import { mongoClient } from '@/database/mongodb';
 
 // Database operations
 async function createSessionInDB(userId: string, tokenHash: string, expiresAt: Date, meta?: { ip?: string; ua?: string }) {
+  const revokedAt = null;
   return await mongoClient.session.create({
     data: {
       userId,
       sessionIdHash: tokenHash,
       expiresAt,
+      revokedAt,
     },
   });
 }
 
 async function findActiveSessions() {
   return await mongoClient.session.findMany({
-    where: { revokedAt: null, expiresAt: { gt: new Date() } },
+    where: {
+      revokedAt: null,
+      expiresAt: {
+        gt: new Date(),
+      },
+    },
   });
 }
 

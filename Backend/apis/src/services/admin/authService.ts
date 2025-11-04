@@ -30,11 +30,8 @@ export async function loginService(
   // if (!user.isActive) return null;
   // if (user.lockedUntil && user.lockedUntil > new Date()) return null;
   // verficar sin un pasword haseado en la base de datos para pruebas seria asi:
-  console.log("USUARIO PARA LOGIN:",user);
-  console.log("PASSWORD en la base de datos:",user.password);
-  console.log("PASSWORD ingresado para login:",password);
-  const ok = password === user.password;
-  //const ok = await bcrypt.compare(password, user.password);
+  //const ok = password === user.password;
+  const ok = await bcrypt.compare(password, user.password);
   if (!ok) return null;
 
   const accessToken = await signAccessToken({
@@ -53,12 +50,20 @@ export async function loginService(
   };
 }
 
-export async function refreshService(
-  oldRefreshToken: string,
-  meta?: { ip?: string; ua?: string }
-) {
-  // verifyAndRotateRefresh valida, revoca la anterior, crea una nueva y devuelve nuevo access+refresh
-  return verifyAndRotateRefresh(oldRefreshToken, undefined, meta);
+export async function refreshService(oldRefreshToken: string, meta?: { ip?: string; ua?: string }) {
+  // Rota y valida token
+  const data = await verifyAndRotateRefresh(oldRefreshToken, undefined, meta);
+  if (!data) return null;
+
+  // Si necesitas más info del usuario (opcional):
+  // const user = await getUserById(data.sub);
+
+  return {
+    accessToken: data.accessToken,
+    refreshToken: data.refreshToken,
+    refreshExpiresAt: data.refreshExpiresAt,
+    // user, // opcional
+  };
 }
 
 export async function logoutService(oldRefreshToken: string) {
