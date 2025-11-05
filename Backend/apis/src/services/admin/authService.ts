@@ -31,6 +31,7 @@ export async function loginService(
   // if (user.lockedUntil && user.lockedUntil > new Date()) return null;
   // verficar sin un pasword haseado en la base de datos para pruebas seria asi:
   //const ok = password === user.password;
+  //console.log("Comparing passwords:", password, "<>",user.password);
   const ok = await bcrypt.compare(password, user.password);
   if (!ok) return null;
 

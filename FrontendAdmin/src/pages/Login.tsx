@@ -32,6 +32,7 @@ export default function Home() {
     confirmPassword: "",
   });
   const [regError, setRegError] = useState<string | null>(null);
+  const [regAdvisor, setRegAdvisor] = useState<string | null>(null);
   const [regLoading, setRegLoading] = useState(false);
   const getCookie = (name: string): string | null => {
     const value = `; ${document.cookie}`;
@@ -62,6 +63,7 @@ export default function Home() {
     setRegError("Las contraseñas no coinciden.");
     return;
   }
+  
 
   setRegLoading(true);
   try {
@@ -98,12 +100,11 @@ export default function Home() {
         return;
       }
 
-      // 3) (Opcional) Autologin + cerrar modal
-      const logged = await login(reg.username, reg.password);
-      if (!logged?.ok) {
+      // 3) aviso + cerrar modal
+      if (res.ok) {
         // si el login falla, al menos informa que la cuenta se creó
-        setRegError("Cuenta creada, pero no se pudo iniciar sesión automáticamente.");
-        return;
+        setRegAdvisor("Cuenta creada Correctamente, Porfavor espere a que su administrador valide su cuenta.");
+        
       }
 
       // Éxito: limpia, cierra modal
@@ -112,7 +113,6 @@ export default function Home() {
         username: "", password: "", confirmPassword: ""
       });
       setRegError(null);
-      closeModal();
 
     } catch (err) {
       console.error(err);
@@ -325,6 +325,11 @@ export default function Home() {
                           {isModalOpen && regError && (
                             <p className="text-red-600 text-sm font-semibold p-4 mx-5 bg-red-100 rounded-md mb-4">
                               {regError}
+                            </p>
+                          )}
+                          {isModalOpen && regAdvisor && (
+                            <p className="text-green-600 text-sm font-semibold p-4 mx-5 bg-green-100 rounded-md mb-4">
+                              {regAdvisor}
                             </p>
                           )}
                         </div>

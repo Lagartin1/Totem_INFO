@@ -1,6 +1,5 @@
 import { UserInfo } from '@/models/admin/userModel'
 import { mongoClient } from '@/database/mongodb';
-import { fa } from 'zod/locales';
 
 
 async function getRegisteredUsers(): Promise<UserInfo[]>{
@@ -24,4 +23,18 @@ async function getRegisteredUsers(): Promise<UserInfo[]>{
 }
 
 
-export { getRegisteredUsers };
+async function acceptRegisteredUser(userId: string) {
+
+  const result = await mongoClient.usuario.update({
+    where: { id: userId },
+    data: { authoriced: true },
+  });
+  if (!result) {
+    throw new Error('Error al autorizar el usuario');
+  }
+  return { ok: true, userId };
+}
+
+
+
+export { getRegisteredUsers, acceptRegisteredUser };  

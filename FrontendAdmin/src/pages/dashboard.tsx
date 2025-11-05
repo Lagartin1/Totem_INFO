@@ -1,5 +1,20 @@
-import React from 'react';
+import React, { use, useState } from 'react';
 import {  useNavigate } from 'react-router-dom';
+import UserCard from '../components/userCards';
+interface User {
+  id: string;
+  username: string;
+  email: string;
+  nombre: string;
+  apellido: string;
+  authoriced: boolean;
+}
+import { useEffect } from 'react';
+import { useCallback } from 'react';
+import Toast from '../components/toast';
+
+
+
 
 export default function Dashboard() { 
   const navigate = useNavigate();
@@ -7,25 +22,75 @@ export default function Dashboard() {
     navigate('/load-data');
   }
 
+
+  const [data, setData] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [toastmsg, setToastmsg] = useState<string | null>(null);
+
+  const cargar = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await fetch('/api/admin/registered',
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            credentials: 'include',
+          },
+        }
+      ).then(res => res.json());
+      setData(data);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+
+  useEffect(() => { cargar(); }, [cargar]);
+
+  const handleUpdated = async () => {
+    await cargar();
+    setToastmsg( "Usuario autorizado con éxito");
+    setTimeout(() => setToastmsg(null), 3000);
+
+  };
+
   return (
     <main className='p-6 w-full min-h-screen '>
-      <div className='mb-1 bg-white shadow-md rounded-lg h-lvh flex flex-col justify-center items-center'>
+      {toastmsg ? <Toast message={toastmsg} status="success" /> : null}
+      <div className='bg-white shadow-md rounded-lg h-lvh flex flex-col justify-center items-center'>
         <div className="w-full max-w-4xl">
-          <h1 className='text-3xl font-bold mb-6'>Panel de Administración</h1>
+          <h1 className='text-3xl font-bold'>Panel de Administración</h1>
           <p>Bienvenido al panel de administración.</p> 
+          <div className="flex flex-row gap-20 ">
+            <div className="grid grid-cols-2 gap-4 text-white mt-24">
+              <button className='w-40 h-40 bg-slate-600 rounded-2xl'> Cargar Datos </button>
+              <button className='w-40 h-40 bg-slate-600 rounded-2xl'> Eliminar Datos</button>
+              <button className='w-40 h-40 bg-slate-600 rounded-2xl'> Agregar practicas</button>         
+              <button className='w-40 h-40 bg-slate-600 rounded-2xl'> Agregar practicas</button>             
+            </div>
+            <div className="mt-6 flex flex-col gap-4">
+              <div className="">
+                <h2 className="text-2xl font-semibold mt-4 font-sans"> Autorización de Usuarios</h2>
+                <p>Lista de usuarios pendientes:</p>
+              </div>
+              {data.length === 0 && <p className='font-extrabold '>No hay usuarios pendientes.</p>}
+              {data.map((user) => (
+                <UserCard 
+                  key={user.id}
+                  id={user.id}
+                  nombre={user.nombre}
+                  apellido={user.apellido}
+                  username={user.username}
+                  email={user.email}
+                  onUpdated={handleUpdated}
+                  />
+              ))}
+            </div>
+            
+          </div>
         </div>
-        <div className='flex flex-col justify-center items-center'>
-          <button
-            onClick={() => {
-              // Redirigir a la página de carga de datos
-              handleOnClick();
-            }}
-            className='mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition'
-          >
-            Cargar Datos
-          </button>
-        </div>
-
+        
       </div>
     
     </main>
