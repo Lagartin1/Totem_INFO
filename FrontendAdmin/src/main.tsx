@@ -7,6 +7,8 @@ import Dashboard from './pages/dashboard';
 import { AuthProvider } from './lib/authProvider';
 import ProtectedRoute from './routes/protectedRoutes';
 import LoadData from './pages/loadData';
+import AdminPracticas from './pages/adminPracticas';
+import NotFound from './pages/404';
 
 
 createRoot(document.getElementById('root')!).render(
@@ -15,12 +17,12 @@ createRoot(document.getElementById('root')!).render(
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/admin-practicas" element={<AdminPracticas />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/load-data" element={<LoadData />} />
           </Route>
-
-          <Route path="*" element={<main><h1>404 - Not Found</h1></main>} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </AuthProvider>

@@ -5,9 +5,8 @@ export default function Toast({ message, status }: { message: string; status: 's
 
   return (
     <>
-      <div className="fixed inset-0 backdrop-blur-sm z-10 animate-fade-in transition ease-out duration-50 "></div>
       <div className={`fixed bottom-10 right-10 ${selectedColor}
-      text-white px-4 py-2 rounded shadow-lg z-30  transition ease-out duration-100`}>
+      text-white px-4 py-2 rounded shadow-lg z-[9999999] animate-fade-in transition-all duration-500`}>
         {message}
       </div>
     
