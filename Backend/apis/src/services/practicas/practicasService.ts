@@ -1,7 +1,10 @@
 
 import {GetPracticas, GetPracticasByYear,SearchTermPracticas} from "@/models/practicas/practicasModel";
 import { PracticasResult} from "@/models/practicas/practicasModel";
+import {CreateNewPractica, GetLastPracticaId,CreateBulkPracticas,GetPracticasByID} from "@/models/practicas/practicasModel";
 
+
+const test = true;
 
 export async function listPracticas(year: string | false,indice: number, type: string): Promise<PracticasResult> {
     let practicasData: PracticasResult;
@@ -26,4 +29,29 @@ export async function BuscarPracticas(term: string, type: string): Promise<Pract
     return practicasData;
 
 }
-    
+
+
+export async function insertNewPractica(data: any): Promise<PracticasResult> {
+    const lastID = await GetLastPracticaId();
+    const practicasData: PracticasResult = await CreateNewPractica(data,lastID);
+    if (!practicasData) {
+        throw new Error('No se pudo crear la práctica');
+    }
+    //const review:PracticasResult= await GetPracticasByID(practicasData.practicas[0].id);
+   // if (!review) {
+    //    throw new Error('No se pudo obtener la práctica');
+   // }
+    //console.log("Review:", review);
+    return practicasData;
+}
+
+
+
+export async function insertCsvPracticas(dataArray: any[]): Promise<PracticasResult[]> {
+    const lastID = await GetLastPracticaId();
+    const practicasDataArray: PracticasResult[] = await CreateBulkPracticas(dataArray,lastID);
+    if (!practicasDataArray) {
+        throw new Error('No se pudieron crear las prácticas');
+    }
+    return practicasDataArray;
+}

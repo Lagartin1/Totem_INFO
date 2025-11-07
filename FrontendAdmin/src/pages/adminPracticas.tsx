@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 
 import Toast from '../components/toast';
-
+import Loader from '../components/loader';
 
 
 interface practicasProps {
@@ -31,6 +31,7 @@ export default function AdminPracticas() {
   const [toastState, setToastState] = React.useState(false);
   const [toastMessage, setToastMessage] = React.useState('');
   const [toastStatus, setToastStatus] = React.useState<'success' | 'error'>('success');
+  const [loading, setLoading] = React.useState(false);
   const [formData, setFormData] = React.useState<practicasProps>({
     tipo_practica: '',
     nombre_contacto: '',
@@ -91,6 +92,7 @@ export default function AdminPracticas() {
   }
 
 
+
   const handleCloseModal = () => {
     closeModal();
     setForm(false);
@@ -105,9 +107,34 @@ export default function AdminPracticas() {
   const  onSubmit = async () => {
     if (!isFormEmpty() || fileContent) { 
       if (form) {
-        // Aquí iría la lógica para enviar el formulario de práctica manualmente
-        console.log("Submitting manual practice form data:", formData);
-        return;
+        // si alguno de los campos del formulario que son requeridos esta vacio, mostrar un toast de error
+        for (const [key, value] of Object.entries(formData)) {
+          if (value === '' && key !== 'beneficios' && key !== 'requisitos_especiales') {
+            makeToast('Por favor complete todos los campos requeridos del formulario.', 'error');
+            return;
+          }
+        }
+        // otras berificaciones pueden ir aqui opcionamente, 
+        
+        // enviar data del formulario
+        setLoading(true);
+        const response = await fetch('/api/admin/administrar/practicas/form', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            credentials: 'include',
+          },
+          body: JSON.stringify(formData),
+        });
+
+        if (response.ok) {
+          makeToast('Práctica agregada exitosamente.', 'success');
+          setLoading(false);
+          resetDataUpload();
+          return;
+        } else {
+          makeToast('Error al agregar práctica.', 'error');
+        } 
       }else {
         // Aquí iría la lógica para procesar el archivo CSV subido
         console.log("Processing uploaded file:", fileContent);
@@ -157,6 +184,7 @@ export default function AdminPracticas() {
 
   return (
     <main className='p-6 w-full min-h-screen '>
+      {loading && <Loader frase={"Enviando..."} />}
       {toastState && <Toast message={toastMessage} status={toastStatus} />}
       <div className='bg-white shadow-md rounded-lg h-lvh flex flex-col '>
         <h1 className='text-2xl font-bold mb-4 text-center mt-40'>Página de Administración de Prácticas</h1>
@@ -257,96 +285,200 @@ function FileUploadForm({ onChange, onDrop,fileUpload }: { onChange?: (e: React.
 function FormPractica(props: practicasProps & { onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void }) {
   const { onChange } = props;
   return (
-  <form className='grid grid-cols-5 gap-10 min-md:grid-cols-2'>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Tipo de práctica</label>
-                  <select onChange={onChange}  name="tipo_practica" className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none">
-                  <option value="">Seleccione...</option>
-                  <option value="Practica Inicial">Pasantía</option>
-                  <option value="Practica Profesional">Práctica profesional</option>
-                  </select>
-                </div>
+  <form className='grid grid-cols-4 gap-10'>
+    <div className="mb-4">
+      <label className="block text-sm font-medium mb-2">Tipo de práctica</label>
+      <select
+        onChange={onChange}
+        name="tipo_practica"
+        value={props.tipo_practica}
+        required
+        className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+        aria-required="true"
+      >
+        <option value="">Seleccione...</option>
+        <option value="Inicial">Practica Inicial</option>
+        <option value="Profesional">Práctica profesional</option>
+      </select>
+    </div>
 
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Nombre del contacto</label>
-                  <input onChange={onChange} name="nombre_contacto" type="text" className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none" />
-                </div>
+    <div className="mb-4">
+      <label className="block text-sm font-medium mb-2">Nombre del contacto</label>
+      <input
+        onChange={onChange}
+        name="nombre_contacto"
+        type="text"
+        value={props.nombre_contacto}
+        required
+        className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+      />
+    </div>
 
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Cargo del contacto</label>
-                  <input onChange={onChange} name="cargo_contacto" type="text" className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none" />
-                </div>
+    <div className="mb-4">
+      <label className="block text-sm font-medium mb-2">Cargo del contacto</label>
+      <input
+        onChange={onChange}
+        name="cargo_contacto"
+        type="text"
+        value={props.cargo_contacto}
+        required
+        className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+      />
+    </div>
 
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Correo del contacto</label>
-                  <input onChange={onChange} name="correo_contacto" type="email" className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none" />
-                </div>
+    <div className="mb-4">
+      <label className="block text-sm font-medium mb-2">Correo del contacto</label>
+      <input
+        onChange={onChange}
+        name="correo_contacto"
+        type="email"
+        value={props.correo_contacto}
+        required
+        className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+      />
+    </div>
 
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Teléfono del contacto</label>
-                  <input onChange={onChange} name="telefono_contacto" type="tel" className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none" />
-                </div>
+    <div className="mb-4">
+      <label className="block text-sm font-medium mb-2">Teléfono del contacto</label>
+      <input
+        onChange={onChange}
+        name="telefono_contacto"
+        type="tel"
+        value={props.telefono_contacto}
+        required
+        className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+      />
+    </div>
 
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Nombre de la empresa</label>
-                  <input onChange={onChange} name="nombre_empresa" type="text" className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none" />
-                </div>
+    <div className="mb-4">
+      <label className="block text-sm font-medium mb-2">Nombre de la empresa</label>
+      <input
+        onChange={onChange}
+        name="nombre_empresa"
+        type="text"
+        value={props.nombre_empresa}
+        required
+        className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+      />
+    </div>
 
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Sitio web de la empresa</label>
-                  <input onChange={onChange} name="sitio_web_empresa" type="url" className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none" />
-                </div>
+    <div className="mb-4">
+      <label className="block text-sm font-medium mb-2">Sitio web de la empresa</label>
+      <input
+        onChange={onChange}
+        name="sitio_web_empresa"
+        type="url"
+        value={props.sitio_web_empresa}
+        required
+        className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+      />
+    </div>
 
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Unidad de la empresa</label>
-                  <input onChange={onChange} name="unidad_empresa" type="text" className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none" />
-                </div>
+    <div className="mb-4">
+      <label className="block text-sm font-medium mb-2">Unidad de la empresa</label>
+      <input
+        onChange={onChange}
+        name="unidad_empresa"
+        type="text"
+        value={props.unidad_empresa}
+        required
+        className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+      />
+    </div>
 
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Fechas de la práctica</label>
-                  <input onChange={onChange} name="fechas_practica" type="text" placeholder="Ej. 2025-06-01 a 2025-08-31" className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none" />
-                </div>
+    <div className="mb-4">
+      <label className="block text-sm font-medium mb-2">Fechas de la práctica</label>
+      <input
+        onChange={onChange}
+        name="fechas_practica"
+        type="text"
+        placeholder="Ej. Enero 2025 - Agosto 2025"
+        value={props.fechas_practica}
+        required
+        className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+      />
+    </div>
 
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Modalidad</label>
-                  <select onChange={onChange} name="modalidad" className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none w-full">
-                  <option value="">Seleccione...</option>
-                  <option value="presencial">Presencial</option>
-                  <option value="remoto">Remoto</option>
-                  <option value="hibrido">Híbrido</option>
-                  </select>
-                </div>
+    <div className="mb-4">
+      <label className="block text-sm font-medium mb-2">Modalidad</label>
+      <select
+        onChange={onChange}
+        name="modalidad"
+        value={props.modalidad}
+        required
+        className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none w-full"
+        aria-required="true"
+      >
+        <option value="">Seleccione...</option>
+        <option value="presencial">Presencial</option>
+        <option value="remoto">Remoto</option>
+        <option value="hibrido">Híbrido</option>
+      </select>
+    </div>
 
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Sede o Ciudad</label>
-                  <input onChange={onChange} name="sede_practica" type="text" className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none w-full" />
-                </div>
+    <div className="mb-4">
+      <label className="block text-sm font-medium mb-2">Sede o Ciudad</label>
+      <input
+        onChange={onChange}
+        name="sede_practica"
+        type="text"
+        value={props.sede_practica}
+        required
+        className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none w-full"
+      />
+    </div>
 
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Régimen de trabajo</label>
-                  <select onChange={onChange} name="regimen_trabajo" className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none w-full">
-                  <option value="">Seleccione...</option>
-                  <option value="tiempo_completo">Tiempo completo</option>
-                  <option value="medio_tiempo">Medio tiempo</option>
-                  <option value="por_horas">Por horas</option>
-                  </select>
-                </div>
+    <div className="mb-4">
+      <label className="block text-sm font-medium mb-2">Régimen de trabajo</label>
+      <select
+        onChange={onChange}
+        name="regimen_trabajo"
+        value={props.regimen_trabajo}
+        required
+        className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none w-full"
+        aria-required="true"
+      >
+        <option value="">Seleccione...</option>
+        <option value="tiempo_completo">Tiempo completo</option>
+        <option value="medio_tiempo">Medio tiempo</option>
+        <option value="por_horas">Por horas</option>
+      </select>
+    </div>
 
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Labores</label>
-                  <textarea onChange={onChange} name="labores" className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none w-full" rows={3}></textarea>
-                </div>
+    <div className="mb-4">
+      <label className="block text-sm font-medium mb-2">Labores</label>
+      <textarea
+        onChange={onChange}
+        name="labores"
+        value={props.labores}
+        required
+        className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none w-full"
+        rows={3}
+      />
+    </div>
 
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Beneficios</label>
-                  <textarea onChange={onChange} name="beneficios" className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none w-full" rows={3}></textarea>
-                </div>
+    <div className="mb-4">
+      <label className="block text-sm font-medium mb-2">Beneficios (opcional)</label>
+      <textarea
+        onChange={onChange}
+        name="beneficios"
+        value={props.beneficios}
+        className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none w-full"
+        rows={3}
+      />
+    </div>
 
-                <div className="mb-4" >
-                  <label className="block text-sm font-medium mb-2">Requisitos especiales</label>
-                  <textarea onChange={onChange} name="requisitos_especiales" className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none w-full" rows={3}></textarea>
-                </div>
-      </form>
+    <div className="mb-4">
+      <label className="block text-sm font-medium mb-2">Requisitos especiales (opcional)</label>
+      <textarea
+        onChange={onChange}
+        name="requisitos_especiales"
+        value={props.requisitos_especiales}
+        className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none w-full"
+        rows={3}
+      />
+    </div>
+  </form>
   );
 
 }

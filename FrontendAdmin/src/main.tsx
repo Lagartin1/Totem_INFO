@@ -17,10 +17,10 @@ createRoot(document.getElementById('root')!).render(
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/admin-practicas" element={<AdminPracticas />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/load-data" element={<LoadData />} />
+            <Route path="/admin-practicas" element={<AdminPracticas />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
