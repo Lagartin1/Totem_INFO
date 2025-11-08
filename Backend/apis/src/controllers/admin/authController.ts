@@ -104,22 +104,8 @@ export async function refreshController(req: NextRequest) {
     }
 
     // 3) setear cookies usando login_tools.setCookie
-    await setCookie(ACCESS_COOKIE, data.accessToken, {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: 'lax',
-      path: '/',
-      maxAge: ACCESS_TTL_SEC,
-    });
-
-    await setCookie(REFRESH_COOKIE, data.refreshToken, {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: 'lax',  // si algún día usas subdominios, quizá 'lax'/'none'
-      path: '/',
-      maxAge: REFRESH_TTL_SEC,
-    });
-
+    await setAccessCookie(data.accessToken);
+    await setRefreshCookie(data.refreshToken);
     // 4) respuesta
     return NextResponse.json({
       ok: true,

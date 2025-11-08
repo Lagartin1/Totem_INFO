@@ -158,8 +158,6 @@ export async function verifyAndRotateRefresh(
 ) {
   // Ideal: que findActiveSessions ya filtre por no revocadas y no expiradas
   const candidates = await findActiveSessions();
-  console.log('Active sessions:', candidates);
-  console.log('Active sessions found:', candidates.length); // --- IGNORE ---
   let match: (typeof candidates)[number] | null = null;
 
   for (const s of candidates) {
@@ -183,6 +181,8 @@ export async function verifyAndRotateRefresh(
   const newToken     = newOpaqueToken();
   const newHash      = await bcrypt.hash(newToken, 12);
   const newExpiresAt = refreshExpiryDate();
+
+  console.log('new hash:', newHash); // --- IGNORE ---
 
   await rotateSessionInDB(match.id, match.userId, newHash, newExpiresAt, meta);
 

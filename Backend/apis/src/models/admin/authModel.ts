@@ -34,6 +34,8 @@ async function revokeSessionInDB(sessionId: string, replacedBy?: string) {
 }
 
 async function rotateSessionInDB(oldSessionId: string, userId: string, newHash: string, newExpiresAt: Date, meta?: { ip?: string; ua?: string }) {
+  console.log('hash in Rotating session DB:', {newHash}); // --- IGNORE ---
+  
   return await mongoClient.$transaction([
     mongoClient.session.update({
       where: { id: oldSessionId },
@@ -44,6 +46,7 @@ async function rotateSessionInDB(oldSessionId: string, userId: string, newHash: 
         userId,
         sessionIdHash: newHash,
         expiresAt: newExpiresAt,
+        revokedAt: null,
       },
     }),
   ]);
