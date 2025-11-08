@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "db:push": "dotenv -e src/config/.env -- npx prisma db push",
-    "es:setup": "ts-node --esm src/database/practicas_mapping.ts",
+    "es:setup": "ts-node --esm src/models/database/practicas_mapping.ts",
     "prisma:push": "dotenv -e src/config/.env -- npx prisma db push"
   },
   "dependencies": {

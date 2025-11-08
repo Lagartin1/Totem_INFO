@@ -1,12 +1,13 @@
 
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../lib/authProvider';
+import Loader from '../components/loader';
 
 export default function ProtectedRoute() {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
 
-  if (isLoading) return <div className="p-6 text-center">Cargando…</div>;
+  if (isLoading) return <Loader frase='Cargando...' />;
   if (!isAuthenticated) {
     // guarda a dónde quería ir
     return <Navigate to="/" replace state={{ from: location }} />;

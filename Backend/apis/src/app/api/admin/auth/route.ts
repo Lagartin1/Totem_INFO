@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server';
-import { issueCsrfToken, setCsrfCookies } from '@/lib/auth/login_tools';
+import { NextResponse,NextRequest } from 'next/server';
 
+import { issueCsrfToken, setCsrfCookies } from '@/lib/auth/login_tools';
+import { refreshController } from '@/controllers/admin/authController';
 export async function GET() {
   try {
     const csrfToken = await issueCsrfToken();
@@ -15,4 +16,9 @@ export async function GET() {
     console.error('Error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
+}
+
+export async function POST(req: NextRequest) {
+  return refreshController(req);
+  
 }

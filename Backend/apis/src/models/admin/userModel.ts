@@ -1,4 +1,6 @@
 import { mongoClient } from "@/database/mongodb"
+import { ok } from "assert";
+import bcrypt from "bcrypt";
 
 
 export interface UserInfo {
@@ -8,6 +10,7 @@ export interface UserInfo {
   nombre?: string;
   apellido?: string;
   password: string; // HASH: se usa solo en backend
+  authoriced: boolean;
   createdAt: Date;
   registros?: any[]; // incluye si lo necesitas
   sesiones?: any[];
@@ -54,6 +57,7 @@ async function getUserByCredentials(username: string) {
       nombre: true,
       apellido: true,
       password: true, // HASH
+      authoriced: true,
       createdAt: true,
       registros: true, // incluye si lo necesitas
       sesiones:true,
@@ -85,5 +89,29 @@ async function getSesionesByUserId(userId: string) {
   return user?.sesiones || [];
 }
 
+async function registerNewUser(params: { username: string; email: string; password: string; nombre: string; apellido: string }) {
+  const hashedPassword = await bcrypt.hash(params.password, 10);
+  const newUser = await mongoClient.usuario.create({
+    data: {
+      username: params.username,
+      email: params.email,
+      password: hashedPassword,
+      nombre: params.nombre,
+      apellido: params.apellido,
+      authoriced: false,
+      createdAt: new Date(),
+    },
+  });
+  if (newUser) {
+    return {
+      ok : true,
+    };
+  }
+  return null;
+}
 
-export {getRegistrosByUserId, getSesionesByUserId, getUserById, getUserByCredentials};
+
+
+
+
+export {getRegistrosByUserId, getSesionesByUserId, getUserById, getUserByCredentials, registerNewUser};
