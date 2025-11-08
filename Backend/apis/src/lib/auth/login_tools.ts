@@ -158,6 +158,7 @@ export async function verifyAndRotateRefresh(
 ) {
   // Ideal: que findActiveSessions ya filtre por no revocadas y no expiradas
   const candidates = await findActiveSessions();
+  console.log('Active sessions:', candidates);
   console.log('Active sessions found:', candidates.length); // --- IGNORE ---
   let match: (typeof candidates)[number] | null = null;
 
@@ -172,7 +173,6 @@ export async function verifyAndRotateRefresh(
       break;
     }
   }
-
   if (!match) {
     console.log('No matching session found');
     return null;
@@ -205,4 +205,21 @@ export async function revokeRefreshByToken(token: string) {
     }
   }
   return false;
+}
+
+
+
+export async function getUserIdFromSessionToken(oldToken: string): Promise<string | null> {
+  const candidates = await findActiveSessions();
+  console.log('Active sessions:', candidates); // --- IGNORE ---
+
+  for (const s of candidates) {
+    if (await bcrypt.compare(oldToken, s.sessionIdHash)) {
+      if (s.expiresAt && new Date(s.expiresAt).getTime() <= Date.now()) {
+        return null; // expiró
+      }
+      return s.userId ?? null; // no expiró -> devuelve userId
+    }
+  }
+  return null;
 }

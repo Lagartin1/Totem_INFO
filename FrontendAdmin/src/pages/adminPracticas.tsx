@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-
+import { useNavigate } from 'react-router-dom';
 import Toast from '../components/toast';
 import Loader from '../components/loader';
 
@@ -22,8 +22,8 @@ interface practicasProps {
   requisitos_especiales: string;
 }
 
-
 export default function AdminPracticas() {
+  const nav = useNavigate();
   const [modalOpen, setModalOpen] = React.useState(false);
   const openModal = () => { setModalOpen(true); }
   const closeModal = () => { setModalOpen(false); }
@@ -59,7 +59,7 @@ export default function AdminPracticas() {
     }, 3000);
   }
 
-  const [fileContent, setFileContent] = React.useState<File | FileReader | null>(null);
+  const [fileContent, setFileContent] = React.useState<File | null>(null);
   const [fileUpload, setFileUploaded] = React.useState(false);
   const handleAddPractica = () => {
     openModal();
@@ -91,8 +91,6 @@ export default function AdminPracticas() {
 
   }
 
-
-
   const handleCloseModal = () => {
     closeModal();
     setForm(false);
@@ -102,6 +100,41 @@ export default function AdminPracticas() {
   // fucnion que verifica que el form este vacio
   const isFormEmpty = () => {
     return Object.values(formData).every((value) => value === '') && fileContent === null;
+  }
+  const fetchForm = async (body: practicasProps) => {
+    const response = await fetch('/api/admin/administrar/practicas/form', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        credentials: 'include',
+      },
+      body: JSON.stringify(body),
+    });
+    return response;
+  }
+
+  const refresh = async () => {
+    const response =  await fetch('/api/auth/refresh', { method: 'GET', credentials: 'include' });
+    if (!response.ok) {
+      nav('/');
+    } else if (response.ok) {
+      return true;
+    }else{
+      return false;
+    }
+    
+  }
+  const fetchFormCsv = async (formData: File) => {
+    const data = new FormData();
+    data.append('file', formData);
+    const response = await fetch('/api/admin/administrar/practicas/file', {
+      method: 'POST',
+      headers: {
+        credentials: 'include',
+      },
+      body: data,
+    });
+    return response;
   }
 
   const  onSubmit = async () => {
@@ -118,26 +151,84 @@ export default function AdminPracticas() {
         
         // enviar data del formulario
         setLoading(true);
-        const response = await fetch('/api/admin/administrar/practicas/form', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            credentials: 'include',
-          },
-          body: JSON.stringify(formData),
-        });
-
-        if (response.ok) {
-          makeToast('Práctica agregada exitosamente.', 'success');
-          setLoading(false);
-          resetDataUpload();
-          return;
-        } else {
+        try{
+          const response = await fetchForm(formData);
+          if (response.ok ) {
+            setLoading(false);
+            makeToast('Práctica agregada con éxito.', 'success');
+            handleCloseModal(); 
+          } else if (response.status === 401) {
+            const refreshed = await refresh();
+            if (refreshed) {
+              try{
+                const retryResponse = await fetchForm(formData);
+                if (retryResponse.ok) {
+                  setLoading(false);
+                  makeToast('Práctica agregada con éxito.', 'success');
+                  handleCloseModal(); 
+                  return;
+                } else {
+                  makeToast('Error al agregar práctica.', 'error');
+                  setLoading(false);
+                  return;
+                }
+              } catch (error) {
+                makeToast('Error al agregar práctica.', 'error');
+                setLoading(false);
+                return;
+              }
+            }
+          } else {
+            makeToast('Error al agregar práctica.', 'error');
+            setLoading(false);
+          }
+        }catch(e){
           makeToast('Error al agregar práctica.', 'error');
-        } 
+          setLoading(false);
+          return;
+        }
+
       }else {
-        // Aquí iría la lógica para procesar el archivo CSV subido
-        console.log("Processing uploaded file:", fileContent);
+        
+        try{
+          setLoading(true);
+          const response = await fetchFormCsv(fileContent as File);
+          if (response.ok) {
+            makeToast('Prácticas agregadas con éxito desde CSV.', 'success');
+            handleCloseModal(); 
+            return;
+          } else if (response.status === 401) {
+            const refreshed = await refresh();
+            if (refreshed) {
+              try{
+                const retryResponse = await fetchFormCsv(fileContent as File);
+                if (retryResponse.ok) {
+                  makeToast('Prácticas agregadas con éxito desde CSV.', 'success');
+                  handleCloseModal(); 
+                  setLoading(false);
+                  return;
+                } else {
+                  makeToast('Error al agregar prácticas desde CSV.', 'error');
+                  setLoading(false);
+                  return;
+                }
+              } catch (error) {
+                makeToast('Error al agregar prácticas desde CSV.', 'error');
+                setLoading(false);
+                return;
+              }
+            }
+          } else {
+            makeToast('Error al agregar prácticas desde CSV.', 'error');
+            setLoading(false);
+          }
+
+        }catch(e){
+          makeToast('Error al agregar prácticas desde CSV.', 'error');
+          setLoading(false);
+          return;
+        }
+
         return;
       }
     }else{
@@ -148,30 +239,19 @@ export default function AdminPracticas() {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   }
+
   const onAddFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
       setFileUploaded(true);
-      reader.onload = () => {
-        setFileContent(reader);
-      };
-      reader.readAsText(file);
-      setFileContent(file)
+      setFileContent(file);
     }
   }
-
-
   const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
     if (file) {
       setFileUploaded(true);
-      const reader = new FileReader();
-      reader.onload = () => {
-        setFileContent(reader);
-      };
-      reader.readAsText(file);
       setFileContent(file);
     }
   }
@@ -179,8 +259,6 @@ export default function AdminPracticas() {
   const handleDownloadTemplate = () => {
     console.log("Downloading CSV template...");
   }
-
-
 
   return (
     <main className='p-6 w-full min-h-screen '>

@@ -31,7 +31,7 @@ async function setRefreshCookie(token: string) {
     value: token,
     httpOnly: true,
     secure: isProd,
-    sameSite: 'strict',
+    sameSite: 'lax',
     path: '/',
     maxAge: REFRESH_TTL_SEC,
   });
@@ -61,6 +61,7 @@ export async function loginController(req: Request) {
 
     await setAccessCookie(data.accessToken);
     await setRefreshCookie(data.refreshToken);
+
 
      return NextResponse.json({
       ok: true,
@@ -114,7 +115,7 @@ export async function refreshController(req: NextRequest) {
     await setCookie(REFRESH_COOKIE, data.refreshToken, {
       httpOnly: true,
       secure: isProd,
-      sameSite: 'strict',  // si algún día usas subdominios, quizá 'lax'/'none'
+      sameSite: 'lax',  // si algún día usas subdominios, quizá 'lax'/'none'
       path: '/',
       maxAge: REFRESH_TTL_SEC,
     });

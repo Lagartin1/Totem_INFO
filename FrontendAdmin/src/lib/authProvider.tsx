@@ -114,39 +114,9 @@ export const AuthProvider = ( {children}:{children: ReactNode}) => {
   }
   // dentro de AuthProvider
   useEffect(() => {
-    let alive = true;
-    (async () => {
-      try {
-        // intenta recuperar sesión (cookie HttpOnly via credentials)
-        const res = await fetch('/api/admin/auth/refresh', { method: 'POST', credentials: 'include' });
-        if (!alive) return;
-
-        if (res.ok) {
-          const data = await res.json();
-          // ajusta a tu formato de respuesta { authenticated, user }
-          if (data?.authenticated && data?.user) {
-            setUserData(data.user);        // { id, username, email, nombre, apellido, ... }
-            setAuthenticated(true);
-            setUser_id(data.user.id);
-          } else {
-            setAuthenticated(false);
-            setUser_id(null);
-            setUserData(null);
-          }
-        } else {
-          setAuthenticated(false);
-          setUser_id(null);
-          setUserData(null);
-        }
-      } catch {
-        setAuthenticated(false);
-        setUser_id(null);
-        setUserData(null);
-      } finally {
-        if (alive) setIsLoading(false);   // <-- clave
-      }
-    })();
-    return () => { alive = false; };
+    // Removed automatic session refresh on mount.
+    // Just mark loading as finished.
+    if (mounted.current) setIsLoading(false);
   }, []);
 
 

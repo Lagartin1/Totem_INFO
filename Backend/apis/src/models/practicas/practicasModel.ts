@@ -13,6 +13,13 @@ export interface PracticasResult {
     total: number;
 };
 
+export interface PracticaCSV {
+    total: number;
+}
+    
+
+
+
 
 
 export async function GetPracticasByYear(indice: number, tipo_practica: string, año: string | false) {
@@ -160,30 +167,44 @@ export async function CreateNewPractica(data: any, lastID: number): Promise<Prac
     };
 }
 
+export async function CreateBulkPracticas(dataArray: any[], lastID: number): Promise<PracticaCSV> {
+  if (!dataArray || dataArray.length === 0) {
+    return { total: 0 };
+  }
 
-export async function CreateBulkPracticas(dataArray: any[], lastID: number): Promise<PracticasResult[]> {
-    const practicasResults: PracticasResult[] = [];
+  const bulkBody: any[] = [];
+  let currentID = lastID;
+  const now = new Date().toISOString();
 
-    for (const data of dataArray) {
-        lastID += 1;
-        const practicaData = {
-            id: lastID.toString(),
-            ...data
-        };
+  for (const data of dataArray) {
+    currentID += 1;
+    const practicaData = {
+      id: currentID.toString(),
+      state: true,
+      vistas: 0,
+      created_at: now,
+      ...data
+    };
 
-        await es().index({
-            index: 'practicas',
-            id: practicaData.id,
-            body: practicaData
-        });
+    bulkBody.push({ index: { _index: 'practicas', _id: practicaData.id } });
+    bulkBody.push(practicaData);
+  }
 
-        practicasResults.push({
-            practicas: [practicaData],
-            total: 1
-        });
+  const response: any = await es().bulk({
+    refresh: true,
+    body: bulkBody
+  });
+
+  // Cuenta cuántos documentos se indexaron correctamente
+  let successCount = 0;
+  if (response && Array.isArray(response.items)) {
+    for (const item of response.items) {
+      const op = item.index || item.create || item.update || item.delete;
+      if (op && !op.error) successCount += 1;
     }
+  }
 
-    return practicasResults;
+  return { total: successCount };
 }
 
 export async function GetPracticasByID(id: string): Promise<PracticasResult> {

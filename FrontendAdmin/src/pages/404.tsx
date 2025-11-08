@@ -5,7 +5,7 @@ import {useNavigate} from "react-router-dom"
 export default function NotFound() {
   const navigate = useNavigate();
   const onClick = () => {
-    navigate('/dashboard');
+    navigate('/');
   };
   return (
     <main className='w-full min-h-screen flex items-center justify-center flex-col gap-10 text-center'>

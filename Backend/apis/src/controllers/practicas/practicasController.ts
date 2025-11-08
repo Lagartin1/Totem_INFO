@@ -1,6 +1,9 @@
 import { PracticasResult} from "@/models/practicas/practicasModel";
-import { listPracticas, BuscarPracticas ,insertNewPractica} from "@/services/practicas/practicasService";
+import { listPracticas, BuscarPracticas ,insertNewPractica, insertCsvPracticas,csvToJson,CleanArray,validatePracticaData} from "@/services/practicas/practicasService";
 import { NextRequest,NextResponse } from "next/server";
+
+import { addLogEntry } from "@/models/admin/logModel";
+
 
 
 
@@ -29,7 +32,7 @@ export async function SearchTermPracticas(term: string, type: string): Promise<P
 
 
 
-export async function adminController(req: NextRequest,infotype: string) {
+export async function adminController(req: NextRequest,infotype: string, userID: string) {
     try{
         if (infotype === 'form') {
             const body = await req.json().catch(() => ({} as any)) 
@@ -37,12 +40,37 @@ export async function adminController(req: NextRequest,infotype: string) {
             if (!result) {
                 return new NextResponse(JSON.stringify({ error: 'No se pudo crear la práctica' }), { status: 500 });
             }
+            // agregar registro de actividad aquí en la base de datos de usuarios
+            await addLogEntry(userID, 'create_practica', 'practica');
+            //
             return new NextResponse(JSON.stringify({ ok: true }), { status: 201 });
         } else if (infotype === 'file') {
-            // Procesar archivo cargado
-            //const body = await req.json();
-            // guardar body...
-            return new NextResponse(JSON.stringify({ ok: true }), { status: 201 });
+             const formData = await req.formData();
+            const file = formData.get("file");
+
+            if (!file || !(file instanceof File)) {
+                return NextResponse.json(
+                    { error: "No se recibió el archivo en el campo 'file'" },
+                    { status: 400 }
+                );
+            } 
+            const fileContent = await file.text();
+            const dataArray = csvToJson(fileContent);  
+            const isValid = validatePracticaData(dataArray);
+            if (!isValid) {
+                return new NextResponse(JSON.stringify({ error: 'El archivo CSV no contiene el formato o las cabeceras necesarias' }), { status: 400 });
+            }
+            const cleanedDataArray = CleanArray(dataArray);
+            const resultArray = await insertCsvPracticas(cleanedDataArray);
+            if (!resultArray) {
+                return new NextResponse(JSON.stringify({ error: 'No se pudieron crear las prácticas' }), { status: 500 });
+            }
+            // agregar registro de actividad aquí en la base de datos de usuarios  
+            await addLogEntry(userID, 'upload_practicas_csv', 'practicas', `${file.name}`);
+            //
+            return new NextResponse(JSON.stringify({ ok: true,
+                practicas: resultArray.total
+            }), { status: 201 });
         }else{
             return new NextResponse(JSON.stringify({ error: 'Tipo de información no válido' }), { status: 400 });
         }
@@ -51,3 +79,6 @@ export async function adminController(req: NextRequest,infotype: string) {
         return new NextResponse(JSON.stringify({ error: 'Error interno del servidor' }), { status: 500 });
     }
 }
+
+
+
