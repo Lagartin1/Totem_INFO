@@ -1,15 +1,28 @@
 import React, { use, useEffect, useState } from 'react';
 import { useAuth } from '../lib/authProvider';
 import { useNavigate } from 'react-router-dom';
+import Loader from '../components/loader';
+import Toast from '../components/toast';
 
 
 export default function Home() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [user, setUser] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const { login, isAuthenticated} = useAuth();
+  const { login, isAuthenticated,isLoading} = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
+  const [toast, setToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
+
+  const makeToast = (message: string, type: 'success' | 'error') => {
+    setToastMessage(message);
+    setToastType(type);
+    setToast(true);
+    setTimeout(() => setToast(false), 3000);
+  }
+
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
@@ -126,7 +139,7 @@ export default function Home() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const result = await login(user, password);
+    const result = await login(user, password, makeToast);
 
     if (!result.ok) {
       setErrorMsg(result.message);
@@ -154,6 +167,8 @@ export default function Home() {
   return (
     <main>
       <div className="min-h-screen flex items-center justify-center" >
+        {isLoading ? <Loader frase='Cargando...' /> : null}
+        {toast && (<Toast message={toastMessage} status={toastType} />)}
         <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-lg shadow-md">
             <div>
             <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">

@@ -1,5 +1,5 @@
 
-import {GetPracticas, GetPracticasByYear,SearchTermPracticas} from "@/models/practicas/practicasModel";
+import {DeletePracticaByID, GetPracticas, GetPracticasByYear,SearchTermPracticas} from "@/models/practicas/practicasModel";
 import { PracticasResult, PracticaCSV} from "@/models/practicas/practicasModel";
 import {CreateNewPractica, GetLastPracticaId,CreateBulkPracticas,GetPracticasByID} from "@/models/practicas/practicasModel";
 
@@ -164,3 +164,9 @@ export function validatePracticaData(data: any): boolean {
     }
     return true;
 }
+
+export function deletePractica(id: string): Promise<boolean> {
+    
+    return DeletePracticaByID(id);
+    
+}   

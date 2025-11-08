@@ -1,6 +1,6 @@
 
 
-export default function UserCard({ id, nombre, apellido, username, email, onUpdated }:{id:string,nombre:string,apellido:string,username:string,email:string,onUpdated:()=>Promise<void>}) {
+export default function UserCard({ id, nombre, apellido, username, email, onUpdated,showToast }:{id:string,nombre:string,apellido:string,username:string,email:string,onUpdated:()=>Promise<void>,showToast:(message:string,type:"success"|"error")=>void}) {
   const authNewUser = async () => {
     const tryAuth = async () => {
       const response = await fetch(`/api/admin/registered/accept`, {
@@ -18,19 +18,20 @@ export default function UserCard({ id, nombre, apellido, username, email, onUpda
       let response = await tryAuth();
       if (response.status === 401) {
         // Unauthorized, try refresh
-        await fetch('/api/auth/refresh', { method: 'POST', credentials: 'include' });
+        await fetch('/api/auth/refresh', { method: 'GET', credentials: 'include' });
         response = await tryAuth();
         if (response.status === 401) {
-          window.location.href = '/login';
+          window.location.href = '/';
           return;
         }
-
       }
       if (!response.ok) {
-        throw new Error('Failed to authorize user');
+        showToast('Error al autorizar el usuario.', 'error');
+        return;
       }
+      showToast('Usuario autorizado exitosamente.', 'success');
     } catch (error) {
-      console.error('Error al autorizar el usuario:', error);
+      showToast('Error al autorizar el usuario.', 'error');
     } finally {
       await onUpdated();
     }

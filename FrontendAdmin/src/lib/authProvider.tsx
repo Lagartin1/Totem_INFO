@@ -21,7 +21,7 @@ interface AuthContextType {
   user_id: string | null;
   handleSignedIn: (user_id: string) => void;
   handleSignOut: (user_id: string) => void;
-  login: (user: string, pwd: string) => Promise<any>;
+  login: (user: string, pwd: string, showToast: (message: string, type: "success" | "error") => void) => Promise<any>;
   logout: () => Promise<void>;
 
 }
@@ -42,8 +42,10 @@ export const AuthProvider = ( {children}:{children: ReactNode}) => {
     return () => { mounted.current = false; };
   }, []);
 
-  async function login(user: string, pwd: string) {
+  async function login(user: string, pwd: string, showToast: (message: string, type: "success" | "error") => void) {
+
     try {
+      setIsLoading(true);
       await fetch('/api/admin/auth',
          { method: 'GET', 
           credentials: 'include',
@@ -68,9 +70,11 @@ export const AuthProvider = ( {children}:{children: ReactNode}) => {
       if (response.ok) {
         setUserData(result.data.user as User);
         await handleSignedIn(result.data.user.id);
-        return true;
+        setIsLoading(false);
+        return result;
       } else {
-        console.error("Login failed(auth):", result);
+        showToast('Usuario o contraseña incorrectos.', 'error');
+        setIsLoading(false);
         return null;
       }
     } catch (error) {

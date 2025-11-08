@@ -221,3 +221,17 @@ export async function GetPracticasByID(id: string): Promise<PracticasResult> {
     };
     return result;
 }
+
+export async function DeletePracticaByID(id: string): Promise<boolean> {
+    const body = {
+        index: 'practicas',
+        id: id,
+    };
+    try {
+        await es().delete(body);
+        return true;
+    } catch (error) {
+        console.error('Error deleting practica:', error);
+        return false;
+    }
+}

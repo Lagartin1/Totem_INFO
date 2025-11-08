@@ -25,6 +25,7 @@ interface practicasProps {
 export default function AdminPracticas() {
   const nav = useNavigate();
   const [modalOpen, setModalOpen] = React.useState(false);
+  const [modalPracticas, setModalPracticas] = React.useState(false);
   const openModal = () => { setModalOpen(true); }
   const closeModal = () => { setModalOpen(false); }
   const [form, setForm] = React.useState(false);
@@ -58,7 +59,9 @@ export default function AdminPracticas() {
       setToastMessage('');
     }, 3000);
   }
-
+  const openModalPracticas = () => {
+    setModalPracticas(true);
+  }
   const [fileContent, setFileContent] = React.useState<File | null>(null);
   const [fileUpload, setFileUploaded] = React.useState(false);
   const handleAddPractica = () => {
@@ -265,10 +268,10 @@ export default function AdminPracticas() {
       {loading && <Loader frase={"Enviando..."} />}
       {toastState && <Toast message={toastMessage} status={toastStatus} />}
       <div className='bg-white shadow-md rounded-lg h-lvh flex flex-col '>
-        <h1 className='text-2xl font-bold mb-4 text-center mt-40'>Página de Administración de Prácticas</h1>
+        <h1 className='text-2xl font-bold mb-4 text-center mt-40'>Administración de Prácticas</h1>
         <div className="p-20 grid grid-cols-2 gap-4 justify-center items-center space-x-8">
-          <button className='bg-slate-500 text-white px-4 py-2 rounded-md  h-30 text-2xl' onClick={handleAddPractica}>Agregar Práctica</button>
-          <button className='bg-slate-500 text-white px-4 py-2 rounded-md h-30 text-2xl'>Administrar Prácticas existentes</button>
+          <button className='bg-slate-500 text-white px-4 py-2 rounded-md  h-30 text-2xl hover:bg-slate-700' onClick={handleAddPractica}>Agregar Práctica</button>
+          <button className='bg-slate-500 text-white px-4 py-2 rounded-md h-30 text-2xl hover:bg-slate-700' onClick={openModalPracticas}>Administrar Prácticas existentes</button>
         </div>
         {modalOpen ? (
           <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-opacity-50 z-50">
@@ -287,27 +290,52 @@ export default function AdminPracticas() {
                   <div className="flex flex-col mt-4 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700">
                     <div className="flex flex-row items-center mb-4 gap-2">
                       <p> Haga click en el botón a continuacion para descargar el formato de archivo CSV pedido:</p>
-                      <button className="ml-2 bg-blue-500 text-white px-4 py-2 rounded-md" onClick={handleDownloadTemplate}>Descargar CSV</button>
+                      <button className="ml-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600" onClick={handleDownloadTemplate}>Descargar CSV</button>
                     </div>
                     <div className="flex flex-row items-center gap-2">
                       <p> Si desea Agregar una nueva práctica manualmente, haga clic en el botón a continuación:</p>
-                      <button className="bg-blue-500 text-white px-4 py-2 rounded-md" onClick={changeOption}>Agregar Práctica Manualmente</button>
+                      <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600" onClick={changeOption}>Agregar Práctica Manualmente</button>
                     </div>
                   </div>
                 : null}
                 {modalOpen && form ? 
                 <div className="flex flex-row items-center mt-4 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700">
                     <p> Si desea Agregar practicas subiando un archivo CSV, haga clic en el botón a continuación:</p>
-                    <button className="ml-2 bg-blue-500 text-white px-4 py-2 rounded-md" onClick={changeOption}>Agregar Archivo Prácticas</button>
+                    <button className="ml-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600" onClick={changeOption}>Agregar Archivo Prácticas</button>
                 </div>:null}
               <div className="flex justify-end space-x-4 pt-5">
-                <button className="bg-red-400 text-white px-4 py-2 rounded-md" onClick={handleCloseModal}>Cancelar</button>
-                <button className="bg-green-500 text-white px-4 py-2 rounded-md" onClick={onSubmit}>Guardar Práctica</button> 
+                <button className="bg-red-400 text-white px-4 py-2 rounded-md hover:bg-red-500" onClick={handleCloseModal}>Cancelar</button>
+                <button className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600" onClick={onSubmit}>Guardar Práctica</button> 
               </div>
               </div>
             </div>
           </div>
         ) : null}
+
+
+
+        {modalPracticas ? ( 
+          <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-opacity-60 bg-black/25 z-50">
+            <div className=" bg-white p-6 rounded-md shadow-md w-3/4 max-h-screen overflow-y-auto">
+              <div className="p-10 m-10 flex flex-col gap-10 min-md:flex-row justify-center items-center">
+                <button className='bg-slate-500 text-white px-4 py-2 rounded-md h-30 text-2xl hover:bg-slate-700' onClick={() => nav("/admin-practicas/practicas-iniciales")}>Prácticas Iniciales</button>
+                <button className='bg-slate-500 text-white px-4 py-2 rounded-md h-30 text-2xl hover:bg-slate-700' onClick={() => nav("/admin-practicas/practicas-profesionales")}>Practicas Profesionales</button>
+
+              </div>
+              
+              
+            </div>
+          
+          
+          
+          </div>
+        ) : null}
+
+
+
+
+
+
         
       </div>
     </main>

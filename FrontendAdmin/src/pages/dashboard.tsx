@@ -25,7 +25,16 @@ export default function Dashboard() {
 
   const [data, setData] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [toast,setToast] = useState<boolean>(false);
   const [toastmsg, setToastmsg] = useState<string | null>(null);
+  const [toastStatus, setToastStatus] = useState<"success" | "error">("success");
+
+
+  const makeToast = (message: string,status: "success" | "error") => {
+    setToastmsg(message);
+    setToastStatus(status);
+    setTimeout(() => setToastmsg(null), 3000);
+  };
 
   const cargar = useCallback(async () => {
     setLoading(true);
@@ -41,23 +50,23 @@ export default function Dashboard() {
       ).then(res => res.json());
       setData(data);
     } finally {
-      setLoading(false);
+      return;
     }
   }, []);
+
+
 
 
   useEffect(() => { cargar(); }, [cargar]);
 
   const handleUpdated = async () => {
     await cargar();
-    setToastmsg( "Usuario autorizado con éxito");
-    setTimeout(() => setToastmsg(null), 3000);
-
+    setLoading(false);
   };
 
   return (
     <main className='p-6 w-full min-h-screen '>
-      {toastmsg ? <Toast message={toastmsg} status="success" /> : null}
+      {toast ? <Toast message={toastmsg as string} status={toastStatus} /> : null}
       <div className='bg-white shadow-md rounded-lg h-lvh flex flex-col justify-center items-center'>
         <div className="w-full max-w-4xl">
           <h1 className='text-3xl font-bold'>Panel de Administración</h1>
@@ -84,6 +93,7 @@ export default function Dashboard() {
                   username={user.username}
                   email={user.email}
                   onUpdated={handleUpdated}
+                  showToast={makeToast}
                   />
               ))}
             </div>
