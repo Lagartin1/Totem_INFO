@@ -1,13 +1,17 @@
-import { fetchNoticias, updateNoticiaService, createNoticiaService, deleteNoticiaService } from "@/services/noticias/noticiasService";
+import {
+  fetchNoticias,
+  updateNoticiaService,
+  createNoticiaService,
+  deleteNoticiaService,
+  deleteNoticiaIndiceService,
+} from "@/services/noticias/noticiasService";
 
-
-export async function listarNoticias () {
-    const noticiasData = await fetchNoticias();
-    if (!noticiasData) {
-        throw new Error("No se pudieron obtener las noticias");
-    }
-
-    return noticiasData;
+export async function listarNoticias() {
+  const noticiasData = await fetchNoticias();
+  if (!noticiasData) {
+    throw new Error("No se pudieron obtener las noticias");
+  }
+  return noticiasData;
 }
 
 export async function actualizarNoticia(id: string, data: Record<string, any>) {
@@ -20,9 +24,9 @@ export async function actualizarNoticia(id: string, data: Record<string, any>) {
   }
 }
 
-export async function crearNoticia(data: Record<string, any>) {
+export async function crearNoticia(formData: FormData) {
   try {
-    const result = await createNoticiaService(data);
+    const result = await createNoticiaService(formData);
     return result;
   } catch (error) {
     console.error("Error al crear noticia:", error);
@@ -36,6 +40,16 @@ export async function eliminarNoticia(id: string) {
     return result;
   } catch (error) {
     console.error("Error al eliminar noticia:", error);
+    throw error;
+  }
+}
+
+export async function DeleteIndiceNoticias() {
+  try {
+    const result = await deleteNoticiaIndiceService();
+    return result;
+  } catch (error) {
+    console.error("Error al eliminar índice:", error);
     throw error;
   }
 }

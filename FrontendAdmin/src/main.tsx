@@ -7,6 +7,7 @@ import Dashboard from './pages/dashboard';
 import { AuthProvider } from './lib/authProvider';
 import ProtectedRoute from './routes/protectedRoutes';
 import LoadData from './pages/loadData';
+import NoticiasSection from './pages/Noticias';
 
 
 createRoot(document.getElementById('root')!).render(
@@ -18,6 +19,7 @@ createRoot(document.getElementById('root')!).render(
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/load-data" element={<LoadData />} />
+            <Route path="/noticias" element={<NoticiasSection />} />
           </Route>
 
           <Route path="*" element={<main><h1>404 - Not Found</h1></main>} />
