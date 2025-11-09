@@ -1,6 +1,5 @@
 import { es } from "../../database/elastic.ts"
-
-const INDEX = process.env.TESIS_INDEX || "tesis";
+const INDEX = process.env.WORKSHOPS_INDEX || "workshops";
 
 async function ensureIndex() {
   const client = es();
@@ -12,23 +11,15 @@ async function ensureIndex() {
         mappings: {
           properties: {
             id: { type: "integer" },
+            titulo: { type: "text", analyzer: "spanish" },
+            descripcion: { type: "text", analyzer: "spanish" },
             created_at: { type: "date", format: "strict_date_optional_time||epoch_millis" },
-            marca_temporal: { type: "text" },
-            profesor: { type: "keyword" },
-            titulo: { type: "text" },
-            area_desarrollo: { type: "text" },
-            descripcion: { type: "text" },
-            autor: { type: "text" },
-            idioma: { type: "text" },
-            anio: { type: "integer" },
-            resumen: { type: "text" },
-            universidad: { type: "text" },
-            facultad: { type: "text" },
-            palabras_clave: { type: "text" },
+            fecha: { type: "date", format: "strict_date_optional_time||epoch_millis" },
+            link: { type: "text", analyzer: "spanish" }
           }
         }
       }
-    }as any);
+    } as any);
     console.log(`Index ${INDEX} creado`);
   } else {
     console.log(`Index ${INDEX} ya existe`);

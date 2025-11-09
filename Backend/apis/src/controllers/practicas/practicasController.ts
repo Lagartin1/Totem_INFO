@@ -1,5 +1,5 @@
 import { PracticasResult} from "@/models/practicas/practicasModel";
-import { listPracticas, BuscarPracticas ,insertNewPractica, insertCsvPracticas,csvToJson,CleanArray,validatePracticaData, deletePractica} from "@/services/practicas/practicasService";
+import { listPracticas, BuscarPracticas ,insertNewPractica, insertCsvPracticas,csvToJson,CleanArray,validatePracticaData, deletePractica, togglePracticaState} from "@/services/practicas/practicasService";
 import { NextRequest,NextResponse } from "next/server";
 
 import { addLogEntry } from "@/models/admin/logModel";
@@ -103,3 +103,25 @@ export async function adminDeletePractica(req: NextRequest,userID: string) {
         return new NextResponse(JSON.stringify({ error: 'Error interno del servidor' }), { status: 500 });
     }
 } 
+
+
+export async function desactivarPractica(req: NextRequest,userID: string) {
+    try{    
+        const body = await req.json().catch(() => ({} as any))
+        const result = await togglePracticaState(body.id as string);
+        if (!result) {
+            return new NextResponse(JSON.stringify({ error: 'No se pudo desactivar la práctica' }), { status: 500 });
+        }
+        if (result && typeof result === 'object' && result.error) {
+            return new NextResponse(JSON.stringify({ error: result.error }), { status: 400 });
+        }
+        // guardar registro de actividad aquí en la base de datos de usuarios
+        await addLogEntry(userID, 'deactivate_practica', 'practica id:{ '+body.id+'}');
+        return new NextResponse(JSON.stringify({ ok: true }), { status: 200 });
+
+    }
+    catch (error) {
+        console.error(error);
+        return new NextResponse(JSON.stringify({ error: 'Error interno del servidor' }), { status: 500 });
+    }
+}   

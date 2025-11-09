@@ -1,7 +1,7 @@
 
 import {DeletePracticaByID, GetPracticas, GetPracticasByYear,SearchTermPracticas} from "@/models/practicas/practicasModel";
 import { PracticasResult, PracticaCSV} from "@/models/practicas/practicasModel";
-import {CreateNewPractica, GetLastPracticaId,CreateBulkPracticas,GetPracticasByID} from "@/models/practicas/practicasModel";
+import {CreateNewPractica, GetLastPracticaId,CreateBulkPracticas,desactivePracticaByID} from "@/models/practicas/practicasModel";
 
 
 const requiredHeaders = [
@@ -170,3 +170,18 @@ export function deletePractica(id: string): Promise<boolean> {
     return DeletePracticaByID(id);
     
 }   
+
+
+
+export async function togglePracticaState(id: string): Promise<boolean | { error: string }> {
+    try {
+        const result = await desactivePracticaByID(id);
+        if (typeof result === 'boolean') {
+            return result;
+        }
+        return { error: 'Error al cambiar el estado de la práctica' };
+    } catch (error) {
+        console.error('Error al cambiar el estado de la práctica:', error);
+        return { error: 'Error al cambiar el estado de la práctica' };
+    }
+}

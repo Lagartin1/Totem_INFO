@@ -235,3 +235,22 @@ export async function DeletePracticaByID(id: string): Promise<boolean> {
         return false;
     }
 }
+
+
+export async function desactivePracticaByID(id: string): Promise<boolean | { error: string }> {
+    try {
+        await es().update({
+            index: 'practicas',
+            id,
+            body: {
+                doc: {
+                    state: false
+                }
+            }
+        });
+        return true;
+    } catch (error) {
+        console.error('Error desactivando práctica:', error);
+        return { error: 'Error desactivando práctica' };
+    }
+}

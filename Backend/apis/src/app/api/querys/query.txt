@@ -20,3 +20,34 @@ curl -u elastic:test123 -X POST "http://localhost:9200/proyects/_bulk" -H "Conte
 { "index": { "_index": "proyects", "_id": 10 } }
 { "id": 10, "created_at": "2025-09-21T10:45:00", "marca_temporal": "2025-09-21 10:45", "profesores": "Ing. Carolina Vega", "titulo": "Análisis de Datos de Ventas", "area_desarrollo": "Ciencia de Datos", "descripcion": "Proyecto de ciencia de datos que estudia tendencias de ventas en retail.", "correo_contacto": "carolina.vega@universidad.cl", "telefono_contacto": "990123456" }
 '
+
+### acualiza mapping y los setea -> aca abajo
+
+
+curl -u elastic:test123 -X PUT "http://localhost:5004/practicas/_mapping" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "properties": {
+      "state": {
+        "type": "boolean"
+      },
+      "visitas": {
+        "type": "integer"
+      }
+    }
+  }'
+
+
+curl -u elastic:test123 -X POST "http://localhost:5004/practicas/_update_by_query?conflicts=proceed" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "script": {
+      "source": "if (ctx._source.state == false) { ctx._source.state = true; }",
+      "lang": "painless"
+    },
+    "query": {
+      "term": {
+        "state": false
+      }
+    }
+  }'

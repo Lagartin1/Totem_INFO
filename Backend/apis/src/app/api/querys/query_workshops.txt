@@ -1,0 +1,40 @@
+## copiar y pegar todo junto al 
+
+
+
+
+ 
+
+
+INDEX="workshops"
+ES_URL="http://localhost:5004"
+USER="elastic"
+PASS="test123"
+NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+curl -u $USER:$PASS -X POST "$ES_URL/$INDEX/_bulk" -H "Content-Type: application/x-ndjson" --data-binary @- <<EOF
+{ "index": { "_index": "$INDEX", "_id": 1 } }
+{ "id": 1, "titulo": "Workshop Informática Primavera 2024", "descripcion": "Ciclo de charlas y networking para estudiantes y titulados de Ingeniería Civil en Informática UACh.", "created_at": "$NOW", "fecha": "2024-10-18T00:00:00Z", "link": "https://www.youtube.com/live/G4avTClTV4M?si=swJvaHRYMB4mEK5E" }
+{ "index": { "_index": "$INDEX", "_id": 2 } }
+{ "id": 2, "titulo": "Workshop Informática Otoño 2024", "descripcion": "Jornada de presentaciones y experiencias de la industria tecnológica para la comunidad de Informática UACh.", "created_at": "$NOW", "fecha": "2024-06-28T00:00:00Z", "link": "https://www.youtube.com/live/PL0WuetiEXU?si=9BZiPl6N71Ys58PA" }
+{ "index": { "_index": "$INDEX", "_id": 3 } }
+{ "id": 3, "titulo": "Workshop Informática Primavera 2023", "descripcion": "Encuentro orientado a tendencias tecnológicas y vinculación con el medio para estudiantes UACh.", "created_at": "$NOW", "fecha": "2023-10-20T00:00:00Z", "link": "https://www.youtube.com/live/DnU7n6W_KeU?si=fSn8gSkmnKZ9CPE4" }
+{ "index": { "_index": "$INDEX", "_id": 4 } }
+{ "id": 4, "titulo": "Workshop Informática Otoño 2023", "descripcion": "Ciclo de charlas con empresas e iniciativas tecnológicas vinculadas a Ingeniería Civil en Informática UACh.", "created_at": "$NOW", "fecha": "2023-06-12T00:00:00Z", "link": "https://www.youtube.com/live/RHZgKHiiD-Q?si=nK1vDufudlW5w5e4" }
+{ "index": { "_index": "$INDEX", "_id": 5 } }
+{ "id": 5, "titulo": "Workshop Informática Primavera 2022", "descripcion": "Versión 2022 enfocada en compartir experiencias profesionales y proyectos con la comunidad estudiantil.", "created_at": "$NOW", "fecha": "2022-11-25T00:00:00Z", "link": "https://www.youtube.com/live/PXGOOvDqi3E?si=eIrwiw1o9kygUKzo" }
+{ "index": { "_index": "$INDEX", "_id": 6 } }
+{ "id": 6, "titulo": "Workshop Informática Otoño 2022", "descripcion": "Encuentro de invierno con charlas técnicas y de industria para estudiantes UACh.", "created_at": "$NOW", "fecha": "2022-07-01T00:00:00Z", "link": "https://www.youtube.com/live/MAfsDOVuTdY?si=qLc-o_XZiQ2pNbDv" }
+{ "index": { "_index": "$INDEX", "_id": 7 } }
+{ "id": 7, "titulo": "Workshop Informática Primavera 2021", "descripcion": "Edición online con presentaciones de proyectos, empresas y egresados de Informática UACh.", "created_at": "$NOW", "fecha": "2021-11-19T00:00:00Z", "link": "https://www.youtube.com/live/X9uY-mnPJzE?si=8CxemBKlXixf4W79" }
+{ "index": { "_index": "$INDEX", "_id": 8 } }
+{ "id": 8, "titulo": "Workshop Informática Otoño 2021", "descripcion": "Sesión de charlas sobre desarrollo de software, emprendimiento y experiencias profesionales.", "created_at": "$NOW", "fecha": "2021-06-04T00:00:00Z", "link": "https://www.youtube.com/live/RqiKgc_AJuk?si=hxwe_D5aaHoQoDwa" }
+{ "index": { "_index": "$INDEX", "_id": 9 } }
+{ "id": 9, "titulo": "Workshop Informática Primavera 2020", "descripcion": "Workshop virtual centrado en tecnologías actuales y casos reales en tiempos de pandemia.", "created_at": "$NOW", "fecha": "2020-12-04T00:00:00Z", "link": "https://www.youtube.com/live/4eFyjwE3bCM?si=-ucU7l5UFIG-e7cN" }
+{ "index": { "_index": "$INDEX", "_id": 10 } }
+{ "id": 10, "titulo": "Workshop Informática Invierno 2020", "descripcion": "Edición de invierno con exposiciones de empresas y proyectos de informática.", "created_at": "$NOW", "fecha": "2020-07-31T00:00:00Z", "link": "https://www.youtube.com/live/XnX3HJDSIgU?si=pURBidHkh9Z5en7x" }
+{ "index": { "_index": "$INDEX", "_id": 11 } }
+{ "id": 11, "titulo": "Workshop Informática Primavera 2019", "descripcion": "Workshop presencial orientado a vincular estudiantes con el medio profesional tecnológico.", "created_at": "$NOW", "fecha": "2019-11-18T00:00:00Z", "link": "" }
+{ "index": { "_index": "$INDEX", "_id": 12 } }
+{ "id": 12, "titulo": "Workshop Informática Otoño 2018", "descripcion": "Primera versión listada del ciclo reciente de workshops de Informática UACh.", "created_at": "$NOW", "fecha": "2018-06-04T00:00:00Z", "link": "" }
+EOF

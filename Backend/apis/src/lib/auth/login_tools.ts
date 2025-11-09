@@ -211,8 +211,6 @@ export async function revokeRefreshByToken(token: string) {
 
 export async function getUserIdFromSessionToken(oldToken: string): Promise<string | null> {
   const candidates = await findActiveSessions();
-  console.log('Active sessions:', candidates); // --- IGNORE ---
-
   for (const s of candidates) {
     if (await bcrypt.compare(oldToken, s.sessionIdHash)) {
       if (s.expiresAt && new Date(s.expiresAt).getTime() <= Date.now()) {
