@@ -21,7 +21,7 @@ export default function Modal_Agregar_Noticias({
     try {
       const res = await fetch(`${baseUrl}/api/noticias`, {
         method: "POST",
-        body: formData, 
+        body: formData,
       });
 
       if (!res.ok) throw new Error("Error al guardar noticia");
@@ -39,16 +39,17 @@ export default function Modal_Agregar_Noticias({
       className="
         fixed inset-0 z-50 flex items-center justify-center
         bg-black/20 backdrop-blur-md
-        transition-all duration-300
-      ">
-      <div className="bg-white p-6 rounded-lg w-96 shadow-lg">
+        transition-all duration-300"
+      onClick={closeModal}>
+      <div
+        className="bg-white p-6 rounded-lg w-96 shadow-lg"
+        onClick={(e) => e.stopPropagation()}>
         <h3 className="text-xl font-semibold mb-4">Agregar Nueva Noticia</h3>
 
         <form
           onSubmit={handleSubmit}
           className="flex flex-col gap-3"
-          encType="multipart/form-data"
-        >
+          encType="multipart/form-data">
           <input
             name="titulo"
             type="text"
@@ -65,8 +66,8 @@ export default function Modal_Agregar_Noticias({
           />
 
           <textarea
-            name="descripcion"
-            placeholder="Descripción"
+            name="contenido"
+            placeholder="Contenido"
             className="border p-2 rounded"
             required
           />
@@ -83,14 +84,12 @@ export default function Modal_Agregar_Noticias({
             <button
               type="button"
               onClick={closeModal}
-              className="px-3 py-2 bg-gray-300 rounded hover:bg-gray-400"
-            >
+              className="px-3 py-2 bg-gray-300 rounded hover:bg-gray-400">
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-3 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
-            >
+              className="px-3 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">
               Guardar
             </button>
           </div>

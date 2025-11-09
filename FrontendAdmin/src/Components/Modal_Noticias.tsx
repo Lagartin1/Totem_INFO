@@ -30,7 +30,7 @@ export default function NoticiaModal({ isOpen, onClose, noticia }: NoticiaModalP
         bg-black/20 backdrop-blur-md
         transition-all duration-300
       "
-      onClick={onClose} // click fuera cierra el modal
+      onClick={onClose}
     >
       <div
         className="
@@ -38,7 +38,7 @@ export default function NoticiaModal({ isOpen, onClose, noticia }: NoticiaModalP
           max-h-[80vh] overflow-y-auto relative
           transform transition-all duration-300
         "
-        onClick={(e) => e.stopPropagation()} // evita cerrar al hacer click dentro
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Imagen de la noticia */}
         {noticia.imagen && (
@@ -58,13 +58,8 @@ export default function NoticiaModal({ isOpen, onClose, noticia }: NoticiaModalP
           {new Date(noticia.fecha_publicacion).toLocaleDateString()}
         </p>
 
-        {/* Descripción */}
-        <p className="mt-2 text-lg text-gray-700">{noticia.descripcion}</p>
-
         {/* Contenido */}
-        <div className="mt-4 text-gray-800 leading-relaxed">
-          {noticia.contenido}
-        </div>
+        <p className="mt-2 text-lg text-gray-700 whitespace-pre-line">{noticia.contenido}</p>
 
         {/* Botón de volver */}
         <div className="flex justify-end mt-6">

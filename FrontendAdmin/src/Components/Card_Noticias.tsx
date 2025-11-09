@@ -28,6 +28,9 @@ export default function NoticiaCard({ noticia, onDelete }: NoticiaCardProps) {
   const [editing, setEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Noticia>>(noticia);
   const [deleting, setDeleting] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [removeImage, setRemoveImage] = useState(false);
+
   const baseUrl = BUILD_MODE ? API_BASE_URL : "http://localhost:3000";
 
   // Función para eliminar la noticia
@@ -49,7 +52,7 @@ export default function NoticiaCard({ noticia, onDelete }: NoticiaCardProps) {
 
       alert("Noticia eliminada correctamente ✅");
 
-      // 🔹 Notificar al componente padre (NoticiasSection) si existe la función
+      // Notificar al componente padre (NoticiasSection) si existe la función
       onDelete?.(noticia.id);
     } catch (error) {
       console.error("Error al eliminar noticia:", error);
@@ -62,24 +65,37 @@ export default function NoticiaCard({ noticia, onDelete }: NoticiaCardProps) {
   // Función para editar una noticia
   const handleEdit = async (e: React.MouseEvent) => {
     e.stopPropagation();
-
-    const confirmar = confirm("¿Deseas guardar los cambios?");
-    if (!confirmar) return;
+    if (!confirm("¿Deseas guardar los cambios?")) return;
 
     try {
       setEditing(true);
+      const formData = new FormData();
+
+      // Campos de texto
+      ["titulo", "descripcion", "contenido", "autor"].forEach((key) => {
+        const value = editData[key as keyof Noticia];
+        if (value !== undefined) formData.append(key, value);
+      });
+
+      // Imagen nueva
+      if (selectedFile) formData.append("imagen", selectedFile);
+
+      // Señal de eliminar imagen
+      if (removeImage) formData.append("eliminarImagen", "true");
+
       const res = await fetch(`${baseUrl}/api/noticias/${noticia.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editData),
+        body: formData,
       });
 
       if (!res.ok) throw new Error("Error al actualizar la noticia");
 
       alert("Noticia actualizada correctamente ✅");
-      setOpen(false);
+      setEditOpen(false);
+      setRemoveImage(false);
+      setSelectedFile(null);
     } catch (error) {
-      console.error("Error al actualizar:", error);
+      console.error(error);
       alert("Error al actualizar la noticia ❌");
     } finally {
       setEditing(false);
@@ -139,6 +155,10 @@ export default function NoticiaCard({ noticia, onDelete }: NoticiaCardProps) {
         onClose={() => setEditOpen(false)}
         editData={editData}
         setEditData={setEditData}
+        selectedFile={selectedFile}
+        setSelectedFile={setSelectedFile}
+        removeImage={removeImage}
+        setRemoveImage={setRemoveImage}
         handleEdit={handleEdit}
         editing={editing}
       />

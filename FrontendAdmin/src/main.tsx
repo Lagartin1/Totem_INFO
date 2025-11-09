@@ -26,8 +26,8 @@ createRoot(document.getElementById("root")!).render(
               path="/admin-practicas/:type"
               element={<PracticasExistentes />}
             />
-            <Route path="/noticias" element={<NoticiasSection />} />
           </Route>
+          <Route path="/noticias" element={<NoticiasSection />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>

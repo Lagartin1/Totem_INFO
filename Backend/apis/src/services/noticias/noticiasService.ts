@@ -14,21 +14,28 @@ export async function fetchNoticias() {
   return noticias;
 }
 
-export async function updateNoticiaService(id: string, data: Record<string, any>) {
+export async function updateNoticiaService(id: string, formData: FormData) {
   if (!id) throw new Error("Falta el ID de la noticia");
-  if (!data || Object.keys(data).length === 0)
-    throw new Error("No se recibieron datos para actualizar");
 
-  const result = await UpdateNoticia(id, data);
+  // ✅ Verificar que FormData tenga al menos un campo
+  let hasData = false;
+  for (const _ of formData.entries()) {
+    hasData = true;
+    break;
+  }
+
+  if (!hasData) throw new Error("No se recibieron datos para actualizar");
+
+  const result = await UpdateNoticia(id, formData);
   return result;
 }
 
 export async function createNoticiaService(formData: FormData) {
   const titulo = formData.get("titulo");
-  const descripcion = formData.get("descripcion");
+  const contenido = formData.get("contenido");
 
-  if (!titulo || !descripcion) {
-    throw new Error("Faltan campos obligatorios: título o descripción");
+  if (!titulo || !contenido) {
+    throw new Error("Faltan campos obligatorios: título o contenido");
   }
 
   const result = await CreateNoticia(formData);

@@ -21,7 +21,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
     const { id } = params;
-    const body = await request.json();
+    const body = await request.formData();
 
     const response = await actualizarNoticia(id, body);
     return NextResponse.json(

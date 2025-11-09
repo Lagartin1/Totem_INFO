@@ -14,9 +14,9 @@ export async function listarNoticias() {
   return noticiasData;
 }
 
-export async function actualizarNoticia(id: string, data: Record<string, any>) {
+export async function actualizarNoticia(id: string, formData: FormData) {
   try {
-    const result = await updateNoticiaService(id, data);
+    const result = await updateNoticiaService(id, formData);
     return result;
   } catch (error) {
     console.error("Error al actualizar noticia:", error);

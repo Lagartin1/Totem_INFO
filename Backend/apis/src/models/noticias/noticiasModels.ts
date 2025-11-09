@@ -1,5 +1,5 @@
 import { es } from "@database/elastic";
-import { writeFile } from "fs/promises";
+import { writeFile, unlink } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
 
@@ -54,8 +54,10 @@ export async function CreateNoticia(formData: FormData) {
 
     // Obtener campos del formulario
     const titulo = formData.get("titulo") as string;
-    const descripcion = formData.get("descripcion") as string;
-    const contenido = (formData.get("contenido") as string) || "Sin contenido disponible.";
+    const descripcion =
+      (formData.get("descripcion") as string) || "Sin descripción disponible.";
+    const contenido =
+      (formData.get("contenido") as string) || "Sin contenido disponible.";
     const autor = (formData.get("autor") as string) || "Anónimo";
     const categoria = (formData.get("categoria") as string) || "general";
     const fecha_publicacion = new Date().toISOString();
@@ -113,22 +115,86 @@ export async function CreateNoticia(formData: FormData) {
   }
 }
 
-export async function UpdateNoticia(id: string, data: Record<string, any>) {
-  if (!id) throw new Error("Debe proporcionar un ID válido");
-  if (!data) throw new Error("Datos vacíos");
+export async function UpdateNoticia(id: string, formData: FormData) {
+  try {
+    const indexName = "noticias";
 
-  const response = await es().update({
-    index: "noticias",
-    id,
-    doc: data,
-  });
+    // Obtener la noticia actual
+    const noticiaActualRes = await es().get({ index: indexName, id });
+    const noticiaActual = noticiaActualRes._source as Partial<Noticia> | undefined;
 
-  return response;
+    if (!noticiaActual) throw new Error("Noticia no encontrada");
+
+    let imageUrl = noticiaActual.imagen || "";
+
+    // Eliminar imagen
+    if (formData.get("eliminarImagen") === "true" && imageUrl) {
+      const oldPath = path.join(process.cwd(), "public", imageUrl);
+      await unlink(oldPath).catch(() => {});
+      imageUrl = "";
+    }
+
+    // Subir nueva imagen
+    const nuevaImagen = formData.get("imagen");
+    if (nuevaImagen instanceof File && nuevaImagen.size > 0) {
+      // Borrar imagen anterior si existía
+      if (imageUrl) {
+        const oldPath = path.join(process.cwd(), "public", imageUrl);
+        await unlink(oldPath).catch(() => {});
+      }
+
+      const buffer = Buffer.from(await nuevaImagen.arrayBuffer());
+      const fileName = `${randomUUID()}_${nuevaImagen.name}`;
+      const filePath = path.join(process.cwd(), "public", "uploads", fileName);
+      await writeFile(filePath, buffer);
+      imageUrl = `/uploads/${fileName}`;
+    }
+
+    // Construir objeto de actualización
+    const updateDoc: Partial<Noticia> = {};
+    ["titulo", "descripcion", "contenido", "autor"].forEach((key) => {
+      const value = formData.get(key);
+      if (typeof value === "string" && value.trim() !== "") {
+        updateDoc[key as keyof Noticia] = value;
+      }
+    });
+
+    // Siempre actualizar imagen (aunque esté vacía)
+    updateDoc.imagen = imageUrl;
+
+    if (Object.keys(updateDoc).length === 0) {
+      throw new Error("No se recibieron datos para actualizar");
+    }
+
+    await es().update({
+      index: indexName,
+      id,
+      doc: updateDoc,
+    });
+
+    console.log("✅ Noticia actualizada correctamente:", id);
+  } catch (error) {
+    console.error("❌ Error al actualizar noticia:", error);
+    throw error;
+  }
 }
 
 export async function DeleteNoticia(id: string) {
   if (!id) throw new Error("Debe proporcionar un ID válido");
 
+  // Obtener la noticia
+  const noticiaRes = await es().get({ index: "noticias", id });
+  const noticia = noticiaRes._source as { imagen?: string } | undefined;
+
+  // Borrar la imagen si existe
+  if (noticia?.imagen) {
+    const imagePath = path.join(process.cwd(), "public", noticia.imagen);
+    await unlink(imagePath).catch(() => {
+      console.warn("No se pudo borrar la imagen o no existe:", noticia.imagen);
+    });
+  }
+
+  // Borrar el documento de Elasticsearch
   const response = await es().delete({
     index: "noticias",
     id,
