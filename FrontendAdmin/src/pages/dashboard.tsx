@@ -74,9 +74,9 @@ export default function Dashboard() {
           <div className="flex flex-row gap-20 ">
             <div className="grid grid-cols-2 gap-4 text-white mt-24">
               <button className='w-40 h-40 bg-slate-600 rounded-2xl'> Cargar Datos </button>
-              <button className='w-40 h-40 bg-slate-600 rounded-2xl'> Eliminar Datos</button>
-              <button className='w-40 h-40 bg-slate-600 rounded-2xl' onClick={() => navigate("/admin-practicas")}> Administrar practicas</button>         
-              <button className='w-40 h-40 bg-slate-600 rounded-2xl'> Agregar practicas</button>             
+              <button className='w-40 h-40 bg-slate-600 rounded-2xl'>  Eliminar Datos</button>
+              <button className='w-40 h-40 bg-orange-400 rounded-2xl text-xl   hover:bg-slate-700' onClick={() => navigate("/admin-practicas")}>Administrar practicas</button>         
+              <button className='w-40 h-40 bg-orange-400 rounded-2xl text-xl   hover:bg-slate-700' onClick={() => navigate("/workshop")}>Administrar workshops</button>             
             </div>
             <div className="mt-6 flex flex-col gap-4">
               <div className="">

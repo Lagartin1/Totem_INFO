@@ -11,6 +11,7 @@ import AdminPracticas from "./pages/adminPracticas";
 import PracticasExistentes from "./pages/practicasExistentes";
 import NotFound from "./pages/404";
 import NoticiasSection from "./pages/Noticias";
+import Workshop from "./pages/workshop";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -26,6 +27,7 @@ createRoot(document.getElementById("root")!).render(
               path="/admin-practicas/:type"
               element={<PracticasExistentes />}
             />
+            <Route path="/workshop" element={<Workshop />} />
           </Route>
           <Route path="/noticias" element={<NoticiasSection />} />
           <Route path="*" element={<NotFound />} />

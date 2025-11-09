@@ -1,11 +1,17 @@
 
 import { NextRequest } from "next/server";
+import { adminWorkshopController } from "@/controllers/workshop/workshopController";
 
 
 
-export async function GET(request: NextRequest) {
-  return new Response(JSON.stringify({ message: "Workshops admin route" }), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
+export async function PUT(req: NextRequest) {
+  return adminWorkshopController('PUT', req);
+}
+
+export async function POST(req: NextRequest) {
+  return adminWorkshopController('POST', req);
+}
+
+export async function DELETE(req: NextRequest) {
+  return adminWorkshopController('DELETE', req);
 }

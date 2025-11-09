@@ -25,8 +25,6 @@ export default function PracticasExistentes() {
     setTimeout(() => setToast(false), 3000);
   };
 
-
-
   const fetchNewPage = async (newPagina: number) => {
     setLoading(true);
     try {
