@@ -1,16 +1,7 @@
 import { useState } from "react";
 import NoticiaModal from "./Modal_Noticias";
 import EdicionModal from "./Modal_Edicion_Noticias";
-
-interface Noticia {
-  id: string;
-  titulo: string;
-  descripcion: string;
-  contenido: string;
-  autor: string;
-  fecha_publicacion: string;
-  imagen?: string;
-}
+import type { Noticia } from "../types/index";
 
 interface NoticiaCardProps {
   noticia: Noticia;

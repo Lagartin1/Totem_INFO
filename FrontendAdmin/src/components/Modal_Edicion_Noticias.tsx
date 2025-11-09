@@ -1,14 +1,6 @@
-import React, {useState} from "react";
+import React from "react";
+import type { Noticia } from "../types/index";
 
-interface Noticia {
-  id: string;
-  titulo: string;
-  descripcion: string;
-  contenido: string;
-  autor: string;
-  fecha_publicacion: string;
-  imagen?: string;
-}
 
 interface EdicionModalProps {
   isOpen: boolean;

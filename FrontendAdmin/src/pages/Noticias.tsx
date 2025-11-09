@@ -1,20 +1,11 @@
 import { useEffect, useState, useRef } from "react";
-import NoticiaCard from "../Components/Card_Noticias";
-import Boton_Landing from "../Components/Boton_Landing";
-import Modal_Agregar_Noticias from "../Components/Modal_Agregar_Noticias";
+import NoticiaCard from "../components/Card_Noticias";
+import Boton_Landing from "../components/Boton_Landing";
+import Modal_Agregar_Noticias from "../components/Modal_Agregar_Noticias";
+import type { Noticia } from "../types/index";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
-
-export interface Noticia {
-  id: string;
-  titulo: string;
-  descripcion: string;
-  contenido: string;
-  autor: string;
-  fecha_publicacion: string;
-  imagen?: string;
-}
 
 export default function NoticiasSection() {
   const [noticias, setNoticias] = useState<Noticia[]>([]);
