@@ -9,11 +9,13 @@ const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 interface CardProyectosProps {
   proyecto: Proyecto;
   onDelete?: (id: string) => void;
+  onAdded?: () => void; 
 }
 
 export default function Card_Proyectos({
   proyecto,
   onDelete,
+  onAdded,
 }: CardProyectosProps) {
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -114,6 +116,7 @@ export default function Card_Proyectos({
       if (!res.ok) throw new Error("Error al actualizar el proyecto");
 
       alert("Proyecto actualizado correctamente ✅");
+      onAdded?.();
       setEditOpen(false);
     } catch (error) {
       console.error("Error al actualizar proyecto:", error);

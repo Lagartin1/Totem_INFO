@@ -4,13 +4,14 @@ const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 export default function Modal_Agregar_Noticias({
   isOpen,
   closeModal,
+  onAdded, 
 }: {
   isOpen: boolean;
   closeModal: () => void;
+  onAdded: () => void;
 }) {
   if (!isOpen) return null;
 
-  // Si estás en desarrollo usa localhost, si estás en producción usa la variable del servidor
   const baseUrl = BUILD_MODE ? API_BASE_URL : "http://localhost:3000";
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -28,6 +29,7 @@ export default function Modal_Agregar_Noticias({
 
       alert("✅ Noticia agregada correctamente");
       closeModal();
+      onAdded();
     } catch (error) {
       console.error("❌ Error al crear noticia:", error);
       alert("❌ Hubo un error al agregar la noticia");

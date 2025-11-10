@@ -8,12 +8,13 @@ interface NoticiaCardProps {
   loading?: boolean;
   onClick?: () => void;
   onDelete?: (id: string) => void;
+  onAdded?: () => void;
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 
-export default function NoticiaCard({ noticia, onDelete }: NoticiaCardProps) {
+export default function NoticiaCard({ noticia, onDelete, onAdded }: NoticiaCardProps) {
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -82,6 +83,7 @@ export default function NoticiaCard({ noticia, onDelete }: NoticiaCardProps) {
       if (!res.ok) throw new Error("Error al actualizar la noticia");
 
       alert("Noticia actualizada correctamente ✅");
+      onAdded?.();
       setEditOpen(false);
       setRemoveImage(false);
       setSelectedFile(null);

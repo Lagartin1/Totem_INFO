@@ -19,47 +19,61 @@ export default function Proyectos() {
 
   const baseUrl = BUILD_MODE ? API_BASE_URL : "http://localhost:3000";
 
+  // 🔁 Función para cargar proyectos
+  const fetchProyectos = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`${baseUrl}/api/proyectos`);
+      const json = await res.json();
+      setProyectos(json.proyectos ?? []);
+    } catch (err) {
+      console.error("Error al obtener proyectos:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    setLoading(true);
-    fetch(`${baseUrl}/api/proyectos`)
-      .then((res) => res.json())
-      .then((json) => setProyectos(json.proyectos ?? []))
-      .catch((err) => console.error("Error en fetch inicial:", err))
-      .finally(() => setLoading(false));
+    fetchProyectos();
   }, []);
 
-  const slides = proyectos.map((proyecto) => {
-    return (
-      <Card_Proyectos
-        proyecto={proyecto}
-        onDelete={(id) =>
-          setProyectos((prev) => prev.filter((x) => x.id !== id))
-        }
-      />
-    );
-  });
+  const slides = proyectos.map((proyecto) => (
+    <Card_Proyectos
+      key={proyecto.id}
+      proyecto={proyecto}
+      onDelete={(id) =>
+        setProyectos((prev) => prev.filter((x) => x.id !== id))
+      }
+      onAdded={fetchProyectos}
+    />
+  ));
 
   return (
     <div className="p-6">
       <h2 className="text-2xl font-bold mb-4">Proyectos</h2>
 
       <div className="py-10 flex flex-col items-center gap-6">
-        {/* 🔹 Loading Spinner */}
         {loading && <Loading frase="Cargando proyectos..." />}
 
         <div className="relative w-full">
           <div className="flex gap-4 overflow-x-auto pb-4">
-            {/* Carrusel de resultados */}
             {!loading && slides.length > 0 && (
               <Carousel key={proyectos.length} slides={slides} />
             )}
           </div>
         </div>
       </div>
+
       <div className="mx-auto w-64 text-white p-4">
         <Boton_Landing Title="Agregar Proyecto" onClick={openModal} />
       </div>
-      <Modal_Agregar_Proyecto isOpen={isModalOpen} closeModal={closeModal} />
+
+      {/* 👇 Pasamos la función para refrescar */}
+      <Modal_Agregar_Proyecto
+        isOpen={isModalOpen}
+        closeModal={closeModal}
+        onAdded={fetchProyectos}
+      />
     </div>
   );
 }

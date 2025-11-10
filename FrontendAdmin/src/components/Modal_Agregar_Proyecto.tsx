@@ -6,21 +6,18 @@ const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 export default function Modal_Agregar_Proyecto({
   isOpen,
   closeModal,
+  onAdded,
 }: {
   isOpen: boolean;
   closeModal: () => void;
+  onAdded: () => void; // 👈 nueva prop
 }) {
   if (!isOpen) return null;
 
   const baseUrl = BUILD_MODE ? API_BASE_URL : "http://localhost:3000";
-
-  // Estado para manejar múltiples autores
   const [autores, setAutores] = useState<string[]>([""]);
 
-  const handleAddAutor = () => {
-    setAutores([...autores, ""]);
-  };
-
+  const handleAddAutor = () => setAutores([...autores, ""]);
   const handleChangeAutor = (index: number, value: string) => {
     const nuevos = [...autores];
     nuevos[index] = value;
@@ -31,7 +28,6 @@ export default function Modal_Agregar_Proyecto({
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
-    // Agregar los autores manualmente al FormData
     autores.forEach((autor) => {
       if (autor.trim() !== "") formData.append("autor", autor);
     });
@@ -46,6 +42,7 @@ export default function Modal_Agregar_Proyecto({
 
       alert("✅ Proyecto agregado correctamente");
       closeModal();
+      onAdded(); // 👈 recarga lista inmediatamente
     } catch (error) {
       console.error("❌ Error al crear proyecto:", error);
       alert("❌ Hubo un error al agregar el proyecto");
@@ -55,8 +52,7 @@ export default function Modal_Agregar_Proyecto({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center
-        bg-black/20 backdrop-blur-md
-        transition-all duration-300"
+        bg-black/20 backdrop-blur-md transition-all duration-300"
       onClick={closeModal}>
       <div
         className="bg-white p-6 rounded-lg w-96 shadow-lg"
@@ -67,7 +63,6 @@ export default function Modal_Agregar_Proyecto({
           onSubmit={handleSubmit}
           className="flex flex-col gap-3"
           encType="multipart/form-data">
-
           <input
             name="titulo"
             type="text"
@@ -83,7 +78,6 @@ export default function Modal_Agregar_Proyecto({
             required
           />
 
-          {/* Autores dinámicos */}
           <label className="text-sm text-gray-600">Autores</label>
           {autores.map((autor, index) => (
             <input
@@ -96,6 +90,7 @@ export default function Modal_Agregar_Proyecto({
               name={`autor_${index}`}
             />
           ))}
+
           <button
             type="button"
             onClick={handleAddAutor}
@@ -103,7 +98,6 @@ export default function Modal_Agregar_Proyecto({
             + Añadir otro autor
           </button>
 
-          {/* Telefono de contacto */}
           <input
             name="telefono_contacto"
             type="tel"
@@ -111,7 +105,6 @@ export default function Modal_Agregar_Proyecto({
             className="border p-2 rounded"
           />
 
-          {/* Correo de contacto */}
           <input
             name="correo_contacto"
             type="email"
@@ -119,7 +112,6 @@ export default function Modal_Agregar_Proyecto({
             className="border p-2 rounded"
           />
 
-          {/* Área de desarrollo */}
           <input
             name="area_desarrollo"
             type="text"
@@ -127,8 +119,9 @@ export default function Modal_Agregar_Proyecto({
             className="border p-2 rounded"
           />
 
-          {/* Subida de videos */}
-          <label className="text-sm text-gray-600">Videos (puedes subir varios)</label>
+          <label className="text-sm text-gray-600">
+            Videos (puedes subir varios)
+          </label>
           <input
             name="videos"
             type="file"
