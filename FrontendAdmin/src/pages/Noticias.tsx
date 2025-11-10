@@ -65,7 +65,7 @@ export default function NoticiasSection() {
           ))}
         </div>
       </div>
-      <div>
+      <div className="mx-auto w-64 text-white p-4">
         <Boton_Landing Title="Agregar Noticia" onClick={openModal} />
       </div>
       <Modal_Agregar_Noticias isOpen={isModalOpen} closeModal={closeModal} />
