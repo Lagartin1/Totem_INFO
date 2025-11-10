@@ -1,10 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { eliminarNoticia, actualizarNoticia } from "@/controllers/noticias/noticiasControllers";
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+// DELETE handler
+export async function DELETE(request: NextRequest, context: any) {
   try {
-    const { id } = params;
+    const { id } = context.params; // <- usar context sin tipar
     const response = await eliminarNoticia(id);
+
     return NextResponse.json(
       { message: "Noticia eliminada correctamente", response },
       { status: 200 }
@@ -18,9 +20,10 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
   }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+// PUT handler
+export async function PUT(request: NextRequest, context: any) {
   try {
-    const { id } = params;
+    const { id } = context.params;
     const body = await request.formData();
 
     const response = await actualizarNoticia(id, body);
