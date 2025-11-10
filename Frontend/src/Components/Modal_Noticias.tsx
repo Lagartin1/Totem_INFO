@@ -57,9 +57,6 @@ export default function NoticiaModal({
           {new Date(noticia.fecha_publicacion).toLocaleDateString()}
         </p>
 
-        {/* Descripción */}
-        <p className="mt-2 text-lg text-gray-700">{noticia.descripcion}</p>
-
         {/* Contenido */}
         <div className="mt-4 text-gray-800 leading-relaxed">
           {noticia.contenido}

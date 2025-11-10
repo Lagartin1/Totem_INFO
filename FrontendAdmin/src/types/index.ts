@@ -13,7 +13,6 @@ export interface Proyecto {
 export interface Noticia {
   id: string;
   titulo: string;
-  descripcion: string;
   contenido: string;
   autor: string;
   fecha_publicacion: string;
