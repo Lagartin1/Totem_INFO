@@ -31,17 +31,42 @@ export default function NoticiaCard({ noticia, onDelete, onAdded }: NoticiaCardP
 
     const confirmar = confirm("¿Seguro que quieres eliminar esta noticia?");
     if (!confirmar) return;
+    const performDeelete = async () => {  
+        try{
+          setDeleting(true);
+          const res = await fetch(`${baseUrl}/api/noticias/${noticia.id}`, {
+            method: "DELETE",
+            credentials: "include",
+          });
+          if (res.status === 401) {
+            const refreshRes = await fetch(`${baseUrl}/api/admin/auth/refresh`, {
+              method: "GET",
+              credentials: "include",
+            });
+            if (refreshRes.ok) {
+              const retryRes = await fetch(`${baseUrl}/api/noticias/${noticia.id}`, {
+                method: "DELETE",
+                credentials: "include",
+              });
+              if (!retryRes.ok) {
+                throw new Error("Error al eliminar noticia después de refrescar token");
+              } else {
+                return retryRes;
+              }
+            }
+          }if (!res.ok) {
+            throw new Error("Error al eliminar noticia");
+          }
+          return res;
+        } finally {
+          setDeleting(false);
+        }
+    }
 
     try {
       setDeleting(true);
-      const res = await fetch(`${baseUrl}/api/noticias/${noticia.id}`, {
-        method: "DELETE",
-      });
-
-      if (!res.ok) {
-        throw new Error("Error al eliminar la noticia");
-      }
-
+      const res = await performDeelete();
+      if (!res.ok) throw new Error("Error al eliminar noticia");
       alert("Noticia eliminada correctamente ✅");
 
       // Notificar al componente padre (NoticiasSection) si existe la función
@@ -75,10 +100,41 @@ export default function NoticiaCard({ noticia, onDelete, onAdded }: NoticiaCardP
       // Señal de eliminar imagen
       if (removeImage) formData.append("eliminarImagen", "true");
 
-      const res = await fetch(`${baseUrl}/api/noticias/${noticia.id}`, {
-        method: "PUT",
-        body: formData,
-      });
+
+      const perfromPut = async () => {
+        try {
+          const res = await fetch(`${baseUrl}/api/noticias/${noticia.id}`, {
+            method: "PUT",
+            body: formData,
+            credentials: "include",
+          });
+          if (res.status === 401) {
+            const refreshRes = await fetch(`${baseUrl}/api/admin/auth/refresh`, {
+              method: "GET",
+              credentials: "include",
+            });
+            if (refreshRes.ok) {
+              const retryRes = await fetch(`${baseUrl}/api/noticias/${noticia.id}`, {
+                method: "PUT",
+                body: formData,
+                credentials: "include",
+              });
+              if (!retryRes.ok) {
+                throw new Error("Error al actualizar noticia después de refrescar token");
+              } else {
+                return retryRes;
+              }
+            }
+          }if (!res.ok) {
+            throw new Error("Error al actualizar noticia");
+          }
+          return res;
+        } catch (error) {
+          throw error;
+        }
+      };
+      
+      const res = await perfromPut();
 
       if (!res.ok) throw new Error("Error al actualizar la noticia");
 
