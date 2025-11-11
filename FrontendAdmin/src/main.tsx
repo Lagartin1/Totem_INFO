@@ -13,6 +13,7 @@ import NotFound from "./pages/404";
 import NoticiasSection from "./pages/Noticias";
 import Workshop from "./pages/workshop";
 import Proyectos from "./pages/proyectos";
+import TopPracticas from './pages/TopPracticas';
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -24,10 +25,8 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/load-data" element={<LoadData />} />
             <Route path="/admin-practicas" element={<AdminPracticas />} />
-            <Route
-              path="/admin-practicas/:type"
-              element={<PracticasExistentes />}
-            />
+            <Route path="/admin-practicas/:type" element={<PracticasExistentes />} />
+            <Route path="/admin-practicas/top-visitadas" element={<TopPracticas />} />
           </Route>
             <Route path="/workshop" element={<Workshop />} />
           <Route path="/proyectos" element={<Proyectos />} />

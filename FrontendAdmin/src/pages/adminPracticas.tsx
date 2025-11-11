@@ -270,8 +270,9 @@ export default function AdminPracticas() {
       <div className='bg-white shadow-md rounded-lg h-lvh flex flex-col '>
         <h1 className='text-2xl font-bold mb-4 text-center mt-40'>Administración de Prácticas</h1>
         <div className="p-20 grid grid-cols-2 gap-4 justify-center items-center space-x-8">
-          <button className='bg-slate-500 text-white px-4 py-2 rounded-md  h-30 text-2xl hover:bg-slate-700' onClick={handleAddPractica}>Agregar Práctica</button>
-          <button className='bg-slate-500 text-white px-4 py-2 rounded-md h-30 text-2xl hover:bg-slate-700' onClick={openModalPracticas}>Administrar Prácticas existentes</button>
+          <button className='bg-blue-500 text-white px-4 py-2 rounded-md h-30 text-2xl hover:bg-slate-700' onClick={handleAddPractica}>Agregar Práctica</button>
+          <button className='bg-blue-500 text-white px-4 py-2 rounded-md h-30 text-2xl hover:bg-slate-700' onClick={openModalPracticas}>Administrar Prácticas existentes</button>
+          <button className='bg-blue-500 text-white px-4 py-2 rounded-md h-30 text-2xl hover:bg-slate-700' onClick={() => nav("/admin-practicas/top-visitadas")}> Top Prácticas Visitadas</button>
         </div>
         {modalOpen ? (
           <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-opacity-50 z-50">
