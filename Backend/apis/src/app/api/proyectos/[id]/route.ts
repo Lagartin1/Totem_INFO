@@ -52,9 +52,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     
-    const { id } = params;
+    const { id } = await params;
     const body = await request.formData();
-    await addLogEntry(userId, "updateProyecto", `Proyecto actualizado con ID: ${params.id}`);
+    await addLogEntry(userId, "updateProyecto", `Proyecto actualizado con ID: ${id}`);
     const response = await PutProyectosController(id, body);
     return NextResponse.json(
       { message: "Noticia actualizada correctamente", response },
