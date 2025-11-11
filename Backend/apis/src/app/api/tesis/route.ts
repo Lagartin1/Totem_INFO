@@ -4,7 +4,7 @@ import { tesisController } from "@/controllers/tesis/tesisControllers";
 export async function GET(req: NextRequest) {
   try {
     const searchParams = req.nextUrl.searchParams;
-    const searchTerm = (searchParams.get("q") || "").trim();
+    const searchTerm = searchParams.get("search") || "";
     let response:any;
     if (searchTerm === "") {
       response = await tesisController(false);

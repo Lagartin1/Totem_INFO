@@ -23,18 +23,17 @@ const requiredHeaders = [
                 'requisitos_especiales'
             ];
 
-export async function listPracticas(year: string | false,indice: number, type: string): Promise<PracticasResult> {
-    let practicasData: PracticasResult;
-    if (year) {
-        practicasData = await GetPracticasByYear(indice, type, year);   
-    } else {
-        practicasData = await GetPracticas(indice, type);
-    }   
+export async function listPracticas(year: string | false,indice: number,type: string): Promise<PracticasResult> {
+  console.log("listPracticas params:", { year, indice, type });
+  const practicasData = year
+    ? await GetPracticasByYear(type, year, indice)
+    : await GetPracticas(type, indice);
 
-    if (!practicasData) {
-        throw new Error('No se encontraron prácticas');
-    }
-    return practicasData;
+  if (!practicasData) {
+    throw new Error("No se encontraron prácticas");
+  }
+
+  return practicasData;
 }
 
 export async function BuscarPracticas(term: string, type: string): Promise<PracticasResult>{

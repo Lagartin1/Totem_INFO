@@ -25,6 +25,7 @@ async function ensureIndex() {
             universidad: { type: "text" },
             facultad: { type: "text" },
             palabras_clave: { type: "text" },
+            visitas: { type: "integer" },
           }
         }
       }
