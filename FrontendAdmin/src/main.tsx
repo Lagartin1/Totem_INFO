@@ -28,10 +28,10 @@ createRoot(document.getElementById("root")!).render(
               path="/admin-practicas/:type"
               element={<PracticasExistentes />}
             />
+            <Route path="/workshop" element={<Workshop />} />
+            <Route path="/proyectos" element={<Proyectos />} />
+            <Route path="/noticias" element={<NoticiasSection />} />
           </Route>
-          <Route path="/workshop" element={<Workshop />} />
-          <Route path="/proyectos" element={<Proyectos />} />
-          <Route path="/noticias" element={<NoticiasSection />} />
         </Routes>
         <Route path="*" element={<NotFound />} />
       </Router>
