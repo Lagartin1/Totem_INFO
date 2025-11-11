@@ -1,14 +1,23 @@
 # ---------- build ----------
 FROM node:20-alpine AS build
 WORKDIR /app
+
+# Variables que vienen desde compose.prod.yml
 ARG VITE_API_BASE_URL
 ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
 ARG VITE_BUILD_MODE
 ENV VITE_BUILD_MODE=${VITE_BUILD_MODE}
+
+# 🔹 Nuevo argumento explícito para base
+ARG VITE_BASE_PATH=/admin/
+ENV VITE_BASE_PATH=${VITE_BASE_PATH}
+
 COPY package*.json ./
 RUN npm ci
 COPY . ./
-RUN npm run build
+
+# 🔹 Forzamos el build con el base correcto
+RUN npx vite build --base=${VITE_BASE_PATH}
 
 # ---------- production ----------
 FROM node:20-alpine
