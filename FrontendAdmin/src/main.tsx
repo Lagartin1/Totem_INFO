@@ -15,6 +15,8 @@ import Workshop from "./pages/workshop";
 import Proyectos from "./pages/proyectos";
 import TopPracticas from './pages/TopPracticas';
 import Becados from "./pages/becados";
+import Tesis from "./pages/adminTesis";
+import TopTesis from './pages/TopTesis';
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -33,6 +35,8 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/proyectos" element={<Proyectos />} />
             <Route path="/noticias" element={<NoticiasSection />} />
             <Route path="/becados" element={<Becados />} />
+            <Route path="/tesis" element={<Tesis />} />
+            <Route path="/tesis/top-visitadas" element={<TopTesis />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>

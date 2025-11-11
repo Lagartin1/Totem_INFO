@@ -27,3 +27,29 @@ export interface Becado {
   fecha_publicacion: string;
   videos: string[];
 }
+
+export interface Tesis {
+  id: string;
+  
+  // Campos principales
+  titulo: string; // 'title' en tu modelo
+  autor: string | string[]; // 'autor' en tu modelo, asumo que puede ser múltiple
+  
+  // Campos descriptivos
+  descripcion?: string;
+  resumen?: string;
+  palabras_clave?: string; // Podría ser string[] si lo parseas
+  
+  // Información académica
+  profesor?: string;
+  area_desarrollo?: string;
+  universidad?: string;
+  facultad?: string;
+  
+  // Metadatos
+  fecha_publicacion?: string; // O 'created_at'
+  visitas?: number; // Para las estadísticas
+  
+  // Para permitir cualquier otro campo que venga de Elasticsearch
+  [key: string]: any;
+}

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import Toast from '../components/toast';
 import Loader from '../components/loader';
 import CardWorkshop from '../components/card_workshop';
-
+import Nav_button from "../components/nav_button";
 
 export default function Workshop() {
   const [pagina, setPagina] = useState<number>(1);
@@ -139,6 +139,9 @@ export default function Workshop() {
 
   return (
     <main className='p-6 w-full min-h-screen '>
+        <div className="px-30 py-10">
+          <Nav_button Title="Volver" Link="/" />
+        </div>
       {loading ? <Loader /> : null}
       {toast ? <Toast message={toastmsg as string} status={toastStatus} /> : null}
       <div className='bg-white shadow-md rounded-lg h-lvh flex flex-col justify-center items-center'>

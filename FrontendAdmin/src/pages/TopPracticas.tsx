@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Loader from '../components/loader'; // Usas tu componente
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from 'recharts';
@@ -9,7 +9,7 @@ import "react-datepicker/dist/react-datepicker.css";
 interface Practica {
   id: string; 
   labores: string;
-  nombre_empresa: string;
+  nombre_empresa: string;  
   visitas: number;
 }
 interface PracticasData {
