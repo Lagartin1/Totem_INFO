@@ -1,30 +1,40 @@
-# -------- dependencies --------
-FROM node:20-alpine AS deps
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-
 # -------- build --------
 FROM node:20-alpine AS builder
 WORKDIR /app
+
 ENV NEXT_TELEMETRY_DISABLED=1
-COPY --from=deps /app/node_modules ./node_modules
+
+# 1. Copiamos solo lo necesario para instalar dependencias correctamente
+COPY package*.json ./
+COPY prisma ./prisma
+
+RUN npm ci
+
+# 2. Copiamos el resto del código fuente
 COPY . .
 
+# 3. Generamos Prisma Client dentro de Alpine
+RUN npx prisma generate
+
+# 4. Build Next.js standalone con Turbopack
 RUN npm run build --turbopack
 
 # -------- runtime --------
 FROM node:20-alpine AS runner
 WORKDIR /app
+
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=4004
 ENV HOSTNAME=0.0.0.0
 
-# copia solo lo necesario para ejecutar standalone
+# Copiamos artefactos desde el builder
 COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./public/.next/static
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/prisma ./prisma
 
-# Puerto interno (puedes dejarlo en 3000, o cambiarlo si prefieres)
 EXPOSE 4004
-# Ejecuta el server standalone generado por Next
-CMD ["node", "server.js"]
+
+# Si quieres aplicar el schema antes de levantar:
+CMD ["sh", "-c", "npx prisma db push && node server.js"]

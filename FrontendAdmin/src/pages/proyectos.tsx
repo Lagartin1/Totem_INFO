@@ -50,34 +50,36 @@ export default function Proyectos() {
   ));
 
   return (
-    <div className="p-6">
+    <main className="p-6 w-full min-h-screen">
         <div className="px-30 py-10">
           <Nav_button Title="Volver" Link="/" />
         </div>
-      <h2 className="text-2xl font-bold mb-4">Proyectos</h2>
+      <div className="">
+        <h2 className="text-2xl font-bold mb-4">Proyectos</h2>
 
-      <div className="py-10 flex flex-col items-center gap-6">
-        {loading && <Loading frase="Cargando proyectos..." />}
+        <div className="py-10 flex flex-col items-center gap-6">
+          {loading && <Loading frase="Cargando proyectos..." />}
 
-        <div className="relative w-full">
-          <div className="flex gap-4 overflow-x-auto pb-4">
-            {!loading && slides.length > 0 && (
-              <Carousel key={proyectos.length} slides={slides} />
-            )}
+          <div className="relative w-full">
+            <div className="flex gap-4 overflow-x-auto pb-4">
+              {!loading && slides.length > 0 && (
+                <Carousel key={proyectos.length} slides={slides} />
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="mx-auto w-64 text-white p-4">
-        <Boton_Landing Title="Agregar Proyecto" onClick={openModal} />
-      </div>
+        <div className="mx-auto w-64 text-white p-4">
+          <Boton_Landing Title="Agregar Proyecto" onClick={openModal} />
+        </div>
 
-      {/* 👇 Pasamos la función para refrescar */}
-      <Modal_Agregar_Proyecto
-        isOpen={isModalOpen}
-        closeModal={closeModal}
-        onAdded={fetchProyectos}
-      />
-    </div>
+        {/* 👇 Pasamos la función para refrescar */}
+        <Modal_Agregar_Proyecto
+          isOpen={isModalOpen}
+          closeModal={closeModal}
+          onAdded={fetchProyectos}
+        />
+      </div>
+    </main>
   );
 }
