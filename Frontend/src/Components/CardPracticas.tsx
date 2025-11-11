@@ -3,8 +3,7 @@ import IndicadorCard from './IndicadorCard';
 import { IdentificationIcon ,BuildingOffice2Icon,MapPinIcon} from "@heroicons/react/24/outline";
 
 
-
-interface CardPracticasProps {
+export interface CardPracticasProps {
     id:string;
     Titulo: string;
     lugar: string;
@@ -17,9 +16,11 @@ interface CardPracticasProps {
     modalidad:string;
     beneficios:string;
     nombre_empresa:string;
+    baseUrl: string;
 }
 
 export default function CardPracticas({
+    id,
     Titulo,
     lugar,
     nombre_contacto,
@@ -31,10 +32,16 @@ export default function CardPracticas({
     modalidad,
     beneficios,
     nombre_empresa,
+    baseUrl
 } : CardPracticasProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const openModal = () => setIsModalOpen(true);
+    const openModal = () => {
+        // Abre el modal inmediatamente para que el usuario no espere
+        setIsModalOpen(true); 
+        fetch(`${baseUrl}/api/practicas/detalle/${id}`)
+            .catch(console.error); // Silenciosamente registra si hay un error
+    };
     const closeModal = () => setIsModalOpen(false);
 
     return (

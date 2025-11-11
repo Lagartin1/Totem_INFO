@@ -142,6 +142,7 @@ export default function PracticasProfesionales() {
                   modalidad={practica.modalidad}
                   beneficios={practica.beneficios}
                   nombre_empresa={practica.nombre_empresa}
+                  baseUrl={baseUrl}
                 />
               ))}
             </div>
@@ -177,6 +178,7 @@ export default function PracticasProfesionales() {
                   modalidad={practica.modalidad}
                   beneficios={practica.beneficios}
                   nombre_empresa={practica.nombre_empresa}
+                  baseUrl={baseUrl}
                 />
               ))}
           </div>

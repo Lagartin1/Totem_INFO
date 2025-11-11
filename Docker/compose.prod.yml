@@ -35,7 +35,7 @@ services:
       - esdata:/usr/share/elasticsearch/data
       - ./Database/backup/es_snapshots:/snapshots 
     ports:
-      - "5004:9200"
+      - "9200:9200"
     networks:
       - totem_network_static
     restart: unless-stopped

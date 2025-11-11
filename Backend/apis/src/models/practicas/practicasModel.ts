@@ -254,3 +254,51 @@ export async function desactivePracticaByID(id: string): Promise<boolean | { err
         return { error: 'Error desactivando práctica' };
     }
 }
+
+
+
+export async function getTopPracticas(limit: number = 10): Promise<PracticasResult> {
+    const body = {
+        index: 'practicas',
+        from: 0,
+        size: limit,
+        body: {
+            query: {
+                match_all: {} // Queremos todas las prácticas
+            },
+            sort: [
+                { "visitas": { "order": "desc" } } // <-- La clave de la HU
+            ],
+            _source: true
+        }
+    };
+    const response = await es().search(body);
+
+    const result: PracticasResult = {
+        practicas: response.hits.hits.map((hit) => hit._source as Practica),
+        total: (response.hits.total as { value: number; relation: string }).value,
+    };
+    return result;
+}
+
+
+
+export async function incrementPracticaVisits(id: string): Promise<boolean> {
+    try {
+        await es().update({
+            index: 'practicas',
+            id: id,
+            body: {
+                script: {
+                    // "Si 'visitas' existe, súmale 1. Si no (?: 0), ponlo en 1"
+                    source: "ctx._source.visitas = (ctx._source.visitas ?: 0) + 1",
+                    lang: "painless"
+                }
+            }
+        });
+        return true;
+    } catch (error) {
+        console.error('Error al incrementar visitas:', error);
+        return false;
+    }
+}

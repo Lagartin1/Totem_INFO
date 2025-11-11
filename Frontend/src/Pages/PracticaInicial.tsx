@@ -8,7 +8,7 @@ import Nav_button from "../Components/nav_button";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 
-interface CardPracticasProps {
+interface PracticaFromApi {
   id: string;
   labores: string;
   sede_practica: string;
@@ -21,11 +21,10 @@ interface CardPracticasProps {
   modalidad: string;
   beneficios: string;
   nombre_empresa: string;
-  total: number;
 }
 
 interface PracticasData {
-  practicas: CardPracticasProps[];
+  practicas: PracticaFromApi[]; 
   total: number;
 }
 
@@ -131,7 +130,7 @@ export default function PracticasIniciales() {
         {!loading && sData.practicas?.length > 0 && (
           <>
             <div className="grid grid-cols-3 gap-20 md:grid-cols-1 lg:grid-cols-3">
-              {sData.practicas.map((practica: CardPracticasProps) => (
+              {sData.practicas.map((practica: PracticaFromApi) => (
                 <CardPracticas
                   key={practica.id}
                   id={practica.id}
@@ -146,6 +145,7 @@ export default function PracticasIniciales() {
                   modalidad={practica.modalidad}
                   beneficios={practica.beneficios}
                   nombre_empresa={practica.nombre_empresa}
+                  baseUrl={baseUrl}
                 />
               ))}
             </div>
@@ -166,7 +166,7 @@ export default function PracticasIniciales() {
         {!loading && (
           <div className="grid grid-cols-3 gap-20 md:grid-cols-1 lg:grid-cols-3">
             {!hasSearched &&
-              data.practicas?.map((practica: CardPracticasProps) => (
+              data.practicas?.map((practica: PracticaFromApi) => (
                 <CardPracticas
                   key={practica.id}
                   id={practica.id}
@@ -181,6 +181,7 @@ export default function PracticasIniciales() {
                   modalidad={practica.modalidad}
                   beneficios={practica.beneficios}
                   nombre_empresa={practica.nombre_empresa}
+                  baseUrl={baseUrl}
                 />
               ))}
           </div>

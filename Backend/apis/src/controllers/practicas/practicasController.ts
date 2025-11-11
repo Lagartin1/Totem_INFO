@@ -1,7 +1,7 @@
-import { PracticasResult} from "@/models/practicas/practicasModel";
+import { PracticasResult, GetPracticasByID, incrementPracticaVisits} from "@/models/practicas/practicasModel";
 import { listPracticas, BuscarPracticas ,insertNewPractica, insertCsvPracticas,csvToJson,CleanArray,validatePracticaData, deletePractica, togglePracticaState} from "@/services/practicas/practicasService";
 import { NextRequest,NextResponse } from "next/server";
-
+import { getTopPracticas } from "@/models/practicas/practicasModel";
 import { addLogEntry } from "@/models/admin/logModel";
 
 
@@ -125,3 +125,34 @@ export async function desactivarPractica(req: NextRequest,userID: string) {
         return new NextResponse(JSON.stringify({ error: 'Error interno del servidor' }), { status: 500 });
     }
 }   
+
+export async function getTopClickedPracticas() {
+  // Llama a la nueva función del modelo
+  const result = await getTopPracticas(10); 
+  return NextResponse.json(result);
+}
+
+export async function getPracticaDetails(id: string) {
+
+  // 1. Incrementa la visita.
+  // Lo ejecutamos "sin await" para que no bloquee al usuario.
+  // El usuario no necesita esperar a que esto termine.
+  incrementPracticaVisits(id);
+
+  // 2. Obtiene los datos de la práctica usando tu función existente
+  const practicaResult = await GetPracticasByID(id);
+
+  // 3. Maneja si no se encuentra
+  if (!practicaResult || practicaResult.total === 0) {
+    return new NextResponse(
+      JSON.stringify({ error: "Práctica no encontrada" }), 
+      { status: 404 }
+    );
+  }
+
+  // 4. Devuelve el documento de la práctica (no el objeto PracticasResult)
+  return new NextResponse(
+    JSON.stringify(practicaResult.practicas[0]), 
+    { status: 200 }
+  );
+}
