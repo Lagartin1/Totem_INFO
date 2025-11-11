@@ -13,25 +13,33 @@ export default function NoticiasSection() {
   const [selectedNoticia, setSelectedNoticia] = useState<Noticia | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const baseUrl = BUILD_MODE ? API_BASE_URL : "http://localhost:3000";
+
+  // 🔁 función para cargar noticias
+  const fetchNoticias = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`${baseUrl}/api/noticias`);
+      const json = await res.json();
+      setNoticias(json.noticias ?? []);
+    } catch (err) {
+      console.error("Error al obtener noticias:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNoticias();
+  }, []);
+
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  const carouselRef = useRef<HTMLDivElement>(null);
-
-  const baseUrl = BUILD_MODE ? API_BASE_URL : "http://localhost:3000";
-
-  useEffect(() => {
-    setLoading(true);
-    fetch(`${baseUrl}/api/noticias`)
-      .then((res) => res.json())
-      .then((json) => setNoticias(json.noticias ?? []))
-      .catch((err) => console.error("Error en fetch inicial:", err))
-      .finally(() => setLoading(false));
-  }, []);
-
   const onClick = (noticia: Noticia) => {
     setSelectedNoticia(noticia);
-    selectedNoticia && console.log("Noticia seleccionada:", selectedNoticia);
+    console.log("Noticia seleccionada:", noticia);
   };
 
   return (
@@ -54,21 +62,28 @@ export default function NoticiasSection() {
       <div className="relative">
         <div ref={carouselRef} className="flex gap-4 overflow-x-auto pb-4">
           {noticias.map((n) => (
-              <NoticiaCard
-                key={n.id}
-                noticia={n}
-                onClick={() => onClick(n)}
-                onDelete={(id) =>
-                  setNoticias((prev) => prev.filter((x) => x.id !== id))
-                }
-              />
+            <NoticiaCard
+              key={n.id}
+              noticia={n}
+              onClick={() => onClick(n)}
+              onDelete={(id) =>
+                setNoticias((prev) => prev.filter((x) => x.id !== id))
+              }
+              onAdded={fetchNoticias}
+            />
           ))}
         </div>
       </div>
-      <div>
+
+      <div className="mx-auto w-64 text-white p-4">
         <Boton_Landing Title="Agregar Noticia" onClick={openModal} />
       </div>
-      <Modal_Agregar_Noticias isOpen={isModalOpen} closeModal={closeModal} />
+
+      <Modal_Agregar_Noticias
+        isOpen={isModalOpen}
+        closeModal={closeModal}
+        onAdded={fetchNoticias}
+      />
     </div>
   );
 }

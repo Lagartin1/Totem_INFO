@@ -4,24 +4,14 @@ import Card_Proyectos from "../Components/Card_Proyect";
 import Search_Bar from "../Components/Search_Bar";
 import Nav_button from "../Components/nav_button";
 import Carousel from "../Components/Carousel";
+import type { Proyecto } from "../types/index";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 
-
-interface ProyectoProps {
-  id: string;
-  titulo: string;
-  area_desarrollo: string;
-  correo_contacto: string;
-  telefono_contacto: string;
-  descripcion: string;
-  profesores: string[] | string;
-}
-
 export default function ProyectosDocentes() {
-  const [data, setData] = useState<ProyectoProps[]>([]);
-  const [sData, setSData] = useState<ProyectoProps[]>([]);
+  const [data, setData] = useState<Proyecto[]>([]);
+  const [sData, setSData] = useState<Proyecto[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -68,17 +58,7 @@ export default function ProyectosDocentes() {
   const slides = displayedData.map((proyecto) => {
     return (
       <Card_Proyectos
-        key={proyecto.id}
-        titulo={proyecto.titulo}
-        area={proyecto.area_desarrollo}
-        correo={proyecto.correo_contacto}
-        telefono={proyecto.telefono_contacto}
-        descripcion={proyecto.descripcion} 
-        profesores={
-          Array.isArray(proyecto.profesores)
-            ? proyecto.profesores.join(", ")
-            : proyecto.profesores
-        }
+        proyecto={proyecto}
       />
     );
   });

@@ -4,30 +4,59 @@ const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 export default function Modal_Agregar_Noticias({
   isOpen,
   closeModal,
+  onAdded, 
 }: {
   isOpen: boolean;
   closeModal: () => void;
+  onAdded: () => void;
 }) {
   if (!isOpen) return null;
 
-  // Si estás en desarrollo usa localhost, si estás en producción usa la variable del servidor
   const baseUrl = BUILD_MODE ? API_BASE_URL : "http://localhost:3000";
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
+    const perferomPost = async () => {
+      try {
+        const res = await fetch(`${baseUrl}/api/noticias`, {
+          method: "POST",
+          credentials: "include",
+          body: formData,
+        });
+        if (res.status === 401) {
+          // Intentar refrescar el token
+          const refreshRes = await fetch(`${baseUrl}/api/admin/auth/refresh`, {
+            method: "GET",
+            credentials: "include",
+          });
+          if (refreshRes.ok) {
+            // Reintentar la solicitud original
+            const retryRes = await fetch(`${baseUrl}/api/noticias`, {
+              method: "POST",
+              credentials: "include",
+              body: formData,
+            });
+            return retryRes;
+          } else {
+            throw new Error("No autorizado");
+          }
+        }
+        return res;
+      } catch (error) {
+        throw error;
+      }
+    };
 
     try {
-      const res = await fetch(`${baseUrl}/api/noticias`, {
-        method: "POST",
-        body: formData,
-      });
-
+      const res = await perferomPost();
+      
       if (!res.ok) throw new Error("Error al guardar noticia");
 
       alert("✅ Noticia agregada correctamente");
       closeModal();
+      onAdded();
     } catch (error) {
       console.error("❌ Error al crear noticia:", error);
       alert("❌ Hubo un error al agregar la noticia");

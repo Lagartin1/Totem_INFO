@@ -76,11 +76,11 @@ function Carousel({ slides = [] }: { slides?: React.ReactNode[] }) {
       <div
         className="flex transition-transform duration-300 gap-4"
         style={{
-          transform: `translateX(-${current * 260}px)`, // ancho de la tarjeta + gap
+          transform: `translateX(-${current * 366}px)`, // ancho de la tarjeta + gap
         }}
       >
         {slides.map((slide, index) => (
-          <div key={index} className="flex-shrink-0 w-[250px]">
+          <div key={index} className="flex-shrink-0 w-[350px]">
             {slide}
           </div>
         ))}

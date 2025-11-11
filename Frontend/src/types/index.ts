@@ -9,12 +9,3 @@ export interface Proyecto {
   area_desarrollo: string;
   videos: string[];
 }
-
-export interface Noticia {
-  id: string;
-  titulo: string;
-  contenido: string;
-  autor: string;
-  fecha_publicacion: string;
-  imagen?: string;
-}
