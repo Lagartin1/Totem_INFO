@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { DeleteProyectosController, PutProyectosController } from "@/controllers/proyectos/proyectosController";
+import { DeleteBecadosController, PutBecadosController } from "@/controllers/becados/becadosController";
 import { addLogEntry } from "@/models/admin/logModel";
 import { cookies } from "next/headers";
 import { verifyAccessToken, getUserIdFromSessionToken } from "@/lib/auth/login_tools";
@@ -21,16 +21,16 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     }
     
     const { id } = params;
-    const response = await DeleteProyectosController(id);
-    await addLogEntry(userId, "deleteProyecto", `Proyecto eliminado con ID: ${params.id}`);
+    const response = await DeleteBecadosController(id);
+    await addLogEntry(userId, "deleteBecado", `Becado eliminado con ID: ${params.id}`);
     return NextResponse.json(
-      { message: "Proyecto eliminado correctamente", response },
+      { message: "Becado eliminado correctamente", response },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error al eliminar proyecto:", error);
+    console.error("Error al eliminar becado:", error);
     return NextResponse.json(
-      { error: "Error al eliminar el proyecto" },
+      { error: "Error al eliminar el becado" },
       { status: 500 }
     );
   }
@@ -54,16 +54,16 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     
     const { id } = params;
     const body = await request.formData();
-    await addLogEntry(userId, "updateProyecto", `Proyecto actualizado con ID: ${params.id}`);
-    const response = await PutProyectosController(id, body);
+    await addLogEntry(userId, "updateBecado", `Becado actualizado con ID: ${params.id}`);
+    const response = await PutBecadosController(id, body);
     return NextResponse.json(
-      { message: "Proyecto actualizado correctamente", response },
+      { message: "Becado actualizado correctamente", response },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error al actualizar proyecto:", error);
+    console.error("Error al actualizar becado:", error);
     return NextResponse.json(
-      { error: "Error al actualizar el proyecto" },
+      { error: "Error al actualizar el becado" },
       { status: 500 }
     );
   }

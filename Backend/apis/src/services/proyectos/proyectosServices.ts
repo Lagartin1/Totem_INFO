@@ -52,11 +52,11 @@ export async function createProyectoService(formData: FormData) {
 }
 
 export async function GetProyectosServices() {
-  const noticias = await GetProyectosModel();
-  if (!noticias) {
-    throw new Error("No se pudieron cargar las noticias");
+  const proyectos = await GetProyectosModel();
+  if (!proyectos) {
+    throw new Error("No se pudieron cargar los proyectos");
   }
-  return noticias;
+  return proyectos;
 }
 
 export async function DeleteProyectoService(id: string) {

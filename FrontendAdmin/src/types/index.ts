@@ -18,3 +18,12 @@ export interface Noticia {
   fecha_publicacion: string;
   imagen?: string;
 }
+
+export interface Becado {
+  id: string;
+  nombre: string;
+  titulo: string;
+  descripcion: string;
+  fecha_publicacion: string;
+  videos: string[];
+}

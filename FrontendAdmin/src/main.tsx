@@ -14,6 +14,7 @@ import NoticiasSection from "./pages/Noticias";
 import Workshop from "./pages/workshop";
 import Proyectos from "./pages/proyectos";
 import TopPracticas from './pages/TopPracticas';
+import Becados from "./pages/becados";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -31,6 +32,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/workshop" element={<Workshop />} />
             <Route path="/proyectos" element={<Proyectos />} />
             <Route path="/noticias" element={<NoticiasSection />} />
+            <Route path="/becados" element={<Becados />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
