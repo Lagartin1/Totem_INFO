@@ -32,8 +32,8 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/proyectos" element={<Proyectos />} />
             <Route path="/noticias" element={<NoticiasSection />} />
           </Route>
+          <Route path="*" element={<NotFound />} />
         </Routes>
-        <Route path="*" element={<NotFound />} />
       </Router>
     </AuthProvider>
   </StrictMode>
