@@ -4,7 +4,7 @@ import Loader from '../components/loader';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from 'recharts';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import Nav_button from "../components/nav_button";
+
 // --- CAMBIO 1: Define la interfaz de Tesis ---
 // (Ajusta esto a los campos reales de tu modelo de Tesis)
 interface Tesis {
@@ -48,25 +48,65 @@ export default function TopTesis() { // <-- CAMBIO AQUÍ
         url += `?startDate=${start}&endDate=${end}`;
     }
 
-    fetch(url)
+  fetch(url)
       .then(res => {
-        if (!res.ok) throw new Error('No se pudieron cargar las tesis'); // <-- CAMBIO AQUÍ
+        if (!res.ok) throw new Error('No se pudieron cargar las tesis');
         return res.json();
       })
-      .then((data: TesisData) => { // <-- CAMBIO AQUÍ
-        setTesis(data.tesis); // <-- CAMBIO AQUÍ
+      .then((data: TesisData) => {
+        setTesis(data.tesis);
       })
-      // ... (el resto del fetch es igual) ...
-// ...
-  }, [baseUrl, startDate, endDate, activeFilter]); 
+      .catch(err => {
+        console.error(err);
+        setError(err.message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [baseUrl, startDate, endDate, activeFilter]); // Se ejecuta cuando las fechas cambian
 
-  // ... (Funciones de filtro son iguales) ...
+    // --- NUEVAS FUNCIONES DE FILTRO ---
+  const setFilter = (filter: 'total' | 'week' | 'month') => {
+    setActiveFilter(filter);
+    const today = new Date();
+    if (filter === 'total') {
+        setStartDate(null);
+        setEndDate(null);
+    } else if (filter === 'week') {
+        const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+        setStartDate(lastWeek);
+        setEndDate(today);
+    } else if (filter === 'month') {
+        const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+        setStartDate(lastMonth);
+        setEndDate(today);
+    }
+  };
+    const handleCustomDateChange = (dates: [Date | null, Date | null]) => {
+    const [start, end] = dates;
+    setStartDate(start);
+    setEndDate(end);
+    setActiveFilter('custom');
+  };
 
   const renderContent = () => {
     if (loading) {
       return <Loader frase="Cargando top de tesis..." />; // <-- CAMBIO AQUÍ
     }
-    // ... (Manejo de error es igual) ...
+     if (error) {
+      return <p className="text-center text-red-600">{error}</p>;
+    }
+
+    // --- PUNTO 5: MENSAJE DE "NO HAY DATOS" ---
+    if (tesis.length === 0) {
+      return (
+        <div className="text-center p-10 bg-gray-50 rounded-lg shadow">
+          <h3 className="text-xl font-semibold text-gray-700">
+            No se encontraron resultados para el período seleccionado.
+          </h3>
+        </div>
+      );
+    }
 
     if (tesis.length === 0) { // <-- CAMBIO AQUÍ
       return (
@@ -87,9 +127,6 @@ export default function TopTesis() { // <-- CAMBIO AQUÍ
 
     return (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="px-30 py-10">
-          <Nav_button Title="Volver" Link="/" />
-        </div>
         {/* Columna de Gráfico */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-4 text-gray-800">Gráfico de Visitas</h2>
@@ -149,11 +186,40 @@ export default function TopTesis() { // <-- CAMBIO AQUÍ
           Tesis Más Visitadas {/* <-- CAMBIO AQUÍ */}
         </h1>
 
-        {/* Los filtros de fecha son idénticos */}
+{/* --- PUNTO 3: FILTROS DE FECHA --- */}
         <div className="mb-8 p-4 bg-white rounded-lg shadow-md flex flex-wrap items-center gap-4">
-          {/* ... (código de botones y datepicker sin cambios) ... */}
+          <span className="font-semibold">Filtrar por:</span>
+          <button
+            onClick={() => setFilter('total')}
+            className={`px-4 py-2 rounded ${activeFilter === 'total' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+          >
+            Total Histórico
+          </button>
+          <button
+            onClick={() => setFilter('week')}
+            className={`px-4 py-2 rounded ${activeFilter === 'week' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+          >
+            Última Semana
+          </button>
+          <button
+            onClick={() => setFilter('month')}
+            className={`px-4 py-2 rounded ${activeFilter === 'month' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+          >
+            Último Mes
+          </button>
+          <div className="flex items-center gap-2">
+            <span className="font-semibold">Personalizado:</span>
+            <DatePicker
+              selectsRange={true}
+              startDate={startDate}
+              endDate={endDate}
+              onChange={handleCustomDateChange}
+              isClearable={true}
+              placeholderText="Selecciona un rango"
+              className="border p-2 rounded"
+            />
+          </div>
         </div>
-
         {/* Contenido dinámico */}
         {renderContent()}
       </div>

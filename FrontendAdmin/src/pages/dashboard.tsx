@@ -101,7 +101,7 @@ export default function Dashboard() {
 
   return (
     <main className='p-6 w-full min-h-screen '>
-      {loading && <Loader />}
+  
       {toast ? <Toast message={toastmsg as string} status={toastStatus} /> : null}
       <div className='bg-white shadow-md rounded-lg h-lvh flex flex-col justify-center items-center'>
         <div className="w-full max-w-4xl">
