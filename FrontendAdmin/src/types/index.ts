@@ -27,3 +27,12 @@ export interface Becado {
   fecha_publicacion: string;
   videos: string[];
 }
+
+export interface Gira {
+  id: string;
+  titulo: string;
+  descripcion: string;
+  anio: string;
+  lugares: string[];
+  videos: string[];
+}
