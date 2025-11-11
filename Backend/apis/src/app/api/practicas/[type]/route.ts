@@ -2,8 +2,8 @@ import { NextRequest,NextResponse } from "next/server";
 import { fetchPracticas } from "@/controllers/practicas/practicasController";
 
 
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ type: string }> }) {
-  const { type } = await params;
+export async function GET(_req: NextRequest, { params }: { params: { type: string } }) {
+  const { type } = params;
   const searchParams = _req.nextUrl.searchParams;
   const pagina = searchParams.get('pagina') || '1';
   const year = searchParams.get('year') || false;
@@ -18,7 +18,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ typ
     } else {
       return NextResponse.json({ error: 'Tipo de práctica no válido' }, { status: 400 });
     }  
-    return NextResponse.json(await fetchPracticas(year, indice, tipo_practica), { status: 200 });
+    return NextResponse.json(await fetchPracticas(year, indice, tipo_practica,null), { status: 200 });
 
   }catch(error){
     console.log(error)

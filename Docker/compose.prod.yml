@@ -87,7 +87,7 @@ services:
       context: ../Frontend
       dockerfile: ../Docker/Frontend/dockerfile
       args:
-        VITE_API_BASE_URL: "http://backend:4004"
+        VITE_API_BASE_URL: ""
         VITE_BUILD_MODE: "true"
     ports:
       - "3004:3004"
@@ -96,6 +96,19 @@ services:
     depends_on: [ backend ]
     restart: unless-stopped
 
+  frontend_admin:
+    build:
+      context: ../FrontendAdmin
+      dockerfile: ../Docker/FrontendAdmin/dockerfile
+      args:
+        VITE_API_BASE_URL: ""
+        VITE_BUILD_MODE: "true"
+    ports:
+      - "6004:6004"
+    networks:
+      - totem_network_static
+    depends_on: [ backend ]
+    restart: unless-stopped
 
 volumes:
   esdata:

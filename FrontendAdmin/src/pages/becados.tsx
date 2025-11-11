@@ -5,6 +5,8 @@ import Carousel from "../components/Carousel";
 import Loading from "../components/loader";
 import Boton_Landing from "../components/Boton_Landing";
 import Modal_Agregar_Becado from "../components/Modal_Agregar_Becado";
+import Nav_button from "../components/nav_button";
+
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
@@ -50,7 +52,10 @@ export default function Becados() {
 
   return (
     <main className="p-6 w-full min-h-screen">
-
+        <div className="px-30 py-10">
+          <Nav_button Title="Volver" Link="/" />
+        </div>
+      <h2 className="text-2xl font-bold mb-4">Becados</h2>
       <div className="p-6">
         <h2 className="text-2xl font-bold mb-4">Becados</h2>
 

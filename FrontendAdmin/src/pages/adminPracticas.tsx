@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Toast from '../components/toast';
 import Loader from '../components/loader';
-
+import Nav_button from "../components/nav_button";
 
 interface practicasProps {
   tipo_practica: string;
@@ -265,6 +265,9 @@ export default function AdminPracticas() {
 
   return (
     <main className='p-6 w-full min-h-screen '>
+        <div className="px-30 py-10">
+          <Nav_button Title="Volver" Link="/" />
+        </div>
       {loading && <Loader frase={"Enviando..."} />}
       {toastState && <Toast message={toastMessage} status={toastStatus} />}
       <div className='bg-white shadow-md rounded-lg h-lvh flex flex-col '>

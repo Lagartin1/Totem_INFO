@@ -1,6 +1,10 @@
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {  useNavigate } from 'react-router-dom';
 import UserCard from '../components/userCards';
+import { useCallback } from 'react';
+import Toast from '../components/toast';
+
+
 interface User {
   id: string;
   username: string;
@@ -9,13 +13,6 @@ interface User {
   apellido: string;
   authoriced: boolean;
 }
-import { useEffect } from 'react';
-import { useCallback } from 'react';
-import Toast from '../components/toast';
-import Loader from '../components/loader';
-
-
-
 
 export default function Dashboard() { 
   const navigate = useNavigate();
@@ -104,22 +101,19 @@ export default function Dashboard() {
 
   return (
     <main className='p-6 w-full min-h-screen '>
-      {loading && <Loader />}
+  
       {toast ? <Toast message={toastmsg as string} status={toastStatus} /> : null}
       <div className='bg-white shadow-md rounded-lg h-lvh flex flex-col justify-center items-center'>
         <div className="w-full max-w-4xl">
-          <div className="grid grid-cols-2 gap-20 ">
-            <div className="span-col-1 flex flex-col items-center">
-              <div className="mt-20 ">
-                <h1 className='text-3xl font-bold mt-2'>Panel de Administración</h1>
-                <p>Bienvenido al panel de administración.</p> 
-              </div>
-              <div className=" grid grid-cols-2 gap-4 text-white mt-24">
-                <button className='w-40 h-40 bg-slate-700 rounded-2xl text-xl hover:bg-orange-400' onClick={() => navigate("/noticias")}> Administrar Noticias </button>
-                <button className='w-40 h-40 bg-slate-700 rounded-2xl text-xl hover:bg-orange-400' onClick={()=>navigate("/proyectos")} >  Administrar proyectos</button>
-                <button className='w-40 h-40 bg-slate-700 rounded-2xl text-xl   hover:bg-orange-400' onClick={() => navigate("/admin-practicas")}>Administrar practicas</button>         
-                <button className='w-40 h-40 bg-slate-700 rounded-2xl text-xl   hover:bg-orange-400' onClick={() => navigate("/workshop")}>Administrar workshops</button>             
-              </div>
+          <h1 className='text-3xl font-bold'>Panel de Administración</h1>
+          <p>Bienvenido al panel de administración.</p> 
+          <div className="flex flex-row gap-20 ">
+            <div className="grid grid-cols-3 gap-4 text-white mt-24">
+              <button className='w-40 h-40 bg-orange-400 rounded-2xl text-xl hover:bg-slate-700' onClick={() => navigate("/noticias")}> Administrar Noticias </button>
+              <button className='w-40 h-40 bg-orange-400 rounded-2xl text-xl hover:bg-slate-700' onClick={()=>navigate("/proyectos")} >  Administrar Proyectos</button>
+              <button className='w-40 h-40 bg-orange-400 rounded-2xl text-xl hover:bg-slate-700' onClick={() => navigate("/admin-practicas")}>Administrar Practicas</button>         
+              <button className='w-40 h-40 bg-orange-400 rounded-2xl text-xl hover:bg-slate-700' onClick={() => navigate("/workshop")}>Administrar Workshops</button>
+              <button className='w-40 h-40 bg-orange-400 rounded-2xl text-xl hover:bg-slate-700' onClick={() => navigate("/tesis")}>Administrar Tesis</button>             
             </div>
             <div className="span-col-2 mt-6 flex flex-col gap-4">
               <div className="flex flex-col items-center">

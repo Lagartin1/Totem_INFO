@@ -1,30 +1,38 @@
-import { PracticasResult, GetPracticasByID, incrementPracticaVisits} from "@/models/practicas/practicasModel";
-import { listPracticas, BuscarPracticas ,insertNewPractica, insertCsvPracticas,csvToJson,CleanArray,validatePracticaData, deletePractica, togglePracticaState} from "@/services/practicas/practicasService";
+import { PracticasResult, GetPracticasByID, incrementPracticasVisits, GetPracticasByYear, SearchTermPracticas} from "@/models/practicas/practicasModel";
+import { listPracticas, insertNewPractica, insertCsvPracticas,csvToJson,CleanArray,validatePracticaData, deletePractica, togglePracticaState} from "@/services/practicas/practicasService";
 import { NextRequest,NextResponse } from "next/server";
 import { getTopPracticas } from "@/models/practicas/practicasModel";
 import { addLogEntry } from "@/models/admin/logModel";
 
-export async function fetchPracticas(year: string | false,indice: number, type: string): Promise<PracticasResult> {
+export async function fetchPracticas(
+  year: string | false,
+  indice: number,
+  tipo_practica: string,
+  searchTerm: string | null // <-- 4. Añadimos el término de búsqueda
+): Promise<PracticasResult> {
 
-    const practicasData: PracticasResult= await listPracticas(year, indice, type);
+  try {
+    let data;
 
-    if (!practicasData) {
-        throw new Error('No se encontraron prácticas');
+    if (searchTerm) {
+      // Si hay búsqueda
+      data = await SearchTermPracticas(searchTerm, tipo_practica, indice, 10);
+    } else if (year) {
+      // Si hay filtro por año
+      data = await GetPracticasByYear(tipo_practica, year, indice, 10);
+    } else {
+      // Si es listado normal (tu caso actual)
+      data = await listPracticas(false, indice, tipo_practica);
     }
-    return practicasData;
+    return data;
+
+  } catch (error) {
+    console.error("Error en fetchPracticas (controlador):", error);
+    // Lanza el error para que la ruta lo atrape en su try/catch
+    throw new Error("Error al consultar Elasticsearch desde el controlador");
+  }
 }
 
-
-
-export async function SearchTermPracticas(term: string, type: string): Promise<PracticasResult> {
-
-    const practicasData: PracticasResult = await BuscarPracticas(term, type);
-
-    if (!practicasData) {
-        throw new Error('No se encontraron prácticas');
-    }
-    return practicasData;
-}
 
 
 
@@ -130,7 +138,7 @@ export async function getTopClickedPracticas() {
 
 export async function getPracticaDetails(id: string) {
     try {
-        incrementPracticaVisits(id).catch(console.error);
+        incrementPracticasVisits(id).catch(console.error);
         addLogEntry('system_user', 'view_practica', 'practica', id).catch(console.error);
 
         // 3. Obtiene y devuelve los datos

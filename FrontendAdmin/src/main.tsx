@@ -14,6 +14,8 @@ import Workshop from "./pages/workshop";
 import Proyectos from "./pages/proyectos";
 import TopPracticas from "./pages/TopPracticas";
 import Becados from "./pages/becados";
+import Tesis from "./pages/adminTesis";
+import TopTesis from './pages/TopTesis';
 import Gira from "./pages/gira";
 
 createRoot(document.getElementById("root")!).render(
