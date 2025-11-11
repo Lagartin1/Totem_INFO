@@ -32,17 +32,42 @@ export default function Card_Proyectos({
 
     const confirmar = confirm("¿Seguro que quieres eliminar este proyecto?");
     if (!confirmar) return;
+    const performDelete = async () => {
+      try{
+        const response = await fetch(`${baseUrl}/api/proyectos/${proyecto.id}`, {
+          method: "DELETE",
+          credentials: "include",
+        });
+        if (response.status === 401) {
+          const refresh = await fetch(`${baseUrl}/api/admin/auth/refresh`, {
+            method: "GET",
+            credentials: "include",
+          });
+          if (refresh.ok) {
+            const retryResponse = await fetch(`${baseUrl}/api/proyectos/${proyecto.id}`, {
+              method: "DELETE",
+              credentials: "include",
+            });
+            if (!retryResponse.ok) {
+              throw new Error("Error al eliminar el proyecto");
+            }
+            return retryResponse;
+          }
+        }
+        if (!response.ok) {
+          throw new Error("Error al eliminar el proyecto");
+        }
+        return response;
+      } catch (error) {
+        throw error;
+      }
+    }
+
+
 
     try {
       setDeleting(true);
-      const res = await fetch(`${baseUrl}/api/proyectos/${proyecto.id}`, {
-        method: "DELETE",
-      });
-
-      if (!res.ok) {
-        throw new Error("Error al eliminar el proyecto");
-      }
-
+      await performDelete();
       alert("Proyecto eliminado correctamente ✅");
       onDelete?.(proyecto.id);
     } catch (error) {
@@ -107,11 +132,40 @@ export default function Card_Proyectos({
       if (removeVideos) {
         formData.append("eliminarVideos", "true");
       }
+      const performPut = async () => {
+        try{
+          const response = await fetch(`${baseUrl}/api/proyectos/${editData.id}`, {
+            method: "PUT",
+            body: formData,
+            credentials: "include",
+          });
+          if (response.status === 401) {
+            const refresh = await fetch(`${baseUrl}/api/admin/auth/refresh`, {
+              method: "GET",
+              credentials: "include",
+            });
+            if (refresh.ok) {
+              const retryResponse = await fetch(`${baseUrl}/api/proyectos/${editData.id}`, {
+                method: "PUT",
+                body: formData,
+                credentials: "include",
+              });
+              if (!retryResponse.ok) {
+                throw new Error("Error al actualizar el proyecto");
+              }
+              return retryResponse;
+            }
+          }
+          if (!response.ok) {
+            throw new Error("Error al actualizar el proyecto");
+          }
+          return response;
+        } catch (error) {
+          throw error;
+        }
+      };
+      const res = await performPut();
 
-      const res = await fetch(`${baseUrl}/api/proyectos/${editData.id}`, {
-        method: "PUT",
-        body: formData,
-      });
 
       if (!res.ok) throw new Error("Error al actualizar el proyecto");
 

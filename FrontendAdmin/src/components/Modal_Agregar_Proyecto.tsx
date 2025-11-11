@@ -32,11 +32,46 @@ export default function Modal_Agregar_Proyecto({
       if (autor.trim() !== "") formData.append("autor", autor);
     });
 
+    const performPost= async () => {  
+      try{
+        const res = await fetch(`${baseUrl}/api/proyectos`, {
+          method: "POST",
+          body: formData,
+          credentials: "include",
+        });
+        if (res.status === 401) {
+          const refresh = await fetch(`${baseUrl}/api/admin/auth/refresh`, {
+            method: "GET",
+            credentials: "include",
+          });
+          if (refresh.ok) {
+            const retryResponse = await fetch(`${baseUrl}/api/proyectos`, {
+              method: "POST",
+              body: formData,
+              credentials: "include",
+            });
+            if (!retryResponse.ok) {
+              throw new Error("Error al guardar proyecto");
+            }
+            return retryResponse;
+          }
+        }
+        if (!res.ok) {
+          throw new Error("Error al guardar proyecto");
+        }
+        return res;   
+      } catch (error) {
+        throw error;
+      }
+    };
+
+
+
+
+
+
     try {
-      const res = await fetch(`${baseUrl}/api/proyectos`, {
-        method: "POST",
-        body: formData,
-      });
+      const res = await performPost();
 
       if (!res.ok) throw new Error("Error al guardar proyecto");
 

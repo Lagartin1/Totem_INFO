@@ -73,8 +73,8 @@ export default function Dashboard() {
           <p>Bienvenido al panel de administración.</p> 
           <div className="flex flex-row gap-20 ">
             <div className="grid grid-cols-2 gap-4 text-white mt-24">
-              <button className='w-40 h-40 bg-slate-600 rounded-2xl'> Cargar Datos </button>
-              <button className='w-40 h-40 bg-slate-600 rounded-2xl'>  Eliminar Datos</button>
+              <button className='w-40 h-40 bg-slate-600 rounded-2xl' onClick={() => navigate("/noticias")}> Administrar Noticias </button>
+              <button className='w-40 h-40 bg-slate-600 rounded-2xl'onClick={()=>navigate("proyectos")} >  Administrar proyectos</button>
               <button className='w-40 h-40 bg-orange-400 rounded-2xl text-xl   hover:bg-slate-700' onClick={() => navigate("/admin-practicas")}>Administrar practicas</button>         
               <button className='w-40 h-40 bg-orange-400 rounded-2xl text-xl   hover:bg-slate-700' onClick={() => navigate("/workshop")}>Administrar workshops</button>             
             </div>
