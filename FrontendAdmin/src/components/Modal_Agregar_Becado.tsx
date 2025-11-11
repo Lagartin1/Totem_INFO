@@ -1,40 +1,26 @@
-import { useState } from "react";
-
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 
-export default function Modal_Agregar_Proyecto({
+export default function Modal_Agregar_Becado({
   isOpen,
   closeModal,
   onAdded,
 }: {
   isOpen: boolean;
   closeModal: () => void;
-  onAdded: () => void; // 👈 nueva prop
+  onAdded: () => void;
 }) {
   if (!isOpen) return null;
 
   const baseUrl = BUILD_MODE ? API_BASE_URL : "http://localhost:3000";
-  const [autores, setAutores] = useState<string[]>([""]);
-
-  const handleAddAutor = () => setAutores([...autores, ""]);
-  const handleChangeAutor = (index: number, value: string) => {
-    const nuevos = [...autores];
-    nuevos[index] = value;
-    setAutores(nuevos);
-  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
-    autores.forEach((autor) => {
-      if (autor.trim() !== "") formData.append("autor", autor);
-    });
-
-    const performPost= async () => {  
+    const performPost= async () => {
       try{
-        const res = await fetch(`${baseUrl}/api/proyectos`, {
+        const res = await fetch(`${baseUrl}/api/becados`, {
           method: "POST",
           body: formData,
           credentials: "include",
@@ -45,19 +31,19 @@ export default function Modal_Agregar_Proyecto({
             credentials: "include",
           });
           if (refresh.ok) {
-            const retryResponse = await fetch(`${baseUrl}/api/proyectos`, {
+            const retryResponse = await fetch(`${baseUrl}/api/becados`, {
               method: "POST",
               body: formData,
               credentials: "include",
             });
             if (!retryResponse.ok) {
-              throw new Error("Error al guardar proyecto");
+              throw new Error("Error al guardar becado");
             }
             return retryResponse;
           }
         }
         if (!res.ok) {
-          throw new Error("Error al guardar proyecto");
+          throw new Error("Error al guardar becado");
         }
         return res;   
       } catch (error) {
@@ -67,14 +53,14 @@ export default function Modal_Agregar_Proyecto({
     try {
       const res = await performPost();
 
-      if (!res.ok) throw new Error("Error al guardar proyecto");
+      if (!res.ok) throw new Error("Error al guardar becado");
 
-      alert("✅ Proyecto agregado correctamente");
+      alert("✅ Becado agregado correctamente");
       closeModal();
-      onAdded(); // 👈 recarga lista inmediatamente
+      onAdded();
     } catch (error) {
-      console.error("❌ Error al crear proyecto:", error);
-      alert("❌ Hubo un error al agregar el proyecto");
+      console.error("❌ Error al crear becado:", error);
+      alert("❌ Hubo un error al agregar el becado");
     }
   };
 
@@ -86,7 +72,7 @@ export default function Modal_Agregar_Proyecto({
       <div
         className="bg-white p-6 rounded-lg w-96 shadow-lg"
         onClick={(e) => e.stopPropagation()}>
-        <h3 className="text-xl font-semibold mb-4">Agregar Nuevo Proyecto</h3>
+        <h3 className="text-xl font-semibold mb-4">Agregar Nuevo Becado</h3>
 
         <form
           onSubmit={handleSubmit}
@@ -105,47 +91,6 @@ export default function Modal_Agregar_Proyecto({
             placeholder="Descripción"
             className="border p-2 rounded"
             required
-          />
-
-          <label className="text-sm text-gray-600">Autores</label>
-          {autores.map((autor, index) => (
-            <input
-              key={index}
-              type="text"
-              value={autor}
-              onChange={(e) => handleChangeAutor(index, e.target.value)}
-              placeholder={`Autor ${index + 1}`}
-              className="border p-2 rounded"
-              name={`autor_${index}`}
-            />
-          ))}
-
-          <button
-            type="button"
-            onClick={handleAddAutor}
-            className="text-blue-600 text-sm underline w-fit">
-            + Añadir otro autor
-          </button>
-
-          <input
-            name="telefono_contacto"
-            type="tel"
-            placeholder="Teléfono de contacto"
-            className="border p-2 rounded"
-          />
-
-          <input
-            name="correo_contacto"
-            type="email"
-            placeholder="Correo de contacto"
-            className="border p-2 rounded"
-          />
-
-          <input
-            name="area_desarrollo"
-            type="text"
-            placeholder="Área de desarrollo"
-            className="border p-2 rounded"
           />
 
           <label className="text-sm text-gray-600">

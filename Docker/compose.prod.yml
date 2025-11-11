@@ -3,18 +3,21 @@ networks:
     driver: bridge
 services:
   backend:
+    container_name: Totem_backend
     build:
       context: ../Backend/apis
       dockerfile: ../../Docker/Backend/dockerfile
     environment:
       NODE_ENV: production
-      ELASTIC_NODE: http://database:9200
+      ELASTIC_NODE: http://database_es:9200
       # Si usas seguridad en ES, habilita una de estas:
       # ELASTIC_API_KEY: ${ELASTIC_API_KEY}
       # ELASTIC_API_KEY_ID: ${ELASTIC_API_KEY_ID}
       # ELASTIC_API_KEY_VALUE: "MldLSUxKa0I4dk5pN0lhZjZDMUI6VGpBVG1CUXFRcENHbVJyRVFlZE1Mdw=="
       ELASTIC_USERNAME: elastic
       ELASTIC_PASSWORD: test123
+      JWT_SECRET: "[AhlwV-b-'FsyuY*b//3xa@TS!ixV6[}V-S=*A/]Ye0It"
+      MONGODB_URL: "mongodb://admin:test123@database_mongo:27017/totem_admins?authSource=admin"
     ports:
       - "4004:4004"
     networks:
@@ -22,6 +25,7 @@ services:
     restart: unless-stopped
 
   database_es:
+    container_name: Totem_database_es
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
     environment:
       - discovery.type=single-node
@@ -41,6 +45,7 @@ services:
     restart: unless-stopped
   
   database_mongo:
+    container_name: Totem_database_mongo
     image: mongo:7.0
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
@@ -81,6 +86,7 @@ services:
       retries: 5
 
   frontend:
+    container_name: Totem_frontend
     build:
       context: ../Frontend
       dockerfile: ../Docker/Frontend/dockerfile
@@ -89,6 +95,21 @@ services:
         VITE_BUILD_MODE: "true"
     ports:
       - "3004:3004"
+    networks:
+      - totem_network_static
+    depends_on: [ backend ]
+    restart: unless-stopped
+  
+  frontend_admin:
+    container_name: Totem_frontend_admin
+    build:
+      context: ../FrontendAdmin
+      dockerfile: ../Docker/FrontendAdmin/dockerfile
+      args:
+        VITE_API_BASE_URL: ""
+        VITE_BUILD_MODE: "true"
+    ports:
+      - "6004:6004"
     networks:
       - totem_network_static
     depends_on: [ backend ]
