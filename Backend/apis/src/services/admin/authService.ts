@@ -25,7 +25,8 @@ export async function loginService(
   // Si quieres login por email también, crea otro método en userModel.
   const user = await getUserByCredentials(identifier.trim().toLowerCase());
   if (!user) return null;
-
+  if (!user.authoriced) return null;
+  
   // si tienes isActive/lockedUntil en el select, puedes validar aquí
   // if (!user.isActive) return null;
   // if (user.lockedUntil && user.lockedUntil > new Date()) return null;
