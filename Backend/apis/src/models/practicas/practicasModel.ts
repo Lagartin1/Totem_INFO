@@ -1,6 +1,10 @@
 
 import {es} from "@/database/elastic";
 
+interface TermsBucket {
+  key: string;
+  doc_count: number;
+}
 
 export interface Practica {
     id: string;
@@ -17,11 +21,6 @@ export interface PracticaCSV {
     total: number;
 }
     
-
-
-
-
-
 export async function GetPracticasByYear(indice: number, tipo_practica: string, año: string | false) {
     const body = {
       index: 'practicas',
@@ -267,7 +266,7 @@ export async function getTopPracticas(limit: number = 10): Promise<PracticasResu
                 match_all: {} // Queremos todas las prácticas
             },
             sort: [
-                { "visitas": { "order": "desc" } } // <-- La clave de la HU
+                { "visitas": { "order": "desc" } } 
             ],
             _source: true
         }
@@ -301,4 +300,105 @@ export async function incrementPracticaVisits(id: string): Promise<boolean> {
         console.error('Error al incrementar visitas:', error);
         return false;
     }
+}
+
+
+export async function getTopPracticasByDateRange(
+    startDate: string, 
+    endDate: string, 
+    limit: number = 10
+): Promise<PracticasResult> {
+    
+    const logQueryBody = {
+        index: 'logs',
+        size: 0,
+        body: {
+            // ... (tu query, está perfecta) ...
+            query: {
+                bool: {
+                    filter: [
+                        { term: { action: 'view_practica' } },
+                        {
+                            range: {
+                                timestamp: {
+                                    gte: startDate,
+                                    lte: endDate
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            aggs: {
+                top_practicas: {
+                    terms: {
+                        field: 'targetId.keyword',
+                        size: limit,
+                        order: { _count: 'desc' }
+                    }
+                }
+            }
+        }
+    };
+
+    const logResponse = await es().search(logQueryBody);
+    
+    // --- CORRECCIÓN 1 (Error 'buckets') ---
+    // Hacemos un "cast" a un tipo que SÍ tiene buckets
+    const topPracticasAgg = logResponse.aggregations?.top_practicas as { buckets: TermsBucket[] };
+    const buckets = topPracticasAgg?.buckets || [];
+    // --- FIN CORRECCIÓN 1 ---
+
+    if (buckets.length === 0) {
+        return { practicas: [], total: 0 };
+    }
+
+    const practicasIds = buckets.map((bucket: TermsBucket) => bucket.key);
+    const practicasVisitasMap = new Map<string, number>();
+    buckets.forEach((bucket: TermsBucket) => {
+        practicasVisitasMap.set(bucket.key, bucket.doc_count);
+    });
+
+    const practicasDetailsResponse = await es().search({
+        index: 'practicas',
+        size: limit,
+        body: {
+            query: {
+                ids: {
+                    values: practicasIds
+                }
+            }
+        }
+    });
+
+    // --- CORRECCIÓN 2 y 3 (Error 'id | undefined') ---
+    const practicasConVisitas = practicasDetailsResponse.hits.hits.map((hit) => {
+        const practica = hit._source as Practica;
+        const id = hit._id; 
+        
+        // 1. Verificamos que el ID exista
+        if (!id) {
+            return null;
+        }
+        
+        // 2. Ahora 'id' es de tipo 'string', no 'undefined'
+        return {
+            ...practica,
+            id: id,
+            visitas: practicasVisitasMap.get(id) || 0
+        };
+    })
+    // 3. Filtramos cualquier 'null' que hayamos añadido
+    .filter(Boolean); // Esto elimina los nulos y convence a TypeScript
+    // --- FIN CORRECCIÓN 2 y 3 ---
+
+
+    // Ahora 'practicasConVisitas' es un array de objetos con 'id: string'
+    // y el Error 3 desaparece
+    const practicasOrdenadas = practicasConVisitas.sort((a, b) => b.visitas - a.visitas);
+
+    return {
+        practicas: practicasOrdenadas,
+        total: practicasOrdenadas.length
+    };
 }

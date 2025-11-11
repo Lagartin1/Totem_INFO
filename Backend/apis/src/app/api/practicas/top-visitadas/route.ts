@@ -1,15 +1,26 @@
-import { NextResponse } from 'next/server';
-// Ajusta la ruta para importar tu controlador
-import { getTopClickedPracticas } from '@/controllers/practicas/practicasController'; 
+// En app/api/practicas/top-visitadas/route.ts
 
-/**
- * Manejador para GET /api/practicas/top-visitadas
- * Obtiene las prácticas más visitadas.
- */
-export async function GET() {
+import { NextRequest, NextResponse } from 'next/server';
+// Importa AMBAS funciones del modelo
+import { getTopPracticas, getTopPracticasByDateRange } from '@/models/practicas/practicasModel'; 
+
+export async function GET(req: NextRequest) {
   try {
-    // Llama a la función que ya escribiste en tu controlador
-    return await getTopClickedPracticas();
+    const { searchParams } = req.nextUrl;
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
+
+    let result;
+
+    if (startDate && endDate) {
+        // Si hay fechas, usa la nueva función de logs
+        result = await getTopPracticasByDateRange(startDate, endDate);
+    } else {
+        // Si NO hay fechas, usa la función original (total histórico)
+        result = await getTopPracticas(10); // Asumo que getTopPracticas está en el controlador
+    }
+
+    return NextResponse.json(result);
 
   } catch (error) {
     console.error("[TOP_PRACTICAS_GET] Error:", error);
