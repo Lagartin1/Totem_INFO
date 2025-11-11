@@ -46,7 +46,7 @@ services:
   
   database_mongo:
     container_name: Totem_database_mongo
-    image: mongo:7.0
+    image: mongo:4.4
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: test123
@@ -54,44 +54,20 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - ./Database/backup/mongo_data:/data/db
-      - ./Database/backup/mongo_keyfile:/data/keyfile:ro
-      - ./Database/backup/mongo_init:/docker-entrypoint-initdb.d:ro
+      - ./Database/mongo_4/mongo_data:/data/db
+      - ./Database/mongo_4/mongo_keyfile:/data/keyfile:ro
+      - ./Database/mongo_4/mongo_init:/docker-entrypoint-initdb.d:ro
     networks:
       - totem_network_static
     restart: unless-stopped
-    entrypoint:
-      - bash
-      - -c
-      - |
-        openssl rand -base64 756 > /data/mongodb-keyfile
-        chmod 400 /data/mongodb-keyfile
-        chown 999:999 /data/mongodb-keyfile
-        exec docker-entrypoint.sh mongod --replSet rs0 --bind_ip_all --keyFile /data/mongodb-keyfile
-    healthcheck:
-      test: |
-        mongosh -u admin -p test123 --authenticationDatabase admin --eval "
-        try {
-          rs.status();
-        } catch(e) {
-          rs.initiate({
-            _id: 'rs0',
-            members: [{ _id: 0, host: 'localhost:27017' }]
-          });
-        }
-        " || exit 1
-      interval: 10s
-      timeout: 10s
-      start_period: 40s
-      retries: 5
-
+    
   frontend:
     container_name: Totem_frontend
     build:
       context: ../Frontend
       dockerfile: ../Docker/Frontend/dockerfile
       args:
-        VITE_API_BASE_URL: "http://backend:4004"
+        VITE_API_BASE_URL: ""
         VITE_BUILD_MODE: "true"
     ports:
       - "3004:3004"
