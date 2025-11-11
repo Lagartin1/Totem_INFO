@@ -43,47 +43,51 @@ export default function NoticiasSection() {
   };
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">Noticias</h2>
+    <main className="p-6 w-full min-h-screen">
 
-      {/* Loading Spinner */}
-      {loading && (
-        <div className="flex flex-col items-center justify-center mt-20">
-          <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="mt-4 text-lg text-gray-600">Cargando...</p>
+      <div className="p-6">
+        <h2 className="text-2xl font-bold mb-4">Noticias</h2>
+
+        {/* Loading Spinner */}
+        {loading && (
+          <div className="flex flex-col items-center justify-center mt-20">
+            <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+            <p className="mt-4 text-lg text-gray-600">Cargando...</p>
+          </div>
+        )}
+
+        {!loading && noticias.length === 0 && (
+          <p className="text-gray-500">No hay noticias disponibles</p>
+        )}
+
+        {/* Carrusel de noticias */}
+        <div className="relative">
+          <div ref={carouselRef} className="flex gap-4 overflow-x-auto pb-4">
+            {noticias.map((n) => (
+              <NoticiaCard
+                key={n.id}
+                noticia={n}
+                onClick={() => onClick(n)}
+                onDelete={(id) =>
+                  setNoticias((prev) => prev.filter((x) => x.id !== id))
+                }
+                onAdded={fetchNoticias}
+              />
+            ))}
+          </div>
         </div>
-      )}
 
-      {!loading && noticias.length === 0 && (
-        <p className="text-gray-500">No hay noticias disponibles</p>
-      )}
-
-      {/* Carrusel de noticias */}
-      <div className="relative">
-        <div ref={carouselRef} className="flex gap-4 overflow-x-auto pb-4">
-          {noticias.map((n) => (
-            <NoticiaCard
-              key={n.id}
-              noticia={n}
-              onClick={() => onClick(n)}
-              onDelete={(id) =>
-                setNoticias((prev) => prev.filter((x) => x.id !== id))
-              }
-              onAdded={fetchNoticias}
-            />
-          ))}
+        <div className="mx-auto w-64 text-white p-4">
+          <Boton_Landing Title="Agregar Noticia" onClick={openModal} />
         </div>
-      </div>
 
-      <div className="mx-auto w-64 text-white p-4">
-        <Boton_Landing Title="Agregar Noticia" onClick={openModal} />
+        <Modal_Agregar_Noticias
+          isOpen={isModalOpen}
+          closeModal={closeModal}
+          onAdded={fetchNoticias}
+        />
       </div>
-
-      <Modal_Agregar_Noticias
-        isOpen={isModalOpen}
-        closeModal={closeModal}
-        onAdded={fetchNoticias}
-      />
-    </div>
+    
+    </main>
   );
 }

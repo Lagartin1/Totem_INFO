@@ -3,13 +3,12 @@ networks:
     driver: bridge
 services:
   backend:
-    container_name: Totem_backend
     build:
       context: ../Backend/apis
       dockerfile: ../../Docker/Backend/dockerfile
     environment:
       NODE_ENV: production
-      ELASTIC_NODE: http://database_es:9200
+      ELASTIC_NODE: http://database:9200
       # Si usas seguridad en ES, habilita una de estas:
       # ELASTIC_API_KEY: ${ELASTIC_API_KEY}
       # ELASTIC_API_KEY_ID: ${ELASTIC_API_KEY_ID}
@@ -17,7 +16,7 @@ services:
       ELASTIC_USERNAME: elastic
       ELASTIC_PASSWORD: test123
       JWT_SECRET: "[AhlwV-b-'FsyuY*b//3xa@TS!ixV6[}V-S=*A/]Ye0It"
-      MONGODB_URL: "mongodb://admin:test123@database_mongo:27017/totem_admins?authSource=admin"
+      MONGODB_URL: "mongodb://admin:test123@database:27017/totem_admins?authSource=admin"
     ports:
       - "4004:4004"
     networks:
@@ -25,7 +24,6 @@ services:
     restart: unless-stopped
 
   database_es:
-    container_name: Totem_database_es
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
     environment:
       - discovery.type=single-node
@@ -39,14 +37,13 @@ services:
       - esdata:/usr/share/elasticsearch/data
       - ./Database/backup/es_snapshots:/snapshots 
     ports:
-      - "9200:9200"
+      - "5004:9200"
     networks:
       - totem_network_static
     restart: unless-stopped
   
   database_mongo:
-    container_name: Totem_database_mongo
-    image: mongo:4.4
+    image: mongo:7.0  #mongo:4.4 para servidor viejo
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: test123
@@ -54,38 +51,46 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - ./Database/mongo_4/mongo_data:/data/db
-      - ./Database/mongo_4/mongo_keyfile:/data/keyfile:ro
-      - ./Database/mongo_4/mongo_init:/docker-entrypoint-initdb.d:ro
+      - ./Database/backup/mongo_data:/data/db
+      - ./Database/backup/mongo_keyfile:/data/keyfile:ro
+      - ./Database/backup/mongo_init:/docker-entrypoint-initdb.d:ro
     networks:
       - totem_network_static
     restart: unless-stopped
-    
+    entrypoint:  ## solo version mongo superior a 4.4
+      - bash
+      - -c
+      - |
+        openssl rand -base64 756 > /data/mongodb-keyfile
+        chmod 400 /data/mongodb-keyfile
+        chown 999:999 /data/mongodb-keyfile
+        exec docker-entrypoint.sh mongod --replSet rs0 --bind_ip_all --keyFile /data/mongodb-keyfile
+    healthcheck:
+      test: |
+        mongosh -u admin -p test123 --authenticationDatabase admin --eval "
+        try {
+          rs.status();
+        } catch(e) {
+          rs.initiate({
+            _id: 'rs0',
+            members: [{ _id: 0, host: 'localhost:27017' }]
+          });
+        }
+        " || exit 1
+      interval: 10s
+      timeout: 10s
+      start_period: 40s
+      retries: 5
+
   frontend:
-    container_name: Totem_frontend
     build:
       context: ../Frontend
       dockerfile: ../Docker/Frontend/dockerfile
       args:
-        VITE_API_BASE_URL: ""
+        VITE_API_BASE_URL: "http://backend:4004"
         VITE_BUILD_MODE: "true"
     ports:
       - "3004:3004"
-    networks:
-      - totem_network_static
-    depends_on: [ backend ]
-    restart: unless-stopped
-  
-  frontend_admin:
-    container_name: Totem_frontend_admin
-    build:
-      context: ../FrontendAdmin
-      dockerfile: ../Docker/FrontendAdmin/dockerfile
-      args:
-        VITE_API_BASE_URL: ""
-        VITE_BUILD_MODE: "true"
-    ports:
-      - "6004:6004"
     networks:
       - totem_network_static
     depends_on: [ backend ]

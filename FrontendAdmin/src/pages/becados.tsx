@@ -49,31 +49,34 @@ export default function Becados() {
   ));
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">Becados</h2>
+    <main className="p-6 w-full min-h-screen">
 
-      <div className="py-10 flex flex-col items-center gap-6">
-        {loading && <Loading frase="Cargando becados..." />}
+      <div className="p-6">
+        <h2 className="text-2xl font-bold mb-4">Becados</h2>
 
-        <div className="relative w-full">
-          <div className="flex gap-4 overflow-x-auto pb-4">
-            {!loading && slides.length > 0 && (
-              <Carousel key={becados.length} slides={slides} />
-            )}
+        <div className="py-10 flex flex-col items-center gap-6">
+          {loading && <Loading frase="Cargando becados..." />}
+
+          <div className="relative w-full">
+            <div className="flex gap-4 overflow-x-auto pb-4">
+              {!loading && slides.length > 0 && (
+                <Carousel key={becados.length} slides={slides} />
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="mx-auto w-64 text-white p-4">
-        <Boton_Landing Title="Agregar Becado" onClick={openModal} />
-      </div>
+        <div className="mx-auto w-64 text-white p-4">
+          <Boton_Landing Title="Agregar Becado" onClick={openModal} />
+        </div>
 
-      {/* 👇 Pasamos la función para refrescar */}
-      <Modal_Agregar_Becado
-        isOpen={isModalOpen}
-        closeModal={closeModal}
-        onAdded={fetchBecados}
-      />
-    </div>
+        {/* 👇 Pasamos la función para refrescar */}
+        <Modal_Agregar_Becado
+          isOpen={isModalOpen}
+          closeModal={closeModal}
+          onAdded={fetchBecados}
+        />
+      </div>
+    </main>
   );
 }

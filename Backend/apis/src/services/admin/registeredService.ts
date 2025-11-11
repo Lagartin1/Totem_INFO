@@ -1,10 +1,10 @@
 import { getRegisteredUsers } from "@/models/admin/registeredUsersModel";
 import { UserInfo } from "@/models/admin/userModel";
 
-async function getUserFromRequest() {
+async function getUserFromRequest(pagina:string) {
   try {
     // Lógica para obtener el usuario desde la solicitud
-    const user = await getRegisteredUsers() as UserInfo[];
+    const user = await getRegisteredUsers(Number(pagina));
     if (!user) {
       return null;
     }
