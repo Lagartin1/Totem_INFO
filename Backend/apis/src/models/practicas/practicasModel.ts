@@ -12,7 +12,6 @@ interface TermsBucket {
  * ¡ESTA ES LA CORRECCIÓN!
  */
 export interface Practica {
-<<<<<<< HEAD
   id: string;
   titulo?: string; // Título o labores
   labores?: string; // Aseguramos que ambos existan
@@ -28,11 +27,6 @@ export interface Practica {
   
   // 2. Esto permite que 'visitas' (number) y otros campos (string) coexistan
   [key: string]: any; 
-=======
-    id: string;
-    titulo: string;
-    [key: string]: string | number;
->>>>>>> 0da3ec6 (cambios para que funcione en el server)
 }
 
 export interface PracticasResult {
@@ -389,108 +383,8 @@ export async function getTopPracticas(limit: number = 10): Promise<PracticasResu
         }
       ]
     }
-<<<<<<< HEAD
   });
-=======
-}
 
-
-export async function getTopPracticasByDateRange(
-    startDate: string, 
-    endDate: string, 
-    limit: number = 10
-): Promise<PracticasResult> {
-    
-    const logQueryBody = {
-        index: 'logs',
-        size: 0,
-        body: {
-            // ... (tu query, está perfecta) ...
-            query: {
-                bool: {
-                    filter: [
-                        { term: { action: 'view_practica' } },
-                        {
-                            range: {
-                                timestamp: {
-                                    gte: startDate,
-                                    lte: endDate
-                                }
-                            }
-                        }
-                    ]
-                }
-            },
-            aggs: {
-                top_practicas: {
-                    terms: {
-                        field: 'targetId.keyword',
-                        size: limit,
-                        order: { _count: 'desc' }
-                    }
-                }
-            }
-        }
-    };
-
-    const logResponse = await es().search(logQueryBody);
-    
-    // --- CORRECCIÓN 1 (Error 'buckets') ---
-    // Hacemos un "cast" a un tipo que SÍ tiene buckets
-    const topPracticasAgg = logResponse.aggregations?.top_practicas as { buckets: TermsBucket[] };
-    const buckets = topPracticasAgg?.buckets || [];
-    // --- FIN CORRECCIÓN 1 ---
-
-    if (buckets.length === 0) {
-        return { practicas: [], total: 0 };
-    }
-
-    const practicasIds = buckets.map((bucket: TermsBucket) => bucket.key);
-    const practicasVisitasMap = new Map<string, number>();
-    buckets.forEach((bucket: TermsBucket) => {
-        practicasVisitasMap.set(bucket.key, bucket.doc_count);
-    });
-
-    const practicasDetailsResponse = await es().search({
-        index: 'practicas',
-        size: limit,
-        body: {
-            query: {
-                ids: {
-                    values: practicasIds
-                }
-            }
-        }
-    });
-
-    // --- CORRECCIÓN 2 y 3 (Error 'id | undefined') ---
-    const practicasConVisitas = practicasDetailsResponse.hits.hits.map((hit) => {
-        const practica = hit._source as Practica;
-        const id = hit._id; 
-        
-        // 1. Verificamos que el ID exista
-        if (!id) {
-            return null;
-        }
-        
-        // 2. Ahora 'id' es de tipo 'string', no 'undefined'
-        return {
-            ...practica,
-            id: id,
-            visitas: practicasVisitasMap.get(id) || 0
-        };
-    })
-    // 3. Filtramos cualquier 'null' que hayamos añadido
-    .filter((item): item is NonNullable<typeof item> => item !== null); // Type guard más específico
-    // --- FIN CORRECCIÓN 2 y 3 ---
-
-
-    // Ahora 'practicasConVisitas' es un array de objetos con 'id: string'
-    // y el Error 3 desaparece
-    const practicasOrdenadas = practicasConVisitas.sort((a, b) => b.visitas - a.visitas);
->>>>>>> 0da3ec6 (cambios para que funcione en el server)
-
-  // --- CORRECCIÓN AQUÍ ---
   const hits: Practica[] = response.hits.hits.map((hit) => {
     const id = hit._id;
     if (!id) return null;

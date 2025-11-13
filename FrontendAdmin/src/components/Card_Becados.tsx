@@ -34,7 +34,7 @@ export default function Card_Becados({
     if (!confirmar) return;
     const performDelete = async () => {
       try{
-        const response = await fetch(`${baseUrl}/api/becado/${becado.id}`, {
+        const response = await fetch(`${baseUrl}/api/becados/${becado.id}`, {
           method: "DELETE",
           credentials: "include",
         });

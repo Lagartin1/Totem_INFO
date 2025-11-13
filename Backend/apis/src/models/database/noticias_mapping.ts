@@ -24,10 +24,7 @@ async function ensureIndex() {
               fields: { raw: { type: "keyword" } }
             },
             fecha_publicacion: { type: "date" },
-            categoria: { 
-              type: "text",
-              fields: { raw: { type: "keyword" } }
-            }
+            imagen: { type: "keyword"},
           }
         }
       }

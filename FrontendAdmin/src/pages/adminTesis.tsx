@@ -63,7 +63,7 @@ export default function Tesis() {
   return (
     <div className="p-6">
         <div className="px-30 py-10">
-          <Nav_button Title="Volver" Link="/" />
+          <Nav_button Title="Volver" Link="/dashboard" />
         </div>
       {/* 14. Cambia el título */}
       <h2 className="text-2xl font-bold mb-4">Tesis</h2>
@@ -85,7 +85,7 @@ export default function Tesis() {
 
 
       <div className="grid grid-cols-3 gap-4 text-white mt-20">
-        <button className='bg-blue-500 text-white px-4 py-2 rounded-md h-30 text-2xl hover:bg-slate-700' onClick={() => nav("/tesis/top-visitadas")}> Top Prácticas Visitadas</button>
+        <button className='bg-blue-500 text-white px-4 py-2 rounded-md h-30 text-2xl hover:bg-slate-700' onClick={() => nav("/tesis/top-visitadas")}> Top Tesis Visitadas</button>
         <Boton_Landing Title="Agregar Tesis" onClick={openModal} />
       </div>
 

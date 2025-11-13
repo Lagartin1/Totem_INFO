@@ -3,7 +3,7 @@ import { fetchPracticas } from "@/controllers/practicas/practicasController";
 
 
 export async function GET(_req: NextRequest, { params }: { params: { type: string } }) {
-  const { type } = params;
+  const { type } = await params;
   const searchParams = _req.nextUrl.searchParams;
   const pagina = searchParams.get('pagina') || '1';
   const year = searchParams.get('year') || false;

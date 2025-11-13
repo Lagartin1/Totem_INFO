@@ -113,7 +113,9 @@ export default function Dashboard() {
               <button className='w-40 h-40 bg-orange-400 rounded-2xl text-xl hover:bg-slate-700' onClick={()=>navigate("/proyectos")} >  Administrar Proyectos</button>
               <button className='w-40 h-40 bg-orange-400 rounded-2xl text-xl hover:bg-slate-700' onClick={() => navigate("/admin-practicas")}>Administrar Practicas</button>         
               <button className='w-40 h-40 bg-orange-400 rounded-2xl text-xl hover:bg-slate-700' onClick={() => navigate("/workshop")}>Administrar Workshops</button>
-              <button className='w-40 h-40 bg-orange-400 rounded-2xl text-xl hover:bg-slate-700' onClick={() => navigate("/tesis")}>Administrar Tesis</button>             
+              <button className='w-40 h-40 bg-orange-400 rounded-2xl text-xl hover:bg-slate-700' onClick={() => navigate("/tesis")}>Administrar Tesis</button>  
+              <button className='w-40 h-40 bg-orange-400 rounded-2xl text-xl hover:bg-slate-700' onClick={() => navigate("/becados")}>Administrar Becados</button>
+              <button className='w-40 h-40 bg-orange-400 rounded-2xl text-xl hover:bg-slate-700' onClick={() => navigate("/gira")}>Administrar Gira</button>           
             </div>
             <div className="span-col-2 mt-6 flex flex-col gap-4">
               <div className="flex flex-col items-center">

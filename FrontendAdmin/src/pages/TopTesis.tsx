@@ -97,7 +97,6 @@ export default function TopTesis() { // <-- CAMBIO AQUÍ
       return <p className="text-center text-red-600">{error}</p>;
     }
 
-    // --- PUNTO 5: MENSAJE DE "NO HAY DATOS" ---
     if (tesis.length === 0) {
       return (
         <div className="text-center p-10 bg-gray-50 rounded-lg shadow">
@@ -108,7 +107,7 @@ export default function TopTesis() { // <-- CAMBIO AQUÍ
       );
     }
 
-    if (tesis.length === 0) { // <-- CAMBIO AQUÍ
+    if (tesis.length === 0) {
       return (
         <div className="text-center p-10 bg-gray-50 rounded-lg shadow">
           <h3 className="text-xl font-semibold text-gray-700">
@@ -176,7 +175,7 @@ export default function TopTesis() { // <-- CAMBIO AQUÍ
     <main className="min-h-screen p-6 bg-gray-100">
       {/* <Header /> */}
       <div className="px-30 py-10">
-        <button onClick={() => nav("/admin-practicas")} className="text-blue-600 hover:underline">
+        <button onClick={() => nav("/tesis")} className="text-blue-600 hover:underline">
           &larr; Volver a Administración
         </button>
       </div>

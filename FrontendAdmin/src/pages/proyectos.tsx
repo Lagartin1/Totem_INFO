@@ -42,21 +42,18 @@ export default function Proyectos() {
     <Card_Proyectos
       key={proyecto.id}
       proyecto={proyecto}
-      onDelete={(id) =>
-        setProyectos((prev) => prev.filter((x) => x.id !== id))
-      }
+      onDelete={(id) => setProyectos((prev) => prev.filter((x) => x.id !== id))}
       onAdded={fetchProyectos}
     />
   ));
 
   return (
     <main className="p-6 w-full min-h-screen">
-        <div className="px-30 py-10">
-          <Nav_button Title="Volver" Link="/" />
-        </div>
-      <div className="">
-        <h2 className="text-2xl font-bold mb-4">Proyectos</h2>
-
+      <h2 className="text-2xl font-bold mb-4">Proyectos</h2>
+      <div className="px-30 py-10">
+        <Nav_button Title="Volver" Link="/dashboard" />
+      </div>
+      <div className="p-6">
         <div className="py-10 flex flex-col items-center gap-6">
           {loading && <Loading frase="Cargando proyectos..." />}
 

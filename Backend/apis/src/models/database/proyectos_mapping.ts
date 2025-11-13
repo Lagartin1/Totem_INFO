@@ -1,7 +1,7 @@
 
 import { es } from "../../database/elastic.ts"
 
-const INDEX = process.env.PROYECTS_INDEX || "proyects";
+const INDEX = process.env.PROYECTOS_INDEX || "proyectos";
 
 async function ensureIndex() {
   const client = es();
@@ -12,15 +12,15 @@ async function ensureIndex() {
       body: {
         mappings: {
           properties: {
-            id: { type: "integer" },
-            created_at: { type: "date", format: "strict_date_optional_time||epoch_millis" },
-            marca_temporal: { type: "text" },
-            profesores: { type: "keyword" },
+            id: { type: "keyword" },
+            autores: { type: "keyword" },
             titulo: { type: "text", analyzer: "spanish" },
             area_desarrollo: { type: "text", analyzer: "spanish" },
             descripcion: { type: "text", analyzer: "spanish" },
             correo_contacto: { type: "keyword" },
-            telefono_contacto: { type: "keyword" }
+            telefono_contacto: { type: "keyword" },
+            fecha_publicacion: {type: "text"},
+            videos : { type: "keyword" },
           }
         }
       }

@@ -34,7 +34,7 @@ export default function Card_Gira({
     if (!confirmar) return;
     const performDelete = async () => {
       try{
-        const response = await fetch(`${baseUrl}/api/giras/${gira.id}`, {
+        const response = await fetch(`${baseUrl}/api/gira/${gira.id}`, {
           method: "DELETE",
           credentials: "include",
         });
@@ -44,7 +44,7 @@ export default function Card_Gira({
             credentials: "include",
           });
           if (refresh.ok) {
-            const retryResponse = await fetch(`${baseUrl}/api/giras/${gira.id}`, {
+            const retryResponse = await fetch(`${baseUrl}/api/gira/${gira.id}`, {
               method: "DELETE",
               credentials: "include",
             });
@@ -120,7 +120,7 @@ export default function Card_Gira({
       }
       const performPut = async () => {
         try{
-          const response = await fetch(`${baseUrl}/api/giras/${editData.id}`, {
+          const response = await fetch(`${baseUrl}/api/gira/${editData.id}`, {
             method: "PUT",
             body: formData,
             credentials: "include",
@@ -131,7 +131,7 @@ export default function Card_Gira({
               credentials: "include",
             });
             if (refresh.ok) {
-              const retryResponse = await fetch(`${baseUrl}/api/giras/${editData.id}`, {
+              const retryResponse = await fetch(`${baseUrl}/api/gira/${editData.id}`, {
                 method: "PUT",
                 body: formData,
                 credentials: "include",

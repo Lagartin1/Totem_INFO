@@ -17,7 +17,7 @@ export default function NoticiasSection() {
   const carouselRef = useRef<HTMLDivElement>(null);
   const baseUrl = BUILD_MODE ? API_BASE_URL : "http://localhost:3000";
 
-  // 🔁 función para cargar noticias
+  // Función para cargar noticias
   const fetchNoticias = async () => {
     try {
       setLoading(true);
@@ -47,11 +47,10 @@ export default function NoticiasSection() {
     <main className="p-6 w-full min-h-screen">
         <h2 className="text-2xl font-bold mb-4">Noticias</h2>
         <div className="px-30 py-10">
-          <Nav_button Title="Volver" Link="/" />
+          <Nav_button Title="Volver" Link="/dashboard" />
         </div>
 
       <div className="p-6">
-        <h2 className="text-2xl font-bold mb-4">Noticias</h2>
 
         {/* Loading Spinner */}
         {loading && (

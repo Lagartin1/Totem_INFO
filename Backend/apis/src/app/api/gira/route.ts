@@ -19,6 +19,8 @@ export async function POST(req: NextRequest) {
   try {
     const jar = await cookies();  
     const token = jar.get("access_token")?.value;
+    const sessionToken = jar.get("refresh_token")?.value;
+    
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -26,7 +28,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userId = await getUserIdFromSessionToken(token || "");
+    const userId = await getUserIdFromSessionToken(sessionToken || "");
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

@@ -7,7 +7,6 @@ import Boton_Landing from "../components/Boton_Landing";
 import Modal_Agregar_Becado from "../components/Modal_Agregar_Becado";
 import Nav_button from "../components/nav_button";
 
-
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 
@@ -43,22 +42,18 @@ export default function Becados() {
     <Card_Becados
       key={becado.id}
       becado={becado}
-      onDelete={(id) =>
-        setBecados((prev) => prev.filter((x) => x.id !== id))
-      }
+      onDelete={(id) => setBecados((prev) => prev.filter((x) => x.id !== id))}
       onAdded={fetchBecados}
     />
   ));
 
   return (
     <main className="p-6 w-full min-h-screen">
-        <div className="px-30 py-10">
-          <Nav_button Title="Volver" Link="/" />
-        </div>
       <h2 className="text-2xl font-bold mb-4">Becados</h2>
+      <div className="px-30 py-10">
+        <Nav_button Title="Volver" Link="/dashboard" />
+      </div>
       <div className="p-6">
-        <h2 className="text-2xl font-bold mb-4">Becados</h2>
-
         <div className="py-10 flex flex-col items-center gap-6">
           {loading && <Loading frase="Cargando becados..." />}
 
@@ -75,7 +70,6 @@ export default function Becados() {
           <Boton_Landing Title="Agregar Becado" onClick={openModal} />
         </div>
 
-        {/* 👇 Pasamos la función para refrescar */}
         <Modal_Agregar_Becado
           isOpen={isModalOpen}
           closeModal={closeModal}
