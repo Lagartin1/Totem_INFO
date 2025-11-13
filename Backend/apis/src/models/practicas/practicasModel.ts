@@ -385,6 +385,7 @@ export async function getTopPracticas(limit: number = 10): Promise<PracticasResu
     }
   });
 
+  // --- CORRECCIÓN AQUÍ ---
   const hits: Practica[] = response.hits.hits.map((hit) => {
     const id = hit._id;
     if (!id) return null;
