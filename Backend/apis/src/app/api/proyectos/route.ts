@@ -10,8 +10,8 @@ export async function GET() {
     const response = await GetProyectosController();
     return NextResponse.json(response, { status: 200 });
   } catch (error) {
-    console.error("Error en GET /noticias:", error);
-    return NextResponse.json({ error: "Error al buscar noticias" }, { status: 500 });
+    console.error("Error en GET /proyectos:", error);
+    return NextResponse.json({ error: "Error al buscar proyectos" }, { status: 500 });
   }
 }
 

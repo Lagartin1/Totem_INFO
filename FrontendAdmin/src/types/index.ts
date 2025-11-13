@@ -28,6 +28,15 @@ export interface Becado {
   videos: string[];
 }
 
+export interface Gira {
+  id: string;
+  titulo: string;
+  descripcion: string;
+  anio: string;
+  lugares: string[];
+  videos: string[];
+}
+
 export interface Tesis {
   id: string;
   
