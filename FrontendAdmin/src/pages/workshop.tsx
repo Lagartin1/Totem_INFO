@@ -140,7 +140,7 @@ export default function Workshop() {
   return (
     <main className='p-6 w-full min-h-screen '>
         <div className="px-30 py-10">
-          <Nav_button Title="Volver" Link="/" />
+          <Nav_button Title="Volver" Link="/dashboard" />
         </div>
       {loading ? <Loader /> : null}
       {toast ? <Toast message={toastmsg as string} status={toastStatus} /> : null}

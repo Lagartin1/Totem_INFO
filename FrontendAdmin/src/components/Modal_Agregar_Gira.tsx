@@ -20,7 +20,7 @@ export default function Modal_Agregar_Gira({
 
     const performPost = async () => {
       try {
-        const res = await fetch(`${baseUrl}/api/giras`, {
+        const res = await fetch(`${baseUrl}/api/gira`, {
           method: "POST",
           body: formData,
           credentials: "include",
@@ -31,7 +31,7 @@ export default function Modal_Agregar_Gira({
             credentials: "include",
           });
           if (refresh.ok) {
-            const retryResponse = await fetch(`${baseUrl}/api/giras`, {
+            const retryResponse = await fetch(`${baseUrl}/api/gira`, {
               method: "POST",
               body: formData,
               credentials: "include",

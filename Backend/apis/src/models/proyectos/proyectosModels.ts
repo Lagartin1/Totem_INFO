@@ -21,7 +21,7 @@ export interface ProyectoResult {
 
 export async function getProyectos() {
   const response = await es().search({
-    index: "proyects",
+    index: "proyectos",
     body: {
       query: {
         match_all: {},
@@ -74,7 +74,7 @@ export async function searchProyectos(searchTerm: string) {
     },
   ];
   const body = {
-    index: "proyects",
+    index: "proyectos",
     size: 10,
     body: {
       query: {
@@ -125,7 +125,7 @@ export async function searchProyectoValidYear(term: number) {
   ];
 
   const body = {
-    index: "proyects",
+    index: "proyectos",
     size: 10,
     body: {
       query: {

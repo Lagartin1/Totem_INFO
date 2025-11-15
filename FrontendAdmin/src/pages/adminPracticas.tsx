@@ -266,7 +266,7 @@ export default function AdminPracticas() {
   return (
     <main className='p-6 w-full min-h-screen '>
         <div className="px-30 py-10">
-          <Nav_button Title="Volver" Link="/" />
+          <Nav_button Title="Volver" Link="/dashboard" />
         </div>
       {loading && <Loader frase={"Enviando..."} />}
       {toastState && <Toast message={toastMessage} status={toastStatus} />}
@@ -316,31 +316,32 @@ export default function AdminPracticas() {
           </div>
         ) : null}
 
-
-
         {modalPracticas ? ( 
-          <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-opacity-60 bg-black/25 z-50">
-            <div className=" bg-white p-6 rounded-md shadow-md w-3/4 max-h-screen overflow-y-auto">
+          <div
+            className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-black/25 z-50"
+            onClick={() => setModalPracticas(false)}
+          >
+            <div
+              className="bg-white p-6 rounded-md shadow-md w-3/4 max-h-screen overflow-y-auto relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+          onClick={() => setModalPracticas(false)}
+          aria-label="Cerrar modal"
+          className="absolute top-3 right-3 p-2 rounded-full text-gray-600 hover:bg-gray-100 hover:text-gray-800"
+              >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10 8.586L15.293 3.293a1 1 0 011.414 1.414L11.414 10l5.293 5.293a1 1 0 01-1.414 1.414L10 11.414l-5.293 5.293a1 1 0 01-1.414-1.414L8.586 10 3.293 4.707A1 1 0 014.707 3.293L10 8.586z" clipRule="evenodd" />
+          </svg>
+              </button>
+
               <div className="p-10 m-10 flex flex-col gap-10 min-md:flex-row justify-center items-center">
-                <button className='bg-slate-500 text-white px-4 py-2 rounded-md h-30 text-2xl hover:bg-slate-700' onClick={() => nav("/admin-practicas/practicas-iniciales")}>Prácticas Iniciales</button>
-                <button className='bg-slate-500 text-white px-4 py-2 rounded-md h-30 text-2xl hover:bg-slate-700' onClick={() => nav("/admin-practicas/practicas-profesionales")}>Practicas Profesionales</button>
-
+          <button className='bg-slate-500 text-white px-4 py-2 rounded-md h-30 text-2xl hover:bg-slate-700' onClick={() => nav("/admin-practicas/practicas-iniciales")}>Prácticas Iniciales</button>
+          <button className='bg-slate-500 text-white px-4 py-2 rounded-md h-30 text-2xl hover:bg-slate-700' onClick={() => nav("/admin-practicas/practicas-profesionales")}>Practicas Profesionales</button>
               </div>
-              
-              
-            </div>
-          
-          
-          
+            </div>       
           </div>
-        ) : null}
-
-
-
-
-
-
-        
+        ) : null}     
       </div>
     </main>
   );

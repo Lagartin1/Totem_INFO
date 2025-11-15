@@ -11,11 +11,12 @@ async function ensureIndex() {
       body: {
         mappings: {
           properties: {
-            id: { type: "integer" },
-            created_at: { type: "date", format: "strict_date_optional_time||epoch_millis" },
+            id: { type: "keyword" },
             nombre: { type: "keyword" },
             titulo: { type: "text", analyzer: "spanish" },
-            descripcion: { type: "text", analyzer: "spanish" }
+            descripcion: { type: "text", analyzer: "spanish" },
+            fecha_publicacion: {type: "text"},
+            videos: { type: "keyword"},
           }
         }
       }

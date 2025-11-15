@@ -71,7 +71,7 @@ export default function Modal_Agregar_Proyecto({
 
       alert("✅ Proyecto agregado correctamente");
       closeModal();
-      onAdded(); // 👈 recarga lista inmediatamente
+      onAdded();
     } catch (error) {
       console.error("❌ Error al crear proyecto:", error);
       alert("❌ Hubo un error al agregar el proyecto");

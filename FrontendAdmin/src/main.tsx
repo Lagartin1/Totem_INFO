@@ -15,7 +15,7 @@ import Proyectos from "./pages/proyectos";
 import TopPracticas from "./pages/TopPracticas";
 import Becados from "./pages/becados";
 import Tesis from "./pages/adminTesis";
-import TopTesis from './pages/TopTesis';
+import TopTesis from "./pages/TopTesis";
 import Gira from "./pages/gira";
 
 createRoot(document.getElementById("root")!).render(
@@ -24,24 +24,26 @@ createRoot(document.getElementById("root")!).render(
       <Router basename="/admin">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route element={<ProtectedRoute />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/workshop" element={<Workshop />} />
-            <Route path="/proyectos" element={<Proyectos />} />
-            <Route path="/noticias" element={<NoticiasSection />} />
-            <Route path="/becados" element={<Becados />} />
-            <Route path="/gira" element={<Gira />} />
-          </Route>
+          <Route element={<ProtectedRoute />}></Route>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/workshop" element={<Workshop />} />
+          <Route path="/noticias" element={<NoticiasSection />} />
+          <Route path="/becados" element={<Becados />} />
+          <Route path="/gira" element={<Gira />} />
           <Route path="/admin-practicas" element={<AdminPracticas />} />
-          <Route
-            path="/admin-practicas/:type"
-            element={<PracticasExistentes />}
-          />
-          <Route path="*" element={<NotFound />} />
           <Route
             path="/admin-practicas/practicas/top-visitadas"
             element={<TopPracticas />}
           />
+          <Route
+            path="/admin-practicas/:type"
+            element={<PracticasExistentes />}
+          />
+          <Route path="/proyectos" element={<Proyectos />} />
+          <Route path="/tesis" element={<Tesis />} />
+          <Route path="/tesis/top-visitadas" element={<TopTesis />} />
+          <Route path="/gira" element={<Gira />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </AuthProvider>
