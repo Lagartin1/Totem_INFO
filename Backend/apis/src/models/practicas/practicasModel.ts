@@ -12,12 +12,10 @@ interface TermsBucket {
  * ¡ESTA ES LA CORRECCIÓN!
  */
 export interface Practica {
-  id: string;
+  id?: string;
   titulo?: string; // Título o labores
   labores?: string; // Aseguramos que ambos existan
   visitas?: number; // 1. Añadimos 'visitas' como número opcional
-  
-  // ... (otros campos conocidos)
   tipo_practica?: string;
   created_at?: string;
   state?: boolean;
@@ -52,7 +50,6 @@ const FIELDS_PRACTICAS: string[] = [
 
 /**
  * 1. LISTAR PRÁCTICAS (PAGINADO)
- * (Función de tu captura, corregida)
  */
 export async function GetPracticas(
   tipo_practica: string,
@@ -87,7 +84,6 @@ export async function GetPracticas(
 
 /**
  * 2. BUSCAR PRÁCTICAS POR TÉRMINO (PAGINADO)
- * (Corregido)
  */
 export async function SearchTermPracticas(
   term: string,
@@ -120,7 +116,6 @@ export async function SearchTermPracticas(
 
   const response = await es().search(body);
   
-  // --- CORRECCIÓN AQUÍ ---
   const hits: Practica[] = response.hits.hits.map((hit) => {
     const id = hit._id;
     if (!id) return null;
@@ -168,7 +163,6 @@ export async function GetPracticasByYear(
   };
   const response = await es().search(body);
   
-  // --- CORRECCIÓN AQUÍ ---
   const hits: Practica[] = response.hits.hits.map((hit) => {
     const id = hit._id;
     if (!id) return null;
@@ -187,6 +181,7 @@ export async function GetPracticasByYear(
 
 /**
  * 4. OBTENER ÚLTIMO ID
+ * (CORREGIDO)
  */
 export async function GetLastPracticaId(): Promise<number> {
   const body = {
@@ -206,8 +201,13 @@ export async function GetLastPracticaId(): Promise<number> {
     if (response.hits.hits.length === 0) {
       return 0;
     }
+
     const hit = response.hits.hits[0];
-    const lastId = parseInt((hit._source as Practica).id, 10);
+
+    // ✔️ CORRECCIÓN SOLICITADA
+    const rawId = (hit._source as Practica).id ?? "0";
+    const lastId = parseInt(rawId, 10);
+
     return lastId;
   } catch (e) {
     console.error("Error GetLastPracticaId (¿'id' no es numérico?):", e);
@@ -362,7 +362,6 @@ export async function incrementPracticasVisits(id: string): Promise<void> {
 
 /**
  * 11. OBTENER TOP 10 HISTÓRICO (por 'visitas')
- * (Corregido)
  */
 export async function getTopPracticas(limit: number = 10): Promise<PracticasResult> {
   const response = await es().search({
@@ -385,7 +384,6 @@ export async function getTopPracticas(limit: number = 10): Promise<PracticasResu
     }
   });
 
-  // --- CORRECCIÓN AQUÍ ---
   const hits: Practica[] = response.hits.hits.map((hit) => {
     const id = hit._id;
     if (!id) return null;
@@ -412,16 +410,16 @@ export async function getTopPracticasByDateRange(
 ): Promise<PracticasResult> {
   
   const logQueryBody = {
-    index: 'logs', // ⚠️ REVISA: Nombre de tu índice de logs
+    index: 'logs',
     size: 0,
     body: {
       query: {
         bool: {
           filter: [
-            { term: { action: 'view_practica' } }, // ⚠️ REVISA: Nombre de la acción
+            { term: { action: 'view_practica' } },
             {
               range: {
-                timestamp: { // ⚠️ REVISA: Campo de fecha
+                timestamp: {
                   gte: startDate,
                   lte: endDate
                 }
@@ -433,7 +431,7 @@ export async function getTopPracticasByDateRange(
       aggs: {
         top_practicas: {
           terms: {
-            field: 'targetId.keyword', // ⚠️ REVISA: Campo del ID
+            field: 'targetId.keyword',
             size: limit,
             order: { _count: 'desc' }
           }
@@ -469,7 +467,6 @@ export async function getTopPracticasByDateRange(
     }
   });
 
-  // (Corregido con la interfaz actualizada)
   const practicasConVisitas = practicasDetailsResponse.hits.hits.map((hit) => {
     const practica = hit._source as Practica;
     const id = hit._id; 

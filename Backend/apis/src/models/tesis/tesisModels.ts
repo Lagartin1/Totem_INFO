@@ -267,8 +267,7 @@ export async function getTopTesisByDateRange(
   .filter(Boolean) as Tesis[]; // Filtramos cualquier nulo
 
   // Ordenamos por las visitas que obtuvimos del log
-  const tesisOrdenadas = tesisConVisitas.sort((a, b) => b.visitas - a.visitas);
-
+  const tesisOrdenadas = tesisConVisitas.sort((a, b) => (b.visitas ?? 0) - (a.visitas ?? 0));
   return {
     tesis: tesisOrdenadas,
     total: tesisOrdenadas.length

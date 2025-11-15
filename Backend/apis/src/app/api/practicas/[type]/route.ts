@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { fetchPracticas } from "@/controllers/practicas/practicasController";
 
 // 1. Fíjate que ahora 'params' está envuelto en Promise<...>
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: Promise<{ type: string }> } 
-) {
+export async function GET(_req: NextRequest,{ params }: { params: Promise<{ type: string }> } ) {
   // 2. Tienes que hacer 'await' antes de usarlo
   const { type } = await params; 
 
