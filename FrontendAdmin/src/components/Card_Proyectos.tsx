@@ -9,7 +9,7 @@ const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 interface CardProyectosProps {
   proyecto: Proyecto;
   onDelete?: (id: string) => void;
-  onAdded?: () => void; 
+  onAdded?: () => void;
 }
 
 export default function Card_Proyectos({
@@ -33,21 +33,27 @@ export default function Card_Proyectos({
     const confirmar = confirm("¿Seguro que quieres eliminar este proyecto?");
     if (!confirmar) return;
     const performDelete = async () => {
-      try{
-        const response = await fetch(`${baseUrl}/api/proyectos/${proyecto.id}`, {
-          method: "DELETE",
-          credentials: "include",
-        });
+      try {
+        const response = await fetch(
+          `${baseUrl}/api/proyectos/${proyecto.id}`,
+          {
+            method: "DELETE",
+            credentials: "include",
+          }
+        );
         if (response.status === 401) {
           const refresh = await fetch(`${baseUrl}/api/admin/auth/refresh`, {
             method: "GET",
             credentials: "include",
           });
           if (refresh.ok) {
-            const retryResponse = await fetch(`${baseUrl}/api/proyectos/${proyecto.id}`, {
-              method: "DELETE",
-              credentials: "include",
-            });
+            const retryResponse = await fetch(
+              `${baseUrl}/api/proyectos/${proyecto.id}`,
+              {
+                method: "DELETE",
+                credentials: "include",
+              }
+            );
             if (!retryResponse.ok) {
               throw new Error("Error al eliminar el proyecto");
             }
@@ -61,10 +67,7 @@ export default function Card_Proyectos({
       } catch (error) {
         throw error;
       }
-    }
-
-
-
+    };
     try {
       setDeleting(true);
       await performDelete();
@@ -78,6 +81,7 @@ export default function Card_Proyectos({
     }
   };
 
+  // Maneja la edición del proyecto
   const handleEdit = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!confirm("¿Deseas guardar los cambios?")) return;
@@ -86,7 +90,6 @@ export default function Card_Proyectos({
       setEditing(true);
       const formData = new FormData();
 
-      // Campos de texto simples
       [
         "titulo",
         "descripcion",
@@ -101,7 +104,6 @@ export default function Card_Proyectos({
         }
       });
 
-      // Autores (puede ser string o string[])
       if (editData.autores) {
         if (Array.isArray(editData.autores)) {
           editData.autores.forEach((autor) =>
@@ -122,7 +124,6 @@ export default function Card_Proyectos({
         });
       }
 
-      // Si hay nuevos archivos seleccionados (por ejemplo en un input multiple)
       if (selectedFile) {
         selectedFile.forEach((file) => {
           formData.append("videos[]", file);
@@ -132,24 +133,31 @@ export default function Card_Proyectos({
       if (removeVideos) {
         formData.append("eliminarVideos", "true");
       }
+
       const performPut = async () => {
-        try{
-          const response = await fetch(`${baseUrl}/api/proyectos/${editData.id}`, {
-            method: "PUT",
-            body: formData,
-            credentials: "include",
-          });
+        try {
+          const response = await fetch(
+            `${baseUrl}/api/proyectos/${editData.id}`,
+            {
+              method: "PUT",
+              body: formData,
+              credentials: "include",
+            }
+          );
           if (response.status === 401) {
             const refresh = await fetch(`${baseUrl}/api/admin/auth/refresh`, {
               method: "GET",
               credentials: "include",
             });
             if (refresh.ok) {
-              const retryResponse = await fetch(`${baseUrl}/api/proyectos/${editData.id}`, {
-                method: "PUT",
-                body: formData,
-                credentials: "include",
-              });
+              const retryResponse = await fetch(
+                `${baseUrl}/api/proyectos/${editData.id}`,
+                {
+                  method: "PUT",
+                  body: formData,
+                  credentials: "include",
+                }
+              );
               if (!retryResponse.ok) {
                 throw new Error("Error al actualizar el proyecto");
               }
@@ -165,7 +173,6 @@ export default function Card_Proyectos({
         }
       };
       const res = await performPut();
-
 
       if (!res.ok) throw new Error("Error al actualizar el proyecto");
 

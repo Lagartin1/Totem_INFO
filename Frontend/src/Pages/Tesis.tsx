@@ -3,7 +3,7 @@ import Card_Tesis from "../Components/Card_Tesis";
 import Carousel from "../Components/Carousel";
 import Header from "../Components/Header";
 import Search_Bar from "../Components/Search_Bar";
-import Nav_button from "../Components/nav_button";
+import Nav_button from "../Components/Nav_Button";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 

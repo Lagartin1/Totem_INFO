@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
@@ -19,20 +19,17 @@ export default function Modal_Agregar_Tesis({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    // Convertimos el FormData a un objeto simple para enviarlo como JSON
     const tesisData = Object.fromEntries(formData.entries());
 
     const performPost = async () => {
       try {
-        const res = await fetch(`${baseUrl}/api/tesis`, { // <-- URL cambiada
+        const res = await fetch(`${baseUrl}/api/tesis`, {
           method: "POST",
-          // Headers para JSON
           headers: {
-            'Content-Type': 'application/json',
-            'credentials': 'include',
+            "Content-Type": "application/json",
+            credentials: "include",
           },
-          // Body como JSON
-          body: JSON.stringify(tesisData), 
+          body: JSON.stringify(tesisData),
         });
         if (res.status === 401) {
           const refresh = await fetch(`${baseUrl}/api/admin/auth/refresh`, {
@@ -40,14 +37,12 @@ export default function Modal_Agregar_Tesis({
             credentials: "include",
           });
           if (refresh.ok) {
-            const retryResponse = await fetch(`${baseUrl}/api/tesis`, { // <-- URL cambiada
+            const retryResponse = await fetch(`${baseUrl}/api/tesis`, {
               method: "POST",
-              // Headers para JSON
               headers: {
-                'Content-Type': 'application/json',
-                'credentials': 'include',
+                "Content-Type": "application/json",
+                credentials: "include",
               },
-               // Body como JSON
               body: JSON.stringify(tesisData),
             });
             if (!retryResponse.ok) {
@@ -59,7 +54,7 @@ export default function Modal_Agregar_Tesis({
         if (!res.ok) {
           throw new Error("Error al guardar la tesis");
         }
-        return res;   
+        return res;
       } catch (error) {
         throw error;
       }
@@ -69,12 +64,12 @@ export default function Modal_Agregar_Tesis({
 
       if (!res.ok) throw new Error("Error al guardar la tesis");
 
-      alert("✅ Tesis agregada correctamente"); // <-- Mensaje cambiado
+      alert("✅ Tesis agregada correctamente");
       closeModal();
       onAdded();
     } catch (error) {
       console.error("❌ Error al crear tesis:", error);
-      alert("❌ Hubo un error al agregar la tesis"); // <-- Mensaje cambiado
+      alert("❌ Hubo un error al agregar la tesis");
     }
   };
 
@@ -84,15 +79,11 @@ export default function Modal_Agregar_Tesis({
         bg-black/20 backdrop-blur-md transition-all duration-300"
       onClick={closeModal}>
       <div
-        className="bg-white p-6 rounded-lg w-full max-w-lg shadow-lg" // <-- Ancho ajustado
+        className="bg-white p-6 rounded-lg w-full max-w-lg shadow-lg"
         onClick={(e) => e.stopPropagation()}>
         <h3 className="text-xl font-semibold mb-4">Agregar Nueva Tesis</h3>
 
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-3"
-          // No se necesita encType porque no subimos archivos
-        >
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <input
             name="titulo"
             type="text"
@@ -135,7 +126,7 @@ export default function Modal_Agregar_Tesis({
             placeholder="Resumen o Descripción"
             className="border p-2 rounded"
           />
-          
+
           <input
             name="palabras_clave"
             type="text"

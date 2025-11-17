@@ -4,7 +4,7 @@ const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 export default function Modal_Agregar_Noticias({
   isOpen,
   closeModal,
-  onAdded, 
+  onAdded,
 }: {
   isOpen: boolean;
   closeModal: () => void;
@@ -26,13 +26,11 @@ export default function Modal_Agregar_Noticias({
           body: formData,
         });
         if (res.status === 401) {
-          // Intentar refrescar el token
           const refreshRes = await fetch(`${baseUrl}/api/admin/auth/refresh`, {
             method: "GET",
             credentials: "include",
           });
           if (refreshRes.ok) {
-            // Reintentar la solicitud original
             const retryRes = await fetch(`${baseUrl}/api/noticias`, {
               method: "POST",
               credentials: "include",
@@ -51,7 +49,7 @@ export default function Modal_Agregar_Noticias({
 
     try {
       const res = await perferomPost();
-      
+
       if (!res.ok) throw new Error("Error al guardar noticia");
 
       alert("✅ Noticia agregada correctamente");

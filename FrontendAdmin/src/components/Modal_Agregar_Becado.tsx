@@ -18,8 +18,8 @@ export default function Modal_Agregar_Becado({
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
-    const performPost= async () => {
-      try{
+    const performPost = async () => {
+      try {
         const res = await fetch(`${baseUrl}/api/becados`, {
           method: "POST",
           body: formData,
@@ -45,7 +45,7 @@ export default function Modal_Agregar_Becado({
         if (!res.ok) {
           throw new Error("Error al guardar becado");
         }
-        return res;   
+        return res;
       } catch (error) {
         throw error;
       }

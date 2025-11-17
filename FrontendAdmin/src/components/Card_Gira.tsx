@@ -9,14 +9,10 @@ const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 interface CardGiraProps {
   gira: Gira;
   onDelete?: (id: string) => void;
-  onAdded?: () => void; 
+  onAdded?: () => void;
 }
 
-export default function Card_Gira({
-  gira,
-  onDelete,
-  onAdded,
-}: CardGiraProps) {
+export default function Card_Gira({ gira, onDelete, onAdded }: CardGiraProps) {
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -33,7 +29,7 @@ export default function Card_Gira({
     const confirmar = confirm("¿Seguro que quieres eliminar esta gira?");
     if (!confirmar) return;
     const performDelete = async () => {
-      try{
+      try {
         const response = await fetch(`${baseUrl}/api/gira/${gira.id}`, {
           method: "DELETE",
           credentials: "include",
@@ -44,10 +40,13 @@ export default function Card_Gira({
             credentials: "include",
           });
           if (refresh.ok) {
-            const retryResponse = await fetch(`${baseUrl}/api/gira/${gira.id}`, {
-              method: "DELETE",
-              credentials: "include",
-            });
+            const retryResponse = await fetch(
+              `${baseUrl}/api/gira/${gira.id}`,
+              {
+                method: "DELETE",
+                credentials: "include",
+              }
+            );
             if (!retryResponse.ok) {
               throw new Error("Error al eliminar la gira");
             }
@@ -61,9 +60,7 @@ export default function Card_Gira({
       } catch (error) {
         throw error;
       }
-    }
-
-
+    };
 
     try {
       setDeleting(true);
@@ -86,12 +83,7 @@ export default function Card_Gira({
       setEditing(true);
       const formData = new FormData();
 
-      // Campos de texto simples
-      [
-        "titulo",
-        "descripcion",
-        "anio",
-      ].forEach((key) => {
+      ["titulo", "descripcion", "anio"].forEach((key) => {
         const value = editData[key as keyof Gira];
         if (typeof value === "string" && value.trim() !== "") {
           formData.append(key, value);
@@ -108,7 +100,6 @@ export default function Card_Gira({
         });
       }
 
-      // Si hay nuevos archivos seleccionados (por ejemplo en un input multiple)
       if (selectedFile) {
         selectedFile.forEach((file) => {
           formData.append("videos[]", file);
@@ -118,8 +109,9 @@ export default function Card_Gira({
       if (removeVideos) {
         formData.append("eliminarVideos", "true");
       }
+
       const performPut = async () => {
-        try{
+        try {
           const response = await fetch(`${baseUrl}/api/gira/${editData.id}`, {
             method: "PUT",
             body: formData,
@@ -131,11 +123,14 @@ export default function Card_Gira({
               credentials: "include",
             });
             if (refresh.ok) {
-              const retryResponse = await fetch(`${baseUrl}/api/gira/${editData.id}`, {
-                method: "PUT",
-                body: formData,
-                credentials: "include",
-              });
+              const retryResponse = await fetch(
+                `${baseUrl}/api/gira/${editData.id}`,
+                {
+                  method: "PUT",
+                  body: formData,
+                  credentials: "include",
+                }
+              );
               if (!retryResponse.ok) {
                 throw new Error("Error al actualizar la gira");
               }
@@ -151,7 +146,6 @@ export default function Card_Gira({
         }
       };
       const res = await performPut();
-
 
       if (!res.ok) throw new Error("Error al actualizar la gira");
 
@@ -217,11 +211,7 @@ export default function Card_Gira({
         </button>
       </div>
 
-      <Modal_Gira
-        gira={gira}
-        isOpen={open}
-        onClose={() => setOpen(false)}
-      />
+      <Modal_Gira gira={gira} isOpen={open} onClose={() => setOpen(false)} />
       <Modal_Edicion_Gira
         isOpen={editOpen}
         onClose={() => setEditOpen(false)}

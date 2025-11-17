@@ -1,18 +1,9 @@
 import { useState } from "react";
-import NoticiaModal from "./Modal_Noticias";
+import type { Noticia } from "../types/index";
+import Modal_Noticias from "./Modal_Noticias";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
-
-interface Noticia {
-  id: string;
-  titulo: string;
-  descripcion: string;
-  contenido: string;
-  autor: string;
-  fecha_publicacion: string;
-  imagen?: string;
-}
 
 interface NoticiaCardProps {
   noticia: Noticia;
@@ -20,7 +11,7 @@ interface NoticiaCardProps {
   onClick?: () => void;
 }
 
-export default function NoticiaCard({ noticia }: NoticiaCardProps) {
+export default function Card_Noticias({ noticia }: NoticiaCardProps) {
   const [open, setOpen] = useState(false);
 
   const baseUrl = BUILD_MODE ? API_BASE_URL : "http://localhost:3000";
@@ -52,7 +43,7 @@ export default function NoticiaCard({ noticia }: NoticiaCardProps) {
       </div>
 
       {/* Modal */}
-      <NoticiaModal
+      <Modal_Noticias
         isOpen={open}
         onClose={() => setOpen(false)}
         noticia={noticia}

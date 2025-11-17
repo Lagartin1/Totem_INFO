@@ -22,12 +22,10 @@ export default function Modal_Gira({
   return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-      onClick={onClose} 
-    >
+      onClick={onClose}>
       <div
         className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 max-h-[80vh] overflow-y-auto relative"
-        onClick={(e) => e.stopPropagation()}
-      >
+        onClick={(e) => e.stopPropagation()}>
         {Array.isArray(gira.videos) && gira.videos.length > 0 ? (
           <div className="flex gap-2 overflow-x-auto mb-4">
             {gira.videos.map((videoUrl, index) => (
@@ -57,9 +55,7 @@ export default function Modal_Gira({
         <div className="space-y-3 text-gray-700">
           <div>
             <span className="font-semibold">Descripción:</span>
-            {gira.descripcion && (
-              <p className="mt-1">{gira.descripcion}</p>
-            )}
+            {gira.descripcion && <p className="mt-1">{gira.descripcion}</p>}
           </div>
         </div>
 

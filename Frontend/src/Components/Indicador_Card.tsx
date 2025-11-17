@@ -1,7 +1,7 @@
-export default function IndicadorCard({ value }: { value?: boolean }) {
+export default function Indicador_Card({ value }: { value?: boolean }) {
   return (
     <div className="flex flex-row justify-end mb-2">
-      <h2 className=" text-black font-semibold">Estado Actual: </h2>
+      <p className=" text-black font-semibold">Estado</p>
 
       {value ? (
         <div className="flex flex-row justify-center items-center">

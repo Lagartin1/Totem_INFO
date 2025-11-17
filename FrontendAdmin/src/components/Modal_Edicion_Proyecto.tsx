@@ -31,7 +31,9 @@ export default function Modal_Edicion_Proyecto({
 
   // Manejar autores dinámicos
   const handleAutorChange = (index: number, value: string) => {
-    const nuevosAutores = [...(Array.isArray(editData.autores) ? editData.autores : [])];
+    const nuevosAutores = [
+      ...(Array.isArray(editData.autores) ? editData.autores : []),
+    ];
     nuevosAutores[index] = value;
     setEditData({ ...editData, autores: nuevosAutores });
   };
@@ -39,14 +41,17 @@ export default function Modal_Edicion_Proyecto({
   const handleAgregarAutor = () => {
     setEditData({
       ...editData,
-      autores: [...(Array.isArray(editData.autores) ? editData.autores : []), ""],
+      autores: [
+        ...(Array.isArray(editData.autores) ? editData.autores : []),
+        "",
+      ],
     });
   };
 
   const handleEliminarAutor = (index: number) => {
-    const nuevosAutores = (Array.isArray(editData.autores) ? editData.autores : []).filter(
-      (_, i) => i !== index
-    );
+    const nuevosAutores = (
+      Array.isArray(editData.autores) ? editData.autores : []
+    ).filter((_, i) => i !== index);
     setEditData({ ...editData, autores: nuevosAutores });
   };
 
@@ -65,12 +70,10 @@ export default function Modal_Edicion_Proyecto({
   return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-md"
-      onClick={onClose}
-    >
+      onClick={onClose}>
       <div
         className="bg-white p-6 rounded-xl shadow-lg w-[450px] max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
+        onClick={(e) => e.stopPropagation()}>
         <h2 className="text-xl font-semibold mb-4">Editar Proyecto</h2>
 
         {/* Título */}
@@ -85,7 +88,9 @@ export default function Modal_Edicion_Proyecto({
         {/* Descripción */}
         <textarea
           value={editData.descripcion || ""}
-          onChange={(e) => setEditData({ ...editData, descripcion: e.target.value })}
+          onChange={(e) =>
+            setEditData({ ...editData, descripcion: e.target.value })
+          }
           className="border p-2 w-full mb-2 rounded min-h-[100px]"
           placeholder="Descripción"
         />
@@ -106,8 +111,7 @@ export default function Modal_Edicion_Proyecto({
                 <button
                   type="button"
                   onClick={() => handleEliminarAutor(index)}
-                  className="px-2 bg-red-500 text-white rounded hover:bg-red-600"
-                >
+                  className="px-2 bg-red-500 text-white rounded hover:bg-red-600">
                   ✕
                 </button>
               </div>
@@ -119,8 +123,7 @@ export default function Modal_Edicion_Proyecto({
           <button
             type="button"
             onClick={handleAgregarAutor}
-            className="text-blue-500 text-sm hover:underline"
-          >
+            className="text-blue-500 text-sm hover:underline">
             + Agregar autor
           </button>
         </div>
@@ -129,7 +132,9 @@ export default function Modal_Edicion_Proyecto({
         <input
           type="email"
           value={editData.correo_contacto || ""}
-          onChange={(e) => setEditData({ ...editData, correo_contacto: e.target.value })}
+          onChange={(e) =>
+            setEditData({ ...editData, correo_contacto: e.target.value })
+          }
           className="border p-2 w-full mb-2 rounded"
           placeholder="Correo de contacto"
         />
@@ -137,7 +142,9 @@ export default function Modal_Edicion_Proyecto({
         <input
           type="tel"
           value={editData.telefono_contacto || ""}
-          onChange={(e) => setEditData({ ...editData, telefono_contacto: e.target.value })}
+          onChange={(e) =>
+            setEditData({ ...editData, telefono_contacto: e.target.value })
+          }
           className="border p-2 w-full mb-2 rounded"
           placeholder="Teléfono de contacto"
         />
@@ -146,7 +153,9 @@ export default function Modal_Edicion_Proyecto({
         <input
           type="text"
           value={editData.area_desarrollo || ""}
-          onChange={(e) => setEditData({ ...editData, area_desarrollo: e.target.value })}
+          onChange={(e) =>
+            setEditData({ ...editData, area_desarrollo: e.target.value })
+          }
           className="border p-2 w-full mb-4 rounded"
           placeholder="Área de desarrollo"
         />
@@ -154,8 +163,8 @@ export default function Modal_Edicion_Proyecto({
         {/* Videos */}
         <div className="mt-4">
           <label className="block font-medium mb-1">Videos:</label>
-          {((editData.videos && editData.videos.length > 0 && !removeVideos) ||
-          (selectedVideos && selectedVideos.length > 0)) ? (
+          {(editData.videos && editData.videos.length > 0 && !removeVideos) ||
+          (selectedVideos && selectedVideos.length > 0) ? (
             <div className="flex flex-col gap-2">
               {(selectedVideos && selectedVideos.length > 0
                 ? selectedVideos.map((file) => URL.createObjectURL(file))
@@ -170,8 +179,7 @@ export default function Modal_Edicion_Proyecto({
               ))}
               <button
                 onClick={handleRemoveVideos}
-                className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-              >
+                className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
                 Eliminar todos los videos
               </button>
             </div>
@@ -193,15 +201,13 @@ export default function Modal_Edicion_Proyecto({
         <div className="flex justify-end gap-2 mt-4">
           <button
             onClick={onClose}
-            className="px-3 py-1 rounded bg-gray-300 hover:bg-gray-400"
-          >
+            className="px-3 py-1 rounded bg-gray-300 hover:bg-gray-400">
             Cancelar
           </button>
           <button
             onClick={handleEdit}
             disabled={editing}
-            className="px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50"
-          >
+            className="px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50">
             {editing ? "Guardando..." : "Guardar"}
           </button>
         </div>

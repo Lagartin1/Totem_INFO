@@ -1,19 +1,13 @@
 import { useEffect, useState } from "react";
 import Headers from "../Components/Header";
-import CardBecados from "../Components/List_Becados";
-import Search_Bar from "../Components/Search_Bar";
-import Nav_button from "../Components/nav_button";
+import Card_Becados from "../Components/Card_Becados";
+import Nav_button from "../Components/Nav_Button";
+import type { Becado } from "../types/index";
+import Loading from "../Components/Loader";
+import Carousel from "../Components/Carousel";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
-
-interface Becado {
-  id: number;
-  nombre: string;
-  titulo: string;
-  descripcion: string;
-  created_at: string;
-}
 
 export default function Becados() {
   const [data, setData] = useState<Becado[]>([]);
@@ -23,7 +17,6 @@ export default function Becados() {
 
   const baseUrl = BUILD_MODE ? API_BASE_URL : "http://localhost:3000";
   
-
   useEffect(() => {
     setLoading(true);
     fetch(`${baseUrl}/api/becados`)
@@ -37,25 +30,7 @@ export default function Becados() {
       });
   }, []);
 
-  const handleSearch = (searchTerm: string) => {
-    if (!searchTerm.trim()) return;
-
-    setHasSearched(true);
-    setLoading(true);
-
-    fetch(`${baseUrl}/api/becados?q=${encodeURIComponent(searchTerm)}`)
-      .then((res) => res.json())
-      .then((json) => {
-        setSData(json.becados ?? []);
-      })
-      .catch((err) => console.error("Error en búsqueda:", err))
-      .finally(() => {
-        setLoading(false);
-      });
-  };
-
-
-  // 🔹 Volver a la lista inicial
+  // Volver a la lista inicial
   const handleVolver = () => {
     setSData([]);
     setHasSearched(false);
@@ -64,65 +39,37 @@ export default function Becados() {
   // Datos a mostrar
   const displayedData = hasSearched ? sData : data;
 
+  const slides = displayedData.map((becado) => (
+    <Card_Becados
+      key={becado.id}
+      becado={becado}
+    />
+  ));
+
   return (
-    <main className="min-h-screen p-6">
+    <main className="p-6 w-full min-h-screen">
       <Headers />
       <div className="px-30 py-10">
         <Nav_button Title="Volver" Link="/" />
       </div>
 
       <div className="py-10 flex flex-col items-center gap-6">
-        <Search_Bar onSearch={handleSearch} />
 
-        {/* 🔹 Loading Spinner */}
-        {loading && (
-          <div className="flex flex-col items-center justify-center mt-20">
-            <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-            <p className="mt-4 text-lg text-gray-600">Cargando...</p>
-          </div>
-        )}
-
-        {/* Resultados de la búsqueda */}
-        {!loading && hasSearched && sData.length > 0 && (
-          <div className="text-2xl font-bold text-gray-700 mb-4">
-            Resultados de la búsqueda:
-          </div>
-        )}
-
-        {/* No hay resultados */}
-        {!loading && hasSearched && sData.length === 0 && (
-          <>
-            <div className="text-xl font-semibold text-red-600 my-6">
-              No se encontraron resultados
-            </div>
-            <div className="flex flex-col mt-8 bg-gray-800/20 items-center rounded-3xl">
-              <div
-                className="flex items-center justify-center rounded-2xl p-10 w-60 h-40 bg-gray-700 shadow-2xl shadow-gray-500 cursor-pointer"
-                onClick={handleVolver}>
-                <h3 className="text-balance text-2xl p-5 text-white">
-                  Volver a la lista
-                </h3>
-              </div>
-            </div>
-          </>
-        )}
+        {/* Loading Spinner */}
+        {loading && <Loading frase="Cargando becados..." />}
 
         {/* Lista de resultados */}
         {!loading && displayedData.length > 0 && (
           <>
-            <div className="flex flex-col gap-4 w-full max-w-6xl bg-white rounded-2xl shadow-md p-6">
-              {displayedData.map((b) => (
-                <CardBecados
-                  key={b.id}
-                  nombre={b.nombre}
-                  titulo={b.titulo}
-                  exp={b.descripcion}
-                  anio={new Date(b.created_at).getFullYear().toString()}
-                />
-              ))}
+           <div className="relative w-full">
+            <div className="flex gap-4 overflow-x-auto pb-4">
+              {!loading && slides.length > 0 && (
+                <Carousel key={displayedData.length} slides={slides} />
+              )}
             </div>
+          </div>
 
-            {/* 🔹 Botón "Volver" solo si se hizo una búsqueda */}
+            {/* Botón "Volver" solo si se hizo una búsqueda */}
             {hasSearched && (
               <div className="flex flex-col mt-8 bg-gray-800/20 items-center rounded-3xl">
                 <div

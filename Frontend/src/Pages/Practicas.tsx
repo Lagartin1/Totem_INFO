@@ -1,6 +1,6 @@
 import Headers from "../Components/Header"
 import Boton_Landing from "../Components/Boton_Landing"
-import Nav_button from "../Components/nav_button"
+import Nav_button from "../Components/Nav_Button"
 
 function Practicas (){
 

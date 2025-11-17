@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect } from "react";
-import Loader from "../components/loader";
-import CardPracticaAdmin from "../components/cardSimplePracticas";
+import Loader from "../components/Loader";
+import CardPracticaAdmin from "../components/Card_Simple_Practicas";
 import { useNavigate } from "react-router-dom";
-import Toast from "../components/toast";
-import Nav_button from "../components/nav_button";
+import Toast from "../components/Toast";
+import Nav_button from "../components/Nav_Button";
 
 export default function PracticasExistentes() {
   const nav = useNavigate();
@@ -20,13 +20,6 @@ export default function PracticasExistentes() {
   const [page, setPage] = React.useState(1);
   const [n_practicas, setNPracticas] = React.useState(0);
   const n_pages = Math.max(1, Math.ceil(n_practicas / 10));
-
-  const makeToast = (message: string, type: "success" | "error") => {
-    setToastMessage(message);
-    setToastType(type);
-    setToast(true);
-    setTimeout(() => setToast(false), 3000);
-  };
 
   const fetchNewPage = async (newPagina: number) => {
     setLoading(true);

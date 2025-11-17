@@ -8,7 +8,7 @@ export default function Modal_Agregar_Gira({
 }: {
   isOpen: boolean;
   closeModal: () => void;
-  onAdded: () => void; // 👈 nueva prop
+  onAdded: () => void;
 }) {
   if (!isOpen) return null;
 

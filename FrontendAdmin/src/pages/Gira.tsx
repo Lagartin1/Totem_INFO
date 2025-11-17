@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import Card_Gira from "../components/Card_Gira";
 import type { Gira } from "../types/index";
 import Carousel from "../components/Carousel";
-import Loading from "../components/loader";
+import Loading from "../components/Loader";
 import Boton_Landing from "../components/Boton_Landing";
 import Modal_Agregar_Gira from "../components/Modal_Agregar_Gira";
-import Nav_button from "../components/nav_button";
+import Nav_button from "../components/Nav_Button";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
@@ -20,7 +20,7 @@ export default function Gira() {
 
   const baseUrl = BUILD_MODE ? API_BASE_URL : "http://localhost:3000";
 
-  // 🔁 Función para cargar giras
+  // Función para cargar giras
   const fetchGiras = async () => {
     try {
       setLoading(true);
@@ -71,7 +71,6 @@ export default function Gira() {
           <Boton_Landing Title="Agregar Gira" onClick={openModal} />
         </div>
 
-        {/* 👇 Pasamos la función para refrescar */}
         <Modal_Agregar_Gira
           isOpen={isModalOpen}
           closeModal={closeModal}

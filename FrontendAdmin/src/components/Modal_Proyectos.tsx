@@ -22,12 +22,10 @@ export default function Modal_Proyectos({
   return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-      onClick={onClose} // 👈 click fuera cierra
-    >
+      onClick={onClose}>
       <div
         className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 max-h-[80vh] overflow-y-auto relative"
-        onClick={(e) => e.stopPropagation()} // 👈 evita que el click dentro cierre
-      >
+        onClick={(e) => e.stopPropagation()}>
         {Array.isArray(proyecto.videos) && proyecto.videos.length > 0 ? (
           <div className="flex gap-2 overflow-x-auto mb-4">
             {proyecto.videos.map((videoUrl, index) => (

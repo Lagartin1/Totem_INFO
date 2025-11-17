@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
-import { ChevronRightIcon } from "@heroicons/react/24/outline"
+import { ChevronRightIcon } from "@heroicons/react/24/outline";
 
-function Breadcrumbs() {
+function Bread_Crumbs() {
   const location = useLocation();
 
   // Diccionario para reemplazar palabras por su versión con tildes o caracteres especiales
@@ -36,7 +36,8 @@ function Breadcrumbs() {
           const formattedLabel = label.charAt(0).toUpperCase() + label.slice(1);
 
           // Si existe traducción, la usamos
-          const finalLabel = translations[value.toLowerCase()] || formattedLabel;
+          const finalLabel =
+            translations[value.toLowerCase()] || formattedLabel;
 
           return (
             <li key={to} className="flex items-center gap-2">
@@ -54,4 +55,4 @@ function Breadcrumbs() {
   );
 }
 
-export default Breadcrumbs;
+export default Bread_Crumbs;
