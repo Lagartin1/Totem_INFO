@@ -1,7 +1,6 @@
 import React from "react";
 import type { Noticia } from "../types/index";
 
-
 interface EdicionModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -40,15 +39,13 @@ export default function EdicionModal({
     setRemoveImage(true);
   };
 
-return (
+  return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-md"
-      onClick={onClose}
-    >
+      onClick={onClose}>
       <div
         className="bg-white p-6 rounded-xl shadow-lg w-[400px] max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
+        onClick={(e) => e.stopPropagation()}>
         <h2 className="text-xl font-semibold mb-4">Editar Noticia</h2>
 
         <input
@@ -69,7 +66,9 @@ return (
 
         <textarea
           value={editData.contenido || ""}
-          onChange={(e) => setEditData({ ...editData, contenido: e.target.value })}
+          onChange={(e) =>
+            setEditData({ ...editData, contenido: e.target.value })
+          }
           className="border p-2 w-full mb-2 rounded min-h-[120px]"
           placeholder="Contenido"
         />
@@ -91,8 +90,7 @@ return (
               <div className="flex gap-2">
                 <button
                   onClick={handleRemoveImage}
-                  className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                >
+                  className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
                   Eliminar
                 </button>
               </div>
@@ -113,15 +111,13 @@ return (
         <div className="flex justify-end gap-2 mt-4">
           <button
             onClick={onClose}
-            className="px-3 py-1 rounded bg-gray-300 hover:bg-gray-400"
-          >
+            className="px-3 py-1 rounded bg-gray-300 hover:bg-gray-400">
             Cancelar
           </button>
           <button
             onClick={handleEdit}
             disabled={editing}
-            className="px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50"
-          >
+            className="px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50">
             {editing ? "Guardando..." : "Guardar"}
           </button>
         </div>

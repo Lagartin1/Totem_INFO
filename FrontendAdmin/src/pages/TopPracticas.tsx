@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Loader from '../components/loader'; // Usas tu componente
+import Loader from '../components/Loader'; 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from 'recharts';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 
-// (Tu interfaz Practica y PracticasData aquí)
 interface Practica {
   id: string; 
   labores: string;
@@ -20,7 +19,6 @@ interface PracticasData {
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 
-// Función helper para formatear fechas
 const getISODate = (date: Date) => date.toISOString().split('T')[0];
 
 export default function TopPracticas() {
@@ -28,15 +26,12 @@ export default function TopPracticas() {
   const [practicas, setPracticas] = useState<Practica[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  // --- NUEVO ESTADO PARA FILTROS ---
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [activeFilter, setActiveFilter] = useState<'total' | 'week' | 'month' | 'custom'>('total');
 
   const baseUrl = BUILD_MODE ? API_BASE_URL : 'http://localhost:3000';
 
-  // --- EFECTO ACTUALIZADO ---
   useEffect(() => {
     setLoading(true);
     setError(null);
@@ -44,7 +39,6 @@ export default function TopPracticas() {
     let url = `${baseUrl}/api/practicas/top-visitadas`;
     
     if (startDate && endDate && activeFilter !== 'total') {
-        // Formatea las fechas para la URL
         const start = getISODate(startDate);
         const end = getISODate(endDate);
         url += `?startDate=${start}&endDate=${end}`;
@@ -65,9 +59,8 @@ export default function TopPracticas() {
       .finally(() => {
         setLoading(false);
       });
-  }, [baseUrl, startDate, endDate, activeFilter]); // Se ejecuta cuando las fechas cambian
+  }, [baseUrl, startDate, endDate, activeFilter]); 
 
-  // --- NUEVAS FUNCIONES DE FILTRO ---
   const setFilter = (filter: 'total' | 'week' | 'month') => {
     setActiveFilter(filter);
     const today = new Date();
@@ -92,7 +85,6 @@ export default function TopPracticas() {
     setActiveFilter('custom');
   };
 
-  // --- RENDERIZADO ---
   const renderContent = () => {
     if (loading) {
       return <Loader frase="Cargando top de prácticas..." />;
@@ -102,7 +94,6 @@ export default function TopPracticas() {
       return <p className="text-center text-red-600">{error}</p>;
     }
 
-    // --- PUNTO 5: MENSAJE DE "NO HAY DATOS" ---
     if (practicas.length === 0) {
       return (
         <div className="text-center p-10 bg-gray-50 rounded-lg shadow">
@@ -113,13 +104,11 @@ export default function TopPracticas() {
       );
     }
 
-    // Prepara datos para el gráfico (solo nombres cortos)
     const chartData = practicas.map(p => ({
         name: p.labores.substring(0, 30) + (p.labores.length > 30 ? '...' : ''),
         Visitas: p.visitas
     }));
 
-    // --- PUNTO 4: GRÁFICO Y TABLA ---
     return (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
@@ -138,7 +127,6 @@ export default function TopPracticas() {
           </ResponsiveContainer>
         </div>
 
-        {/* Columna de Tabla */}
         <div className="bg-white shadow-md rounded-lg overflow-hidden">
           <h2 className="text-xl font-semibold mb-4 p-6 text-gray-800">Tabla de Visitas</h2>
           <table className="min-w-full divide-y divide-gray-200">
@@ -168,7 +156,6 @@ export default function TopPracticas() {
 
   return (
     <main className="min-h-screen p-6 bg-gray-100">
-      {/* <Header /> */}
       <div className="px-30 py-10">
         <button onClick={() => nav("/admin-practicas")} className="text-blue-600 hover:underline">
           &larr; Volver a Administración
@@ -180,7 +167,6 @@ export default function TopPracticas() {
           Prácticas Más Visitadas
         </h1>
 
-        {/* --- PUNTO 3: FILTROS DE FECHA --- */}
         <div className="mb-8 p-4 bg-white rounded-lg shadow-md flex flex-wrap items-center gap-4">
           <span className="font-semibold">Filtrar por:</span>
           <button
@@ -215,7 +201,6 @@ export default function TopPracticas() {
           </div>
         </div>
 
-        {/* Contenido dinámico (Gráfico, Tabla, Loader o Msg) */}
         {renderContent()}
       </div>
     </main>

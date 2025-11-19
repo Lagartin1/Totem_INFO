@@ -1,15 +1,11 @@
 import { useState } from "react";
-import ModalProyecto from "./Modal_proyectos";
-import type { Proyecto } from "../types/index";
+import Modal_Becados from "./Modal_Becados";
+import type { Becado } from "../types/index";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 
-interface ProyectoProps {
-  proyecto: Proyecto;
-}
-
-export default function Card_Proyectos({ proyecto }: ProyectoProps) {
+function Card_Becados({ becado }: { becado: Becado }) {
   const [open, setOpen] = useState(false);
 
   const baseUrl = BUILD_MODE ? API_BASE_URL : "http://localhost:3000";
@@ -19,9 +15,9 @@ export default function Card_Proyectos({ proyecto }: ProyectoProps) {
       {/* Card */}
       <div className="relative min-w-[350px] max-w-[350px] border rounded-xl shadow-sm p-4 flex-shrink-0 snap-center bg-white">
         {/* Galería de videos */}
-        {Array.isArray(proyecto.videos) && proyecto.videos.length > 0 ? (
+        {Array.isArray(becado.videos) && becado.videos.length > 0 ? (
           <div className="flex gap-2 overflow-x-auto mb-4">
-            {proyecto.videos.map((videoUrl, index) => (
+            {becado.videos.map((videoUrl, index) => (
               <video
                 key={index}
                 className="w-full h-40 rounded-lg flex-shrink-0 object-cover"
@@ -40,12 +36,7 @@ export default function Card_Proyectos({ proyecto }: ProyectoProps) {
           </div>
         )}
 
-        <h3 className="font-bold text-lg mb-1">{proyecto.titulo}</h3>
-        <p className="text-gray-600 text-sm">{proyecto.autores}</p>
-        <p className="text-gray-500 text-sm mb-4">{proyecto.area_desarrollo}</p>
-        <p className="text-gray-500 text-sm mb-4">
-          {proyecto.correo_contacto} | {proyecto.telefono_contacto}
-        </p>
+        <h3 className="font-bold text-lg mb-1">{becado.titulo}</h3>
 
         <button
           onClick={() => setOpen(true)}
@@ -53,11 +44,13 @@ export default function Card_Proyectos({ proyecto }: ProyectoProps) {
           Ver detalles
         </button>
       </div>
-      <ModalProyecto
-        proyecto={proyecto}
+      <Modal_Becados
+        becado={becado}
         isOpen={open}
         onClose={() => setOpen(false)}
       />
     </>
   );
 }
+
+export default Card_Becados;

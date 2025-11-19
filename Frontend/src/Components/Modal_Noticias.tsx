@@ -1,16 +1,8 @@
 import { createPortal } from "react-dom";
+import type { Noticia } from "../types/index";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
-
-interface Noticia {
-  titulo: string;
-  descripcion: string;
-  contenido: string;
-  autor: string;
-  fecha_publicacion: string;
-  imagen?: string;
-}
 
 interface NoticiaModalProps {
   isOpen: boolean;
@@ -18,7 +10,7 @@ interface NoticiaModalProps {
   noticia: Noticia | null;
 }
 
-export default function NoticiaModal({
+export default function Modal_Noticias({
   isOpen,
   onClose,
   noticia,

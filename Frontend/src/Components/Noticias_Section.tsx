@@ -1,24 +1,14 @@
 import { useEffect, useState, useRef } from "react";
-import NoticiaCard from "./Card_Noticias";
+import Card_Noticias from "./Card_Noticias";
+import type { Noticia } from "../types/index";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 
-export interface Noticia {
-  id: string;
-  titulo: string;
-  descripcion: string;
-  contenido: string;
-  autor: string;
-  fecha_publicacion: string;
-  imagen?: string;
-}
-
-export default function NoticiasSection() {
+export default function Noticias_Section() {
   const [noticias, setNoticias] = useState<Noticia[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedNoticia, setSelectedNoticia] = useState<Noticia | null>(null);
-
 
   const carouselRef = useRef<HTMLDivElement>(null);
 
@@ -59,7 +49,7 @@ export default function NoticiasSection() {
       <div className="relative">
         <div ref={carouselRef} className="flex gap-4 overflow-x-auto pb-4">
           {noticias.map((n) => (
-            <NoticiaCard
+            <Card_Noticias
               key={n.id}
               noticia={n}
               onClick={() => onClick(n)}

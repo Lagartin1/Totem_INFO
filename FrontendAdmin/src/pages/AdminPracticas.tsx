@@ -1,0 +1,732 @@
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Toast from "../components/Toast";
+import Loader from "../components/Loader";
+import Nav_button from "../components/Nav_Button";
+
+interface practicasProps {
+  tipo_practica: string;
+  nombre_contacto: string;
+  cargo_contacto: string;
+  correo_contacto: string;
+  telefono_contacto: string;
+  nombre_empresa: string;
+  sitio_web_empresa: string;
+  unidad_empresa: string;
+  fechas_practica: string;
+  modalidad: string;
+  sede_practica: string;
+  regimen_trabajo: string;
+  labores: string;
+  beneficios: string;
+  requisitos_especiales: string;
+}
+
+export default function AdminPracticas() {
+  const nav = useNavigate();
+  const [modalOpen, setModalOpen] = React.useState(false);
+  const [modalPracticas, setModalPracticas] = React.useState(false);
+  const openModal = () => {
+    setModalOpen(true);
+  };
+  const closeModal = () => {
+    setModalOpen(false);
+  };
+  const [form, setForm] = React.useState(false);
+  const [toastState, setToastState] = React.useState(false);
+  const [toastMessage, setToastMessage] = React.useState("");
+  const [toastStatus, setToastStatus] = React.useState<"success" | "error">(
+    "success"
+  );
+  const [loading, setLoading] = React.useState(false);
+  const [formData, setFormData] = React.useState<practicasProps>({
+    tipo_practica: "",
+    nombre_contacto: "",
+    cargo_contacto: "",
+    correo_contacto: "",
+    telefono_contacto: "",
+    nombre_empresa: "",
+    sitio_web_empresa: "",
+    unidad_empresa: "",
+    fechas_practica: "",
+    modalidad: "",
+    sede_practica: "",
+    regimen_trabajo: "",
+    labores: "",
+    beneficios: "",
+    requisitos_especiales: "",
+  });
+  const makeToast = (message: string, status: "success" | "error") => {
+    setToastMessage(message);
+    setToastStatus(status);
+    setToastState(true);
+    setTimeout(() => {
+      setToastState(false);
+      setToastMessage("");
+    }, 3000);
+  };
+  const openModalPracticas = () => {
+    setModalPracticas(true);
+  };
+  const [fileContent, setFileContent] = React.useState<File | null>(null);
+  const [fileUpload, setFileUploaded] = React.useState(false);
+  const handleAddPractica = () => {
+    openModal();
+  };
+  const changeOption = () => {
+    setForm(!form);
+    resetDataUpload();
+  };
+  const resetDataUpload = () => {
+    setFileUploaded(false);
+    setFileContent(null);
+    setFormData({
+      tipo_practica: "",
+      nombre_contacto: "",
+      cargo_contacto: "",
+      correo_contacto: "",
+      telefono_contacto: "",
+      nombre_empresa: "",
+      sitio_web_empresa: "",
+      unidad_empresa: "",
+      fechas_practica: "",
+      modalidad: "",
+      sede_practica: "",
+      regimen_trabajo: "",
+      labores: "",
+      beneficios: "",
+      requisitos_especiales: "",
+    });
+  };
+
+  const handleCloseModal = () => {
+    closeModal();
+    setForm(false);
+    resetDataUpload();
+  };
+  // fucnion que verifica que el form este vacio
+  const isFormEmpty = () => {
+    return (
+      Object.values(formData).every((value) => value === "") &&
+      fileContent === null
+    );
+  };
+  const fetchForm = async (body: practicasProps) => {
+    const response = await fetch("/api/admin/administrar/practicas/form", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        credentials: "include",
+      },
+      body: JSON.stringify(body),
+    });
+    return response;
+  };
+
+  const refresh = async () => {
+    const response = await fetch("/api/auth/refresh", {
+      method: "GET",
+      credentials: "include",
+    });
+    if (!response.ok) {
+      nav("/");
+    } else if (response.ok) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+  const fetchFormCsv = async (formData: File) => {
+    const data = new FormData();
+    data.append("file", formData);
+    const response = await fetch("/api/admin/administrar/practicas/file", {
+      method: "POST",
+      headers: {
+        credentials: "include",
+      },
+      body: data,
+    });
+    return response;
+  };
+
+  const onSubmit = async () => {
+    if (!isFormEmpty() || fileContent) {
+      if (form) {
+        // si alguno de los campos del formulario que son requeridos esta vacio, mostrar un toast de error
+        for (const [key, value] of Object.entries(formData)) {
+          if (
+            value === "" &&
+            key !== "beneficios" &&
+            key !== "requisitos_especiales"
+          ) {
+            makeToast(
+              "Por favor complete todos los campos requeridos del formulario.",
+              "error"
+            );
+            return;
+          }
+        }
+        // otras verificaciones pueden ir aqui opcionamente,
+
+        // enviar data del formulario
+        setLoading(true);
+        try {
+          const response = await fetchForm(formData);
+          if (response.ok) {
+            setLoading(false);
+            makeToast("Práctica agregada con éxito.", "success");
+            handleCloseModal();
+          } else if (response.status === 401) {
+            const refreshed = await refresh();
+            if (refreshed) {
+              try {
+                const retryResponse = await fetchForm(formData);
+                if (retryResponse.ok) {
+                  setLoading(false);
+                  makeToast("Práctica agregada con éxito.", "success");
+                  handleCloseModal();
+                  return;
+                } else {
+                  makeToast("Error al agregar práctica.", "error");
+                  setLoading(false);
+                  return;
+                }
+              } catch (error) {
+                makeToast("Error al agregar práctica.", "error");
+                setLoading(false);
+                return;
+              }
+            }
+          } else {
+            makeToast("Error al agregar práctica.", "error");
+            setLoading(false);
+          }
+        } catch (e) {
+          makeToast("Error al agregar práctica.", "error");
+          setLoading(false);
+          return;
+        }
+      } else {
+        try {
+          setLoading(true);
+          const response = await fetchFormCsv(fileContent as File);
+          if (response.ok) {
+            makeToast("Prácticas agregadas con éxito desde CSV.", "success");
+            handleCloseModal();
+            return;
+          } else if (response.status === 401) {
+            const refreshed = await refresh();
+            if (refreshed) {
+              try {
+                const retryResponse = await fetchFormCsv(fileContent as File);
+                if (retryResponse.ok) {
+                  makeToast(
+                    "Prácticas agregadas con éxito desde CSV.",
+                    "success"
+                  );
+                  handleCloseModal();
+                  setLoading(false);
+                  return;
+                } else {
+                  makeToast("Error al agregar prácticas desde CSV.", "error");
+                  setLoading(false);
+                  return;
+                }
+              } catch (error) {
+                makeToast("Error al agregar prácticas desde CSV.", "error");
+                setLoading(false);
+                return;
+              }
+            }
+          } else {
+            makeToast("Error al agregar prácticas desde CSV.", "error");
+            setLoading(false);
+          }
+        } catch (e) {
+          makeToast("Error al agregar prácticas desde CSV.", "error");
+          setLoading(false);
+          return;
+        }
+
+        return;
+      }
+    } else {
+      makeToast(
+        "Por favor complete el formulario o cargue un archivo antes de enviar.",
+        "error"
+      );
+    }
+  };
+  const onChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const onAddFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFileUploaded(true);
+      setFileContent(file);
+    }
+  };
+  const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      setFileUploaded(true);
+      setFileContent(file);
+    }
+  };
+
+  const handleDownloadTemplate = () => {
+    console.log("Downloading CSV template...");
+  };
+
+  return (
+    <main className="p-6 w-full min-h-screen ">
+      <div className="px-30 py-10">
+        <Nav_button Title="Volver" Link="/dashboard" />
+      </div>
+      {loading && <Loader frase={"Enviando..."} />}
+      {toastState && <Toast message={toastMessage} status={toastStatus} />}
+      <div className="bg-white shadow-md rounded-lg h-lvh flex flex-col ">
+        <h1 className="text-2xl font-bold mb-4 text-center mt-40">
+          Administración de Prácticas
+        </h1>
+        <div className="p-20 grid grid-cols-3 gap-5 justify-center items-center space-x-8">
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded-md h-30 text-2xl hover:bg-slate-700"
+            onClick={handleAddPractica}>
+            Agregar Práctica
+          </button>
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded-md h-30 text-2xl hover:bg-slate-700"
+            onClick={openModalPracticas}>
+            Administrar Prácticas existentes
+          </button>
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded-md h-30 text-2xl hover:bg-slate-700"
+            onClick={() => nav("/admin-practicas/practicas/top-visitadas")}>
+            {" "}
+            Top Prácticas Visitadas
+          </button>
+        </div>
+        {modalOpen ? (
+          <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-opacity-50 z-50">
+            <div className="bg-white p-6 rounded-md shadow-md w-3/4 max-h-screen overflow-y-auto">
+              <h2 className="text-xl font-bold mb-4">Agregar Nueva Práctica</h2>
+              <div className="mb-4">
+                {modalOpen && !form ? (
+                  <FileUploadForm
+                    onChange={onAddFile}
+                    onDrop={onDrop}
+                    fileUpload={fileUpload}
+                  />
+                ) : (
+                  <FormPractica onChange={onChange} {...formData} />
+                )}
+                {modalOpen && !form ? (
+                  <div className="flex flex-col mt-4 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700">
+                    <div className="flex flex-row items-center mb-4 gap-2">
+                      <p>
+                        {" "}
+                        Haga click en el botón a continuacion para descargar el
+                        formato de archivo CSV pedido:
+                      </p>
+                      <button
+                        className="ml-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                        onClick={handleDownloadTemplate}>
+                        Descargar CSV
+                      </button>
+                    </div>
+                    <div className="flex flex-row items-center gap-2">
+                      <p>
+                        {" "}
+                        Si desea Agregar una nueva práctica manualmente, haga
+                        clic en el botón a continuación:
+                      </p>
+                      <button
+                        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                        onClick={changeOption}>
+                        Agregar Práctica Manualmente
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+                {modalOpen && form ? (
+                  <div className="flex flex-row items-center mt-4 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700">
+                    <p>
+                      {" "}
+                      Si desea Agregar practicas subiando un archivo CSV, haga
+                      clic en el botón a continuación:
+                    </p>
+                    <button
+                      className="ml-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                      onClick={changeOption}>
+                      Agregar Archivo Prácticas
+                    </button>
+                  </div>
+                ) : null}
+                <div className="flex justify-end space-x-4 pt-5">
+                  <button
+                    className="bg-red-400 text-white px-4 py-2 rounded-md hover:bg-red-500"
+                    onClick={handleCloseModal}>
+                    Cancelar
+                  </button>
+                  <button
+                    className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+                    onClick={onSubmit}>
+                    Guardar Práctica
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {modalPracticas ? (
+          <div
+            className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-black/25 z-50"
+            onClick={() => setModalPracticas(false)}>
+            <div
+              className="bg-white p-6 rounded-md shadow-md w-3/4 max-h-screen overflow-y-auto relative"
+              onClick={(e) => e.stopPropagation()}>
+              <button
+                onClick={() => setModalPracticas(false)}
+                aria-label="Cerrar modal"
+                className="absolute top-3 right-3 p-2 rounded-full text-gray-600 hover:bg-gray-100 hover:text-gray-800">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor">
+                  <path
+                    fillRule="evenodd"
+                    d="M10 8.586L15.293 3.293a1 1 0 011.414 1.414L11.414 10l5.293 5.293a1 1 0 01-1.414 1.414L10 11.414l-5.293 5.293a1 1 0 01-1.414-1.414L8.586 10 3.293 4.707A1 1 0 014.707 3.293L10 8.586z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </button>
+
+              <div className="p-10 m-10 flex flex-col gap-10 min-md:flex-row justify-center items-center">
+                <button
+                  className="bg-slate-500 text-white px-4 py-2 rounded-md h-30 text-2xl hover:bg-slate-700"
+                  onClick={() => nav("/admin-practicas/practicas-iniciales")}>
+                  Prácticas Iniciales
+                </button>
+                <button
+                  className="bg-slate-500 text-white px-4 py-2 rounded-md h-30 text-2xl hover:bg-slate-700"
+                  onClick={() =>
+                    nav("/admin-practicas/practicas-profesionales")
+                  }>
+                  Practicas Profesionales
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </main>
+  );
+}
+
+function FileUploadForm({
+  onChange,
+  onDrop,
+  fileUpload,
+}: {
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onDrop?: (e: React.DragEvent<HTMLDivElement>) => void;
+  fileUpload: boolean;
+}) {
+  const boxStyles = {
+    uploaded:
+      "flex flex-col items-center justify-center border-2 border-dashed border-green-500 rounded-xl p-6 bg-green-50 hover:bg-green-100 cursor-pointer",
+    notUploaded:
+      "flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-6 bg-gray-50 hover:bg-gray-100 cursor-pointer",
+  };
+  const [currentBoxStyle, setCurrentBoxStyle] = React.useState(
+    boxStyles.notUploaded
+  );
+
+  useEffect(() => {
+    if (fileUpload) {
+      setCurrentBoxStyle(boxStyles.uploaded);
+    } else {
+      setCurrentBoxStyle(boxStyles.notUploaded);
+    }
+  }, [fileUpload]);
+
+  return (
+    <>
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">
+          Importar CSV (arrastrar o agregar)
+        </label>
+        <div
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={onDrop}
+          className={currentBoxStyle}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-10 w-10 text-gray-400 mb-2"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M7 16v-4a4 4 0 014-4h2a4 4 0 014 4v4M12 12v8m0-8l-3 3m3-3 3 3"
+            />
+          </svg>
+          <p className="text-sm text-gray-600">
+            {fileUpload ? "Archivo CSV cargado" : "Arrastra un CSV aquí o"}
+          </p>
+          <label className="mt-2 inline-block bg-white border border-gray-300 text-sm px-3 py-1 rounded hover:bg-gray-100">
+            <input
+              type="file"
+              accept=".csv,text/csv"
+              onChange={onChange}
+              className="hidden"
+            />
+            Seleccionar archivo
+          </label>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function FormPractica(
+  props: practicasProps & {
+    onChange: (
+      e: React.ChangeEvent<
+        HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+      >
+    ) => void;
+  }
+) {
+  const { onChange } = props;
+  return (
+    <form className="grid grid-cols-4 gap-10">
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">
+          Tipo de práctica
+        </label>
+        <select
+          onChange={onChange}
+          name="tipo_practica"
+          value={props.tipo_practica}
+          required
+          className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+          aria-required="true">
+          <option value="">Seleccione...</option>
+          <option value="Inicial">Practica Inicial</option>
+          <option value="Profesional">Práctica profesional</option>
+        </select>
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">
+          Nombre del contacto
+        </label>
+        <input
+          onChange={onChange}
+          name="nombre_contacto"
+          type="text"
+          value={props.nombre_contacto}
+          required
+          className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+        />
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">
+          Cargo del contacto
+        </label>
+        <input
+          onChange={onChange}
+          name="cargo_contacto"
+          type="text"
+          value={props.cargo_contacto}
+          required
+          className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+        />
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">
+          Correo del contacto
+        </label>
+        <input
+          onChange={onChange}
+          name="correo_contacto"
+          type="email"
+          value={props.correo_contacto}
+          required
+          className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+        />
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">
+          Teléfono del contacto
+        </label>
+        <input
+          onChange={onChange}
+          name="telefono_contacto"
+          type="tel"
+          value={props.telefono_contacto}
+          required
+          className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+        />
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">
+          Nombre de la empresa
+        </label>
+        <input
+          onChange={onChange}
+          name="nombre_empresa"
+          type="text"
+          value={props.nombre_empresa}
+          required
+          className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+        />
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">
+          Sitio web de la empresa
+        </label>
+        <input
+          onChange={onChange}
+          name="sitio_web_empresa"
+          type="url"
+          value={props.sitio_web_empresa}
+          required
+          className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+        />
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">
+          Unidad de la empresa
+        </label>
+        <input
+          onChange={onChange}
+          name="unidad_empresa"
+          type="text"
+          value={props.unidad_empresa}
+          required
+          className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+        />
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">
+          Fechas de la práctica
+        </label>
+        <input
+          onChange={onChange}
+          name="fechas_practica"
+          type="text"
+          placeholder="Ej. Enero 2025 - Agosto 2025"
+          value={props.fechas_practica}
+          required
+          className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+        />
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">Modalidad</label>
+        <select
+          onChange={onChange}
+          name="modalidad"
+          value={props.modalidad}
+          required
+          className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none w-full"
+          aria-required="true">
+          <option value="">Seleccione...</option>
+          <option value="presencial">Presencial</option>
+          <option value="remoto">Remoto</option>
+          <option value="hibrido">Híbrido</option>
+        </select>
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">Sede o Ciudad</label>
+        <input
+          onChange={onChange}
+          name="sede_practica"
+          type="text"
+          value={props.sede_practica}
+          required
+          className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none w-full"
+        />
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">
+          Régimen de trabajo
+        </label>
+        <select
+          onChange={onChange}
+          name="regimen_trabajo"
+          value={props.regimen_trabajo}
+          required
+          className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none w-full"
+          aria-required="true">
+          <option value="">Seleccione...</option>
+          <option value="tiempo_completo">Tiempo completo</option>
+          <option value="medio_tiempo">Medio tiempo</option>
+          <option value="por_horas">Por horas</option>
+        </select>
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">Labores</label>
+        <textarea
+          onChange={onChange}
+          name="labores"
+          value={props.labores}
+          required
+          className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none w-full"
+          rows={3}
+        />
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">
+          Beneficios (opcional)
+        </label>
+        <textarea
+          onChange={onChange}
+          name="beneficios"
+          value={props.beneficios}
+          className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none w-full"
+          rows={3}
+        />
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">
+          Requisitos especiales (opcional)
+        </label>
+        <textarea
+          onChange={onChange}
+          name="requisitos_especiales"
+          value={props.requisitos_especiales}
+          className="rounded-xl border border-gray-300 p-2 shadow-md focus:ring-2 focus:ring-blue-400 focus:outline-none w-full"
+          rows={3}
+        />
+      </div>
+    </form>
+  );
+}

@@ -1,6 +1,5 @@
 import { createPortal } from "react-dom";
-// Usamos la interfaz Tesis desde tu archivo de tipos
-import type { Tesis } from "../types/index"; 
+import type { Tesis } from "../types/index";
 
 export interface ModalTesisProps {
   tesis: Tesis;
@@ -15,7 +14,6 @@ export default function Modal_Tesis({
 }: ModalTesisProps) {
   if (!isOpen) return null;
 
-  // Helper para formatear autores si es un array
   const formatAutores = (autores: string | string[] | undefined) => {
     if (!autores) return "No especificado";
     if (Array.isArray(autores)) {
@@ -24,7 +22,6 @@ export default function Modal_Tesis({
     return autores;
   };
 
-  // Helper para formatear la fecha
   const formatFecha = (fecha: string | undefined) => {
     if (!fecha) return "No especificada";
     return new Date(fecha).toLocaleDateString("es-CL", {
@@ -37,16 +34,24 @@ export default function Modal_Tesis({
   return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-      onClick={onClose} // 👈 click fuera cierra
-    >
+      onClick={onClose}>
       <div
         className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 max-h-[80vh] overflow-y-auto relative"
-        onClick={(e) => e.stopPropagation()} // 👈 evita que el click dentro cierre
-      >
+        onClick={(e) => e.stopPropagation()}>
         {/* Placeholder visual donde estaban los videos */}
         <div className="w-full h-40 bg-gray-100 rounded-lg mb-4 flex items-center justify-center text-gray-400">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-16 h-16">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5a3.375 3.375 0 0 0-3.375 3.375v2.625m5.25 0v-4.875c0-.621-.504-1.125-1.125-1.125H9.75c-.621 0-1.125.504-1.125 1.125v4.875m0 0a3.375 3.375 0 0 0 3.375 3.375h1.5a3.375 3.375 0 0 0 3.375-3.375Z" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="w-16 h-16">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5a3.375 3.375 0 0 0-3.375 3.375v2.625m5.25 0v-4.875c0-.621-.504-1.125-1.125-1.125H9.75c-.621 0-1.125.504-1.125 1.125v4.875m0 0a3.375 3.375 0 0 0 3.375 3.375h1.5a3.375 3.375 0 0 0 3.375-3.375Z"
+            />
           </svg>
         </div>
 
@@ -80,15 +85,17 @@ export default function Modal_Tesis({
           <div>
             <span className="font-semibold">Resumen:</span>
             <p className="mt-1 text-sm text-gray-600">
-              {tesis.resumen || tesis.descripcion || "No hay resumen disponible."}
+              {tesis.resumen ||
+                tesis.descripcion ||
+                "No hay resumen disponible."}
             </p>
           </div>
           {tesis.palabras_clave && (
-             <div>
-                <span className="font-semibold">Palabras Clave:</span>
-                <p className="mt-1 text-sm italic text-gray-500">
-                  {tesis.palabras_clave}
-                </p>
+            <div>
+              <span className="font-semibold">Palabras Clave:</span>
+              <p className="mt-1 text-sm italic text-gray-500">
+                {tesis.palabras_clave}
+              </p>
             </div>
           )}
         </div>

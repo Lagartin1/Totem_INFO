@@ -3,20 +3,20 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./index.css";
 import Home from "./pages/Login";
-import Dashboard from "./pages/dashboard";
+import Dashboard from "./pages/Dashboard";
 import { AuthProvider } from "./lib/authProvider";
 import ProtectedRoute from "./routes/protectedRoutes";
-import AdminPracticas from "./pages/adminPracticas";
-import PracticasExistentes from "./pages/practicasExistentes";
+import AdminPracticas from "./pages/AdminPracticas";
+import PracticasExistentes from "./pages/PracticasExistentes";
 import NotFound from "./pages/404";
 import NoticiasSection from "./pages/Noticias";
-import Workshop from "./pages/workshop";
-import Proyectos from "./pages/proyectos";
+import Workshop from "./pages/Workshop";
+import Proyectos from "./pages/Proyectos";
 import TopPracticas from "./pages/TopPracticas";
-import Becados from "./pages/becados";
-import Tesis from "./pages/adminTesis";
+import Becados from "./pages/Becados";
+import Tesis from "./pages/AdminTesis";
 import TopTesis from "./pages/TopTesis";
-import Gira from "./pages/gira";
+import Gira from "./pages/Gira";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

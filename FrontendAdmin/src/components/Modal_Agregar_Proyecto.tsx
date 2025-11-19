@@ -10,7 +10,7 @@ export default function Modal_Agregar_Proyecto({
 }: {
   isOpen: boolean;
   closeModal: () => void;
-  onAdded: () => void; // 👈 nueva prop
+  onAdded: () => void;
 }) {
   if (!isOpen) return null;
 
@@ -32,8 +32,8 @@ export default function Modal_Agregar_Proyecto({
       if (autor.trim() !== "") formData.append("autor", autor);
     });
 
-    const performPost= async () => {  
-      try{
+    const performPost = async () => {
+      try {
         const res = await fetch(`${baseUrl}/api/proyectos`, {
           method: "POST",
           body: formData,
@@ -59,7 +59,7 @@ export default function Modal_Agregar_Proyecto({
         if (!res.ok) {
           throw new Error("Error al guardar proyecto");
         }
-        return res;   
+        return res;
       } catch (error) {
         throw error;
       }

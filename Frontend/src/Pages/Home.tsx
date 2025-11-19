@@ -1,6 +1,6 @@
 import Boton_Landing from "../Components/Boton_Landing"
 import Header from "../Components/Header"
-import NoticiasSection from "../Components/Noticias";
+import NoticiasSection from "../Components/Noticias_Section";
 
 function Home() {
 

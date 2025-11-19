@@ -4,11 +4,9 @@ function Carousel({ slides = [] }: { slides?: React.ReactNode[] }) {
   const [current, setCurrent] = useState(0);
   const length = slides.length;
 
-  // Touch
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
-  // Mouse
   const [mouseDown, setMouseDown] = useState<number | null>(null);
   const [mouseUp, setMouseUp] = useState<number | null>(null);
 
@@ -16,7 +14,6 @@ function Carousel({ slides = [] }: { slides?: React.ReactNode[] }) {
 
   if (length === 0) return null;
 
-  // --- Touch handlers ---
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
@@ -37,7 +34,6 @@ function Carousel({ slides = [] }: { slides?: React.ReactNode[] }) {
     }
   };
 
-  // --- Mouse handlers ---
   const handleMouseDown = (e: React.MouseEvent) => {
     setMouseUp(null);
     setMouseDown(e.clientX);
@@ -71,14 +67,12 @@ function Carousel({ slides = [] }: { slides?: React.ReactNode[] }) {
       onTouchEnd={handleTouchEnd}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-    >
+      onMouseUp={handleMouseUp}>
       <div
         className="flex transition-transform duration-300 gap-4"
         style={{
           transform: `translateX(-${current * 366}px)`, // ancho de la tarjeta + gap
-        }}
-      >
+        }}>
         {slides.map((slide, index) => (
           <div key={index} className="flex-shrink-0 w-[350px]">
             {slide}

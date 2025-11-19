@@ -3,7 +3,7 @@ import NoticiaCard from "../components/Card_Noticias";
 import Boton_Landing from "../components/Boton_Landing";
 import Modal_Agregar_Noticias from "../components/Modal_Agregar_Noticias";
 import type { Noticia } from "../types/index";
-import Nav_button from "../components/nav_button";
+import Nav_button from "../components/Nav_Button";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
@@ -11,7 +11,6 @@ const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 export default function NoticiasSection() {
   const [noticias, setNoticias] = useState<Noticia[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedNoticia, setSelectedNoticia] = useState<Noticia | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -39,19 +38,17 @@ export default function NoticiasSection() {
   const closeModal = () => setIsModalOpen(false);
 
   const onClick = (noticia: Noticia) => {
-    setSelectedNoticia(noticia);
     console.log("Noticia seleccionada:", noticia);
   };
 
   return (
     <main className="p-6 w-full min-h-screen">
-        <h2 className="text-2xl font-bold mb-4">Noticias</h2>
-        <div className="px-30 py-10">
-          <Nav_button Title="Volver" Link="/dashboard" />
-        </div>
+      <h2 className="text-2xl font-bold mb-4">Noticias</h2>
+      <div className="px-30 py-10">
+        <Nav_button Title="Volver" Link="/dashboard" />
+      </div>
 
       <div className="p-6">
-
         {/* Loading Spinner */}
         {loading && (
           <div className="flex flex-col items-center justify-center mt-20">
@@ -91,7 +88,6 @@ export default function NoticiasSection() {
           onAdded={fetchNoticias}
         />
       </div>
-    
     </main>
   );
 }

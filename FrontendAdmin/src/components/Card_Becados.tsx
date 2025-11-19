@@ -9,7 +9,7 @@ const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 interface CardBecadosProps {
   becado: Becado;
   onDelete?: (id: string) => void;
-  onAdded?: () => void; 
+  onAdded?: () => void;
 }
 
 export default function Card_Becados({
@@ -33,7 +33,7 @@ export default function Card_Becados({
     const confirmar = confirm("¿Seguro que quieres eliminar este becado?");
     if (!confirmar) return;
     const performDelete = async () => {
-      try{
+      try {
         const response = await fetch(`${baseUrl}/api/becados/${becado.id}`, {
           method: "DELETE",
           credentials: "include",
@@ -44,10 +44,13 @@ export default function Card_Becados({
             credentials: "include",
           });
           if (refresh.ok) {
-            const retryResponse = await fetch(`${baseUrl}/api/becados/${becado.id}`, {
-              method: "DELETE",
-              credentials: "include",
-            });
+            const retryResponse = await fetch(
+              `${baseUrl}/api/becados/${becado.id}`,
+              {
+                method: "DELETE",
+                credentials: "include",
+              }
+            );
             if (!retryResponse.ok) {
               throw new Error("Error al eliminar el becado");
             }
@@ -61,9 +64,7 @@ export default function Card_Becados({
       } catch (error) {
         throw error;
       }
-    }
-
-
+    };
 
     try {
       setDeleting(true);
@@ -86,18 +87,14 @@ export default function Card_Becados({
       setEditing(true);
       const formData = new FormData();
 
-      // Campos de texto simples
-      [
-        "nombre",
-        "titulo",
-        "descripcion",
-        "fecha_publicacion",
-      ].forEach((key) => {
-        const value = editData[key as keyof Becado];
-        if (typeof value === "string" && value.trim() !== "") {
-          formData.append(key, value);
+      ["nombre", "titulo", "descripcion", "fecha_publicacion"].forEach(
+        (key) => {
+          const value = editData[key as keyof Becado];
+          if (typeof value === "string" && value.trim() !== "") {
+            formData.append(key, value);
+          }
         }
-      });
+      );
 
       // Videos (array de strings o archivos)
       if (Array.isArray(editData.videos)) {
@@ -109,7 +106,6 @@ export default function Card_Becados({
         });
       }
 
-      // Si hay nuevos archivos seleccionados (por ejemplo en un input multiple)
       if (selectedFile) {
         selectedFile.forEach((file) => {
           formData.append("videos[]", file);
@@ -120,23 +116,29 @@ export default function Card_Becados({
         formData.append("eliminarVideos", "true");
       }
       const performPut = async () => {
-        try{
-          const response = await fetch(`${baseUrl}/api/becados/${editData.id}`, {
-            method: "PUT",
-            body: formData,
-            credentials: "include",
-          });
+        try {
+          const response = await fetch(
+            `${baseUrl}/api/becados/${editData.id}`,
+            {
+              method: "PUT",
+              body: formData,
+              credentials: "include",
+            }
+          );
           if (response.status === 401) {
             const refresh = await fetch(`${baseUrl}/api/admin/auth/refresh`, {
               method: "GET",
               credentials: "include",
             });
             if (refresh.ok) {
-              const retryResponse = await fetch(`${baseUrl}/api/becados/${editData.id}`, {
-                method: "PUT",
-                body: formData,
-                credentials: "include",
-              });
+              const retryResponse = await fetch(
+                `${baseUrl}/api/becados/${editData.id}`,
+                {
+                  method: "PUT",
+                  body: formData,
+                  credentials: "include",
+                }
+              );
               if (!retryResponse.ok) {
                 throw new Error("Error al actualizar el becado");
               }
@@ -152,7 +154,6 @@ export default function Card_Becados({
         }
       };
       const res = await performPut();
-
 
       if (!res.ok) throw new Error("Error al actualizar el becado");
 

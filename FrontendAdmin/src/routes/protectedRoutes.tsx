@@ -1,7 +1,7 @@
 
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../lib/authProvider';
-import Loader from '../components/loader';
+import Loader from '../components/Loader';
 
 export default function ProtectedRoute() {
   const { isAuthenticated, isLoading } = useAuth();

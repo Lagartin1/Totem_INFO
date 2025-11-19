@@ -1,6 +1,4 @@
-
 import React from 'react';
-
 
 interface CardWorkshopProps {
   id: string;
@@ -15,7 +13,6 @@ export default function CardWorkshop({ id, titulo, link, descripcion, onUpdate,s
   const [ensureEvent, setEnsureEvent] = React.useState<string>(''); 
   const [props, setProps] = React.useState({titulo, link, descripcion });
   const [editable, setEditable] = React.useState(false);
-
 
   const onAccept = () => {
     showLoader(true);
@@ -38,14 +35,12 @@ export default function CardWorkshop({ id, titulo, link, descripcion, onUpdate,s
       });
       
       if (response.status === 401) {
-        // Try to refresh token
         const refreshResponse = await fetch("/api/auth/refresh", {
           method: "POST",
           credentials: "include",
         });
         
         if (refreshResponse.ok) {
-          // Retry the update request
           return await fetch("/api/admin/administrar/workshops", {
             method: "PUT",
             headers: {
@@ -55,8 +50,7 @@ export default function CardWorkshop({ id, titulo, link, descripcion, onUpdate,s
             body: JSON.stringify({ id, ...props }),
           });
         }
-      }
-      
+      } 
       return response;
     };
     try{
@@ -78,8 +72,6 @@ export default function CardWorkshop({ id, titulo, link, descripcion, onUpdate,s
     }
   }
 
-
-
   const deleteWorkshop = async () => {
     const performDelete = async () => {
       const response = await fetch("/api/admin/administrar/workshops", {
@@ -92,14 +84,12 @@ export default function CardWorkshop({ id, titulo, link, descripcion, onUpdate,s
       });
       
       if (response.status === 401) {
-        // Try to refresh token
         const refreshResponse = await fetch("/api/auth/refresh", {
           method: "POST",
           credentials: "include",
         });
         
         if (refreshResponse.ok) {
-          // Retry the delete request
           return await fetch("/api/admin/administrar/workshops", {
             method: "DELETE",
             headers: {
@@ -109,8 +99,7 @@ export default function CardWorkshop({ id, titulo, link, descripcion, onUpdate,s
             body: JSON.stringify({ id }),
           });
         }
-      }
-      
+      }  
       return response;
     };
     try{
@@ -148,7 +137,6 @@ export default function CardWorkshop({ id, titulo, link, descripcion, onUpdate,s
     setModal(false);
   }
   const onSave = () => {
-    // Aquí iría la lógica para guardar los cambios, por ejemplo, una llamada a la API
     setEnsureEvent('Guardar');
     setEnsurment(true);
     setEditable(false);

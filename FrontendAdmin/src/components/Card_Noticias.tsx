@@ -14,7 +14,11 @@ interface NoticiaCardProps {
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 
-export default function NoticiaCard({ noticia, onDelete, onAdded }: NoticiaCardProps) {
+export default function NoticiaCard({
+  noticia,
+  onDelete,
+  onAdded,
+}: NoticiaCardProps) {
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -31,37 +35,43 @@ export default function NoticiaCard({ noticia, onDelete, onAdded }: NoticiaCardP
 
     const confirmar = confirm("¿Seguro que quieres eliminar esta noticia?");
     if (!confirmar) return;
-    const performDeelete = async () => {  
-        try{
-          setDeleting(true);
-          const res = await fetch(`${baseUrl}/api/noticias/${noticia.id}`, {
-            method: "DELETE",
+    const performDeelete = async () => {
+      try {
+        setDeleting(true);
+        const res = await fetch(`${baseUrl}/api/noticias/${noticia.id}`, {
+          method: "DELETE",
+          credentials: "include",
+        });
+        if (res.status === 401) {
+          const refreshRes = await fetch(`${baseUrl}/api/admin/auth/refresh`, {
+            method: "GET",
             credentials: "include",
           });
-          if (res.status === 401) {
-            const refreshRes = await fetch(`${baseUrl}/api/admin/auth/refresh`, {
-              method: "GET",
-              credentials: "include",
-            });
-            if (refreshRes.ok) {
-              const retryRes = await fetch(`${baseUrl}/api/noticias/${noticia.id}`, {
+          if (refreshRes.ok) {
+            const retryRes = await fetch(
+              `${baseUrl}/api/noticias/${noticia.id}`,
+              {
                 method: "DELETE",
                 credentials: "include",
-              });
-              if (!retryRes.ok) {
-                throw new Error("Error al eliminar noticia después de refrescar token");
-              } else {
-                return retryRes;
               }
+            );
+            if (!retryRes.ok) {
+              throw new Error(
+                "Error al eliminar noticia después de refrescar token"
+              );
+            } else {
+              return retryRes;
             }
-          }if (!res.ok) {
-            throw new Error("Error al eliminar noticia");
           }
-          return res;
-        } finally {
-          setDeleting(false);
         }
-    }
+        if (!res.ok) {
+          throw new Error("Error al eliminar noticia");
+        }
+        return res;
+      } finally {
+        setDeleting(false);
+      }
+    };
 
     try {
       setDeleting(true);
@@ -69,7 +79,6 @@ export default function NoticiaCard({ noticia, onDelete, onAdded }: NoticiaCardP
       if (!res.ok) throw new Error("Error al eliminar noticia");
       alert("Noticia eliminada correctamente ✅");
 
-      // Notificar al componente padre (NoticiasSection) si existe la función
       onDelete?.(noticia.id);
     } catch (error) {
       console.error("Error al eliminar noticia:", error);
@@ -88,18 +97,14 @@ export default function NoticiaCard({ noticia, onDelete, onAdded }: NoticiaCardP
       setEditing(true);
       const formData = new FormData();
 
-      // Campos de texto
       ["titulo", "descripcion", "contenido", "autor"].forEach((key) => {
         const value = editData[key as keyof Noticia];
         if (value !== undefined) formData.append(key, value);
       });
 
-      // Imagen nueva
       if (selectedFile) formData.append("imagen", selectedFile);
 
-      // Señal de eliminar imagen
       if (removeImage) formData.append("eliminarImagen", "true");
-
 
       const perfromPut = async () => {
         try {
@@ -109,23 +114,32 @@ export default function NoticiaCard({ noticia, onDelete, onAdded }: NoticiaCardP
             credentials: "include",
           });
           if (res.status === 401) {
-            const refreshRes = await fetch(`${baseUrl}/api/admin/auth/refresh`, {
-              method: "GET",
-              credentials: "include",
-            });
-            if (refreshRes.ok) {
-              const retryRes = await fetch(`${baseUrl}/api/noticias/${noticia.id}`, {
-                method: "PUT",
-                body: formData,
+            const refreshRes = await fetch(
+              `${baseUrl}/api/admin/auth/refresh`,
+              {
+                method: "GET",
                 credentials: "include",
-              });
+              }
+            );
+            if (refreshRes.ok) {
+              const retryRes = await fetch(
+                `${baseUrl}/api/noticias/${noticia.id}`,
+                {
+                  method: "PUT",
+                  body: formData,
+                  credentials: "include",
+                }
+              );
               if (!retryRes.ok) {
-                throw new Error("Error al actualizar noticia después de refrescar token");
+                throw new Error(
+                  "Error al actualizar noticia después de refrescar token"
+                );
               } else {
                 return retryRes;
               }
             }
-          }if (!res.ok) {
+          }
+          if (!res.ok) {
             throw new Error("Error al actualizar noticia");
           }
           return res;
@@ -133,7 +147,7 @@ export default function NoticiaCard({ noticia, onDelete, onAdded }: NoticiaCardP
           throw error;
         }
       };
-      
+
       const res = await perfromPut();
 
       if (!res.ok) throw new Error("Error al actualizar la noticia");
@@ -192,7 +206,6 @@ export default function NoticiaCard({ noticia, onDelete, onAdded }: NoticiaCardP
         </button>
       </div>
 
-      {/* Modal */}
       <NoticiaModal
         isOpen={open}
         onClose={() => setOpen(false)}

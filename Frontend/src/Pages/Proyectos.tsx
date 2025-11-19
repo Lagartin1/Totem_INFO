@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import Header from "../Components/Header";
-import Card_Proyectos from "../Components/Card_Proyect";
+import Card_Proyectos from "../Components/Card_Proyectos";
 import Search_Bar from "../Components/Search_Bar";
-import Nav_button from "../Components/nav_button";
+import Nav_button from "../Components/Nav_Button";
 import Carousel from "../Components/Carousel";
 import type { Proyecto } from "../types/index";
 
@@ -15,13 +15,15 @@ export default function ProyectosDocentes() {
   const [hasSearched, setHasSearched] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const baseUrl = BUILD_MODE ? API_BASE_URL : 'http://localhost:3000';
+  const baseUrl = BUILD_MODE ? API_BASE_URL : "http://localhost:3000";
 
   useEffect(() => {
     setLoading(true);
     fetch(`${baseUrl}/api/proyectos`)
       .then((res) => res.json())
-      .then((json) => {setData(json.proyectos ?? []);})
+      .then((json) => {
+        setData(json.proyectos ?? []);
+      })
       .catch((err) => console.error("Error en fetch inicial:", err))
       .finally(() => {
         setLoading(false);
@@ -33,9 +35,7 @@ export default function ProyectosDocentes() {
     setHasSearched(true);
     setLoading(true);
 
-    fetch(
-      `${baseUrl}/api/proyectos?q=${encodeURIComponent(searchTerm)}`
-    )
+    fetch(`${baseUrl}/api/proyectos?q=${encodeURIComponent(searchTerm)}`)
       .then((res) => res.json())
       .then((json) => {
         setSData(json.proyectos ?? []);
@@ -56,11 +56,7 @@ export default function ProyectosDocentes() {
 
   // Generamos los slides para el carrusel
   const slides = displayedData.map((proyecto) => {
-    return (
-      <Card_Proyectos
-        proyecto={proyecto}
-      />
-    );
+    return <Card_Proyectos proyecto={proyecto} />;
   });
 
   return (
@@ -97,8 +93,7 @@ export default function ProyectosDocentes() {
             <div className="flex flex-col mt-30 bg-gray-800/20 items-center rounded-3xl">
               <div
                 className="flex items-center justify-center rounded-2xl p-10 w-60 h-40 bg-gray-700 shadow-2xl shadow-gray-500 cursor-pointer"
-                onClick={handleVolver}
-              >
+                onClick={handleVolver}>
                 <h3 className="text-balance text-2xl p-5 text-white">
                   Volver a la lista
                 </h3>
