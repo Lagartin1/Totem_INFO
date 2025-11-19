@@ -1,78 +1,78 @@
+import {PracticasResult,PracticaCSV,GetPracticas,GetPracticasByYear,SearchTermPracticas,CreateNewPractica,CreateBulkPracticas,DeletePracticaByID,desactivePracticaByID} from "@/models/practicas/practicasModel";
 
-import {DeletePracticaByID, GetPracticas, GetPracticasByYear,SearchTermPracticas} from "@/models/practicas/practicasModel";
-import { PracticasResult, PracticaCSV} from "@/models/practicas/practicasModel";
-import {CreateNewPractica, GetLastPracticaId,CreateBulkPracticas,desactivePracticaByID} from "@/models/practicas/practicasModel";
-
-
+// Headers requeridos para la validación del CSV
 const requiredHeaders = [
-                'marca_temporal',
-                'tipo_practica',
-                'nombre_contacto',
-                'cargo_contacto',
-                'correo_contacto',
-                'telefono_contacto',
-                'nombre_empresa',
-                'sitio_web_empresa',
-                'unidad_empresa',
-                'fechas_practica',
-                'modalidad',
-                'sede_practica',
-                'regimen_trabajo',
-                'labores',
-                'beneficios',
-                'requisitos_especiales'
-            ];
+    'marca_temporal',
+    'tipo_practica',
+    'nombre_contacto',
+    'cargo_contacto',
+    'correo_contacto',
+    'telefono_contacto',
+    'nombre_empresa',
+    'sitio_web_empresa',
+    'unidad_empresa',
+    'fechas_practica',
+    'modalidad',
+    'sede_practica',
+    'regimen_trabajo',
+    'labores',
+    'beneficios',
+    'requisitos_especiales'
+];
 
-export async function listPracticas(year: string | false,indice: number,type: string): Promise<PracticasResult> {
-  console.log("listPracticas params:", { year, indice, type });
-  const practicasData = year
-    ? await GetPracticasByYear(type, year, indice)
-    : await GetPracticas(type, indice);
+const PAGE_SIZE = 10; // Definimos un tamaño de página por defecto para el servicio
 
-  if (!practicasData) {
-    throw new Error("No se encontraron prácticas");
-  }
+export async function listPracticas(year: string | false, indice: number, type: string): Promise<PracticasResult> {
+    console.log("listPracticas params:", { year, indice, type });
+    
+    // Llamamos a las funciones del modelo que ahora usan Prisma
+    const practicasData = year
+        ? await GetPracticasByYear(type, year, indice)
+        : await GetPracticas(type, indice);
 
-  return practicasData;
+    if (!practicasData || practicasData.practicas.length === 0) {
+        throw new Error("No se encontraron prácticas");
+    }
+
+    return practicasData;
 }
 
-export async function BuscarPracticas(term: string, type: string): Promise<PracticasResult>{
-    const practicasData: PracticasResult = await SearchTermPracticas(term, type);
+// Actualizamos para aceptar 'indice' y soportar paginación en búsquedas
+export async function BuscarPracticas(term: string, type: string, indice: number): Promise<PracticasResult> {
+    const practicasData: PracticasResult = await SearchTermPracticas(term, type, indice, PAGE_SIZE);
 
-    if (!practicasData) {
+    if (!practicasData || practicasData.practicas.length === 0) {
         throw new Error('No se encontraron prácticas');
     }
     return practicasData;
-
 }
 
 
 export async function insertNewPractica(data: any): Promise<PracticasResult> {
-    const lastID = await GetLastPracticaId();
-    const practicasData: PracticasResult = await CreateNewPractica(data,lastID);
+    // ELIMINADO: const lastID = await GetLastPracticaId(); 
+    // Ahora Prisma genera el ID automáticamente
+    const practicasData: PracticasResult = await CreateNewPractica(data);
+    
     if (!practicasData) {
         throw new Error('No se pudo crear la práctica');
     }
-    //const review:PracticasResult= await GetPracticasByID(practicasData.practicas[0].id);
-   // if (!review) {
-    //    throw new Error('No se pudo obtener la práctica');
-   // }
-    //console.log("Review:", review);
     return practicasData;
 }
 
 
-
 export async function insertCsvPracticas(dataArray: any[]): Promise<PracticaCSV> {
-    const lastID = await GetLastPracticaId();   
-    const practicasDataArray = await CreateBulkPracticas(dataArray,lastID) as PracticaCSV;
-    if (!practicasDataArray) {
-        throw new Error('No se pudieron crear las prácticas');
+    // ELIMINADO: const lastID = await GetLastPracticaId();
+    // Pasamos directamente el array de datos limpios
+    const practicasDataArray = await CreateBulkPracticas(dataArray) as PracticaCSV;
+    
+    if (!practicasDataArray || (practicasDataArray.total === 0 && practicasDataArray.errors.length > 0)) {
+        throw new Error('No se pudieron crear las prácticas o hubo errores en la carga masiva');
     }
     return practicasDataArray;
 }
 
 
+// --- Funciones Utilitarias (Sin cambios lógicos, solo mantenemos la estructura) ---
 
 export function csvToJson(csv: string): any[] {
     const rows: string[][] = [];
@@ -84,12 +84,11 @@ export function csvToJson(csv: string): any[] {
         const ch = csv[i];
 
         if (ch === '"') {
-            // Escaped quote inside quoted field
             if (inQuotes && csv[i + 1] === '"') {
                 curField += '"';
-                i++; // skip the escaped quote
+                i++; 
             } else {
-                inQuotes = !inQuotes; // toggle quote state
+                inQuotes = !inQuotes; 
             }
             continue;
         }
@@ -101,10 +100,8 @@ export function csvToJson(csv: string): any[] {
         }
 
         if ((ch === '\n' || ch === '\r') && !inQuotes) {
-            // Handle CRLF
             if (ch === '\r' && csv[i + 1] === '\n') i++;
             curRow.push(curField);
-            // skip entirely empty trailing line
             if (!(curRow.length === 1 && curRow[0] === '')) {
                 rows.push(curRow);
             }
@@ -112,11 +109,9 @@ export function csvToJson(csv: string): any[] {
             curField = '';
             continue;
         }
-
         curField += ch;
     }
 
-    // push last field/row if any
     if (curField !== '' || curRow.length > 0) {
         curRow.push(curField);
         if (!(curRow.length === 1 && curRow[0] === '')) {
@@ -142,19 +137,21 @@ export function csvToJson(csv: string): any[] {
 
 
 export function CleanArray(dataArray: any[]): any[] {
-     const cleanedDataArray = dataArray.filter((item) => {
-                for (const key of requiredHeaders) {
-                    if ((key !== 'beneficios' && key !== 'requisitos_especiales') && (!item[key] || item[key].trim() === '')) {
-                        return false;
-                    }
-                }
-                return true;
-            });
-            return cleanedDataArray;    
+    const cleanedDataArray = dataArray.filter((item) => {
+        for (const key of requiredHeaders) {
+            // Validación simple para asegurar que campos requeridos no estén vacíos
+            if ((key !== 'beneficios' && key !== 'requisitos_especiales') && (!item[key] || item[key].trim() === '')) {
+                return false;
+            }
+        }
+        return true;
+    });
+    return cleanedDataArray;    
 }
 
 
 export function validatePracticaData(data: any): boolean {
+    if (!data || data.length === 0) return false;
     const fileHeaders = Object.keys(data[0]);
     const hasAllHeaders = requiredHeaders.every(header => fileHeaders.includes(header));
     if (!hasAllHeaders) {
@@ -165,12 +162,8 @@ export function validatePracticaData(data: any): boolean {
 }
 
 export function deletePractica(id: string): Promise<boolean> {
-    
     return DeletePracticaByID(id);
-    
 }   
-
-
 
 export async function togglePracticaState(id: string): Promise<boolean | { error: string }> {
     try {

@@ -1,35 +1,38 @@
-import {
-  searchProyectosService,
-  listProyectos,
-  createProyectoService,
-  DeleteProyectoService,
-  PutProyectosService,
-} from "@/services/proyectos/proyectosServices";
-import {
-  ProyectoResult,
-  GetProyectosModel,
-} from "@/models/proyectos/proyectosModels";
+import {searchProyectosService,listProyectos,createProyectoService,DeleteProyectoService,PutProyectosService,} from "@/services/proyectos/proyectosServices";
+
+import {ProyectoResult,} from "@/models/proyectos/proyectosModels"; 
+import { addLogEntry } from "@/models/admin/logModel"; 
 
 export async function proyectosController(
-  searchTerm?: string
+  searchTerm?: string,
+  indice: number = 0 // <-- AÑADIDO
 ): Promise<ProyectoResult> {
   let response: ProyectoResult;
 
   if (searchTerm) {
-    response = await searchProyectosService(searchTerm);
+    // Pasamos el índice de paginación a la búsqueda
+    response = await searchProyectosService(searchTerm, indice);
   } else {
-    response = await listProyectos();
+    // Pasamos el índice de paginación al listado
+    response = await listProyectos(indice);
   }
-  if (!response) {
+  
+  if (!response || response.proyectos.length === 0) {
     throw new Error("No se encontraron proyectos");
   }
 
   return response;
 }
 
-export async function createProyectoController(formData: FormData) {
+// AÑADIDO: userID para autoría y registro
+export async function createProyectoController(formData: FormData, userID: string) {
   try {
-    const response = await createProyectoService(formData);
+    // Pasamos el userID al servicio (obligatorio por el esquema de Prisma)
+    const response = await createProyectoService(formData, userID);
+    
+    // Registro de actividad
+    await addLogEntry(userID, 'create_proyecto', 'proyectos');
+    
     return response;
   } catch (error) {
     console.error("❌ Error al crear el proyecto:", error);
@@ -37,17 +40,25 @@ export async function createProyectoController(formData: FormData) {
   }
 }
 
+// GetProyectosController se comporta ahora como un listado inicial no paginado (índice 0)
 export async function GetProyectosController() {
-  const proyectosData = await GetProyectosModel();
-  if (!proyectosData) {
+  // Usamos el listado del servicio con el índice 0 por defecto
+  const proyectosData = await listProyectos(0); 
+  
+  if (!proyectosData || proyectosData.proyectos.length === 0) {
     throw new Error("No se pudieron obtener los proyectos");
   }
   return proyectosData;
 }
 
-export async function DeleteProyectosController(id: string) {
+// AÑADIDO: userID para el registro de actividad
+export async function DeleteProyectosController(id: string, userID: string) {
   try {
     const result = await DeleteProyectoService(id);
+    
+    // Registro de actividad
+    await addLogEntry(userID, 'delete_proyecto', 'proyectos', id);
+    
     return result;
   } catch (error) {
     console.error("Error al eliminar proyecto:", error);
@@ -55,9 +66,14 @@ export async function DeleteProyectosController(id: string) {
   }
 }
 
-export async function PutProyectosController(id: string, formData: FormData) {
+// AÑADIDO: userID para el registro de actividad
+export async function PutProyectosController(id: string, formData: FormData, userID: string) {
   try {
     const result = await PutProyectosService(id, formData);
+    
+    // Registro de actividad
+    await addLogEntry(userID, 'update_proyecto', 'proyectos', id);
+    
     return result;
   } catch (error) {
     console.error("Error al actualizar noticia:", error);

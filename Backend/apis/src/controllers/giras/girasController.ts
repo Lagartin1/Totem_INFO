@@ -1,16 +1,16 @@
-import {
-  createGiraService,
-  DeleteGiraService,
-  PutGirasService,
-} from "@/services/giras/girasService";
-import {
-  GetGirasModel,
-} from "@/models/giras/girasModel";
+import {createGiraService,DeleteGiraService,PutGirasService,GetGirasServices} from "@/services/giras/girasService";
+import {GiraResult} from "@/models/giras/girasModel"; 
+import { addLogEntry } from "@/models/admin/logModel"; // Para el registro de actividad
 
-
-export async function createGiraController(formData: FormData) {
+// NOTA: Se añade userID porque la creación requiere un autorId en el esquema de Prisma.
+export async function createGiraController(formData: FormData, userID: string) {
   try {
-    const response = await createGiraService(formData);
+    // Pasamos el userID al servicio
+    const response = await createGiraService(formData, userID); 
+    
+    // Registro de actividad
+    await addLogEntry(userID, 'create_gira', 'giras'); 
+
     return response;
   } catch (error) {
     console.error("❌ Error al crear la gira:", error);
@@ -19,16 +19,23 @@ export async function createGiraController(formData: FormData) {
 }
 
 export async function GetGirasController() {
-  const girasData = await GetGirasModel();
-  if (!girasData) {
+  // Llamamos a la función del servicio que obtiene los datos paginados
+  const girasData = await GetGirasServices(); 
+  
+  if (!girasData || girasData.giras.length === 0) {
     throw new Error("No se pudieron obtener las giras");
   }
   return girasData;
 }
 
-export async function DeleteGirasController(id: string) {
+// NOTA: Se añade userID para el registro de actividad
+export async function DeleteGirasController(id: string, userID: string) {
   try {
     const result = await DeleteGiraService(id);
+    
+    // Registro de actividad
+    await addLogEntry(userID, 'delete_gira', 'giras');
+
     return result;
   } catch (error) {
     console.error("Error al eliminar gira:", error);
@@ -36,9 +43,14 @@ export async function DeleteGirasController(id: string) {
   }
 }
 
-export async function PutGirasController(id: string, formData: FormData) {
+// NOTA: Se añade userID para el registro de actividad
+export async function PutGirasController(id: string, formData: FormData, userID: string) {
   try {
     const result = await PutGirasService(id, formData);
+    
+    // Registro de actividad
+    await addLogEntry(userID, 'update_gira', 'giras', id);
+
     return result;
   } catch (error) {
     console.error("Error al actualizar gira:", error);

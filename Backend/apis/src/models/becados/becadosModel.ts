@@ -1,357 +1,122 @@
-import {es}from "@/database/elastic";
-import { writeFile, unlink } from "fs/promises";
-import path from "path";
-import { randomUUID } from "crypto";
+import { mongoClient } from "@/database/mongodb";
+import { Becado, Prisma } from "@prisma/client"; // Importamos el tipo generado por Prisma
 
-export interface Becado {
-  id: string;
-  nombre: string;
-  titulo: string;
-  descripcion: string;
-  fecha_publicacion: string;
-  videos: string[];
-}
+// Eliminadas: las importaciones de 'es', 'writeFile', 'unlink', 'path', y 'randomUUID'
+
+// --- Tipos de Respuesta (Ajustados para consistencia) ---
+export type { Becado };
 
 export interface BecadosResult {
     becados: Becado[];
     total: number;
 }
 
-export async function GetBecados(){
-    const body = {
-        index: 'becados',
-        size: 10,
-        body: {
-            query: {
-                match_all: {}
-            },
-            _source: true
-        }
-    };
-    const response = await es().search(body);
-    const result: BecadosResult = {
-        becados: response.hits.hits.map((hit) => hit._source as Becado),
-        total: (response.hits.total as { value: number; relation: string }).value,
-    };
-    return result ;
+const PAGE_SIZE = 10;
 
-}
-export async function SearchBecado(searchTerm: string): Promise<BecadosResult> {
-    const should: any[] = [
-        // 🔹 Búsqueda exacta con analyzer spanish
-        {
-          multi_match: {
-            query: searchTerm,
-            type: "phrase",
-            fields: ["nombre", "titulo", "descripcion"],
-            analyzer: "spanish",
-          },
-        },
-        // 🔹 Búsqueda con fuzziness
-        {
-          multi_match: {
-            query: searchTerm,
-            fields: ["nombre", "titulo", "descripcion"],
-            fuzziness: "AUTO",
-            prefix_length: 1,
-            analyzer: "spanish",
-          },
-        },
-      ];
-    const body = {
-        index: 'becados',
-        size: 10,
-        body: {
-            query: {
-                bool : { should, minimum_should_match: 1 }
+// --- OPERACIONES DE LECTURA ---
 
-            } ,
-        }
-    }
-    const response = await es().search(body);
-    const result: BecadosResult = {
-        becados: response.hits.hits.map((hit) => hit._source as Becado),
-        total: (response.hits.total as { value: number; relation: string }).value,
-    };
-    return result ;
+// 1. GetBecados: Listado paginado (Reemplaza GetBecados() original)
+export async function GetBecados(indice: number = 0, pageSize: number = PAGE_SIZE): Promise<BecadosResult> {
+    // Usamos $transaction para obtener los datos y el conteo total en una sola llamada eficiente
+    const [becados, total] = await mongoClient.$transaction([
+        mongoClient.becado.findMany({
+            orderBy: { fecha_publicacion: 'desc' },
+            skip: indice,
+            take: pageSize,
+        }),
+        mongoClient.becado.count(),
+    ]);
 
+    return { becados, total };
 }
 
-export async function SearchBecadoYear(searchTerm: string, year: number): Promise<BecadosResult> {
-    const should: any[] = [
-        // 🔹 Búsqueda exacta con analyzer spanish
-        {
-          multi_match: {
-            query: searchTerm,
-            type: "phrase",
-            fields: ["nombre", "titulo", "descripcion"],
-            analyzer: "spanish",
-          },
-        },
-        // 🔹 Búsqueda con fuzziness
-        {
-          multi_match: {
-            query: searchTerm,
-            fields: ["nombre", "titulo", "descripcion"],
-            fuzziness: "AUTO",
-            prefix_length: 1,
-            analyzer: "spanish",
-          },
-        },
-        {
-          range: {
-            created_at: {
-              gte: `${year}-01-01`,
-              lt: `${year + 1}-01-01`,
-            },
-          },
-        }
-      ];
-    const body = {
-        index: 'becados',
-        size: 10,
-        body: {
-            query: {
-                bool : { should, minimum_should_match: 1 }
-            } ,
-        }
-    }
-    const response = await es().search(body);
-    const result: BecadosResult = {
-        becados: response.hits.hits.map((hit) => hit._source as Becado),
-        total: (response.hits.total as { value: number; relation: string }).value,
-    };
-    return result;
-
-}
-
-export async function createBecadoModel(formData: FormData) {
-  try {
-    const indexName = "becados";
-    const exists = await es().indices.exists({ index: indexName });
-
-    if (!exists) {
-      await es().indices.create({
-        index: indexName,
-        mappings: {
-          properties: {
-            id: { type: "keyword" },
-            nombre: { type: "text" },
-            titulo: { type: "text" },
-            descripcion: { type: "text" },
-            fecha_publicacion: { type: "date" },
-            videos: { type: "keyword" },
-          },
-        },
-      });
-    }
-
-    // Obtener campos del formulario
-    const nombre = formData.get("nombre") as string;
-    const titulo = formData.get("titulo") as string;
-    const descripcion =
-    (formData.get("descripcion") as string) || "Sin descripción disponible.";
-    const fecha_publicacion = new Date().toISOString();
-    const videos = (formData.getAll("videos") as string[]) || [];
-
-    let videoUrls: string[] = [];
-
-    // Iterar sobre todos los elementos del campo "videos"
-    for (const video of videos) {
-      // Caso 1: es un archivo
-      const v: any = video;
-
-      if (v instanceof File && v.size > 0) {
-        const bytes = await v.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-
-        const fileName = `${randomUUID()}_${v.name}`;
-        const filePath = path.join(
-          process.cwd(),
-          "public",
-          "uploads",
-          fileName
-        );
-        await writeFile(filePath, buffer);
-
-        videoUrls.push(`/uploads/${fileName}`);
-      } else if (typeof v === "string" && v.startsWith("http")) {
-        videoUrls.push(v);
-      }
-
-      // Caso 2: es una URL (por ejemplo, un enlace de YouTube)
-      else if (typeof video === "string" && video.startsWith("http")) {
-        videoUrls.push(video);
-      }
-    }
-    // Calcular ID incremental
-    const last = await es().search({
-      index: indexName,
-      sort: [{ id: { order: "desc" } }],
-      size: 1,
-      _source: ["id"],
+// 2. GetBecadoByID (Nuevo, esencial para el Service para operaciones de actualización/eliminación)
+export async function GetBecadoByID(id: string): Promise<Becado | null> {
+    return await mongoClient.becado.findUnique({
+        where: { id }
     });
+}
 
-    const lastId = (last.hits.hits[0]?._source as any)?.id ?? 0;
-    const newId = Number(lastId) + 1;
-
-    const nuevoBecado = {
-      id: newId.toString(),
-      nombre,
-      titulo,
-      descripcion,
-      fecha_publicacion,
-      videos: videoUrls,
+// 3. SearchBecado: Búsqueda de texto (Reemplaza SearchBecado(searchTerm) original de ES)
+export async function SearchBecado(searchTerm: string, indice: number = 0, pageSize: number = PAGE_SIZE): Promise<BecadosResult> {
+    const searchFilter: Prisma.BecadoWhereInput = {
+        OR: [
+            { nombre: { contains: searchTerm, mode: 'insensitive' } },
+            { titulo: { contains: searchTerm, mode: 'insensitive' } },
+            { descripcion: { contains: searchTerm, mode: 'insensitive' } },
+        ]
     };
 
-    const response = await es().index({
-      index: indexName,
-      id: nuevoBecado.id,
-      document: nuevoBecado,
+    const [becados, total] = await mongoClient.$transaction([
+        mongoClient.becado.findMany({
+            where: searchFilter,
+            orderBy: { fecha_publicacion: 'desc' },
+            skip: indice,
+            take: pageSize,
+        }),
+        mongoClient.becado.count({ where: searchFilter }),
+    ]);
+
+    return { becados, total };
+}
+
+// 4. SearchBecadoYear: Búsqueda por año (Reemplaza SearchBecadoYear(searchTerm, year) original de ES)
+export async function SearchBecadoYear(searchTerm: string, year: number, indice: number = 0, pageSize: number = PAGE_SIZE): Promise<BecadosResult> {
+    const start = new Date(`${year}-01-01`);
+    const end = new Date(`${year + 1}-01-01`);
+
+    const whereClause: any = {
+        fecha_publicacion: {
+            gte: start,
+            lt: end,
+        },
+    };
+    
+    // Si hay un término de búsqueda, lo incluimos en el filtro
+    if (searchTerm && searchTerm.trim() !== '') {
+         whereClause.OR = [
+            { nombre: { contains: searchTerm, mode: 'insensitive' } },
+            { titulo: { contains: searchTerm, mode: 'insensitive' } },
+            { descripcion: { contains: searchTerm, mode: 'insensitive' } },
+        ];
+    }
+
+    const [becados, total] = await mongoClient.$transaction([
+        mongoClient.becado.findMany({
+            where: whereClause,
+            orderBy: { fecha_publicacion: 'desc' },
+            skip: indice,
+            take: pageSize,
+        }),
+        mongoClient.becado.count({ where: whereClause }),
+    ]);
+
+    return { becados, total };
+}
+
+// --- OPERACIONES DE MUTACIÓN (CREACIÓN, ACTUALIZACIÓN, ELIMINACIÓN) ---
+
+// 5. CreateBecado (Reemplaza createBecadoModel y solo acepta datos limpios, sin FormData)
+export async function CreateBecado(data: any): Promise<Becado> {
+    return await mongoClient.becado.create({
+        data: {
+            ...data,
+            visitas: 0, 
+        }
     });
-
-    console.log("Nuevo becado creado:", nuevoBecado);
-    return response;
-  } catch (error) {
-    console.error("Error al crear el índice de becados:", error);
-    throw error;
-  }
 }
 
-export async function DeleteBecadoModel(id: string) {
-  if (!id) throw new Error("Debe proporcionar un ID válido");
-
-  // Obtener el becado
-  const becadoRes = await es().get({ index: "becados", id });
-  const becado = becadoRes._source as { videos?: string[] } | undefined;
-
-  // Borrar los videos si existen
-  if (becado?.videos && becado.videos.length > 0) {
-    for (const videoPath of becado.videos) {
-      const fullPath = path.join(process.cwd(), "public", videoPath);
-      try {
-        await unlink(fullPath);
-        console.log(`✅ Video eliminado: ${videoPath}`);
-      } catch (err) {
-        console.warn(`⚠️ No se pudo borrar el video o no existe: ${videoPath}`);
-      }
-    }
-  }
-
-  // Borrar el documento de Elasticsearch
-  const response = await es().delete({
-    index: "becados",
-    id,
-  });
-
-  return response;
-}
-
-export async function PutBecadoModel(id: string, formData: FormData) {
-  try {
-    const indexName = "becados";
-
-    // Obtener el documento actual
-    const res = await es().get({ index: indexName, id });
-    const becadoActual = res._source as Partial<Becado> | undefined;
-
-    if (!becadoActual) throw new Error("Becado no encontrado");
-
-    // Mantener los videos actuales
-    let videoUrls: string[] = Array.isArray(becadoActual.videos)
-      ? [...becadoActual.videos]
-      : [];
-
-    // Eliminar videos existentes si se indica
-    if (formData.get("eliminarVideos") === "true" && videoUrls.length > 0) {
-      for (const url of videoUrls) {
-        const oldPath = path.join(process.cwd(), "public", url);
-        await unlink(oldPath).catch(() => {}); // Ignorar error si no existe
-      }
-      videoUrls = [];
-    }
-
-    // Subir nuevos videos
-    const nuevosVideos = formData.getAll("videos");
-
-    for (const video of nuevosVideos) {
-      // 🔒 comprobamos si es un archivo subido
-      if (video instanceof File && video.size > 0) {
-        const bytes = await video.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-
-        const fileName = `${randomUUID()}_${video.name}`;
-        const filePath = path.join(
-          process.cwd(),
-          "public",
-          "uploads",
-          fileName
-        );
-        await writeFile(filePath, buffer);
-
-        videoUrls.push(`/uploads/${fileName}`);
-      } else if (typeof video === "string" && video.startsWith("http")) {
-        // 🔗 si es una URL externa, la guardamos directamente
-        videoUrls.push(video);
-      }
-    }
-
-    // Construir objeto de actualización
-    const updateDoc: Partial<Becado> = {};
-
-    // Campos simples
-    [
-      "nombre",
-      "titulo",
-      "descripcion",
-    ].forEach((key) => {
-      const value = formData.get(key);
-      if (typeof value === "string" && value.trim() !== "") {
-        updateDoc[key as keyof Becado] = value as any;
-      }
+// 6. UpdateBecado (Reemplaza PutBecadoModel y solo acepta datos limpios, sin FormData)
+export async function UpdateBecado(id: string, data: any): Promise<Becado> {
+    return await mongoClient.becado.update({
+        where: { id },
+        data: data
     });
+}
 
-    // Actualizar lista de videos (aunque esté vacía)
-    updateDoc.videos = videoUrls;
-
-    if (Object.keys(updateDoc).length === 0) {
-      throw new Error("No se recibieron datos para actualizar");
-    }
-
-    // Actualizar en Elasticsearch
-    await es().update({
-      index: indexName,
-      id,
-      doc: updateDoc,
+// 7. DeleteBecado (Reemplaza DeleteBecadoModel y solo borra de la DB)
+export async function DeleteBecado(id: string): Promise<Becado> {
+    return await mongoClient.becado.delete({
+        where: { id }
     });
-
-    console.log("✅ Becado actualizado correctamente:", id);
-  } catch (error) {
-    console.error("❌ Error al actualizar becado:", error);
-    throw error;
-  }
-}
-
-export async function GetBecadosModel() {
-  const response = await es().search({
-    index: "becados",
-    size: 20,
-    query: { match_all: {} },
-    _source: true,
-  });
-
-  const result: BecadosResult = {
-    becados: response.hits.hits.map((hit) => hit._source as Becado),
-    total: (response.hits.total as { value: number }).value,
-  };
-
-  return result;
-}
-
-export async function DeleteIndiceBecados() {
-  const response = await es().indices.delete({
-    index: "becados",
-  });
-
-  return response;
 }

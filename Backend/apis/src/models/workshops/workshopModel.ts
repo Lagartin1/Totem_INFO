@@ -1,150 +1,74 @@
-import {es} from "../../database/elastic.ts"
+import { mongoClient } from "@/database/mongodb";
+import { Workshop } from "@prisma/client"; // Importamos el tipo generado por Prisma
 
-const INDEX = process.env.WORKSHOPS_INDEX || "workshops";
-const COUNTER_INDEX = process.env.COUNTER_INDEX || "workshop_counter";
-const COUNTER_ID = "workshop_id_counter";
+// Eliminadas: las importaciones de 'es' y las constantes de contador
 
+// --- Tipos de Respuesta (Ajustados para consistencia) ---
+export type { Workshop };
 
-export async function getWorkshops(from: number = 0) {
-  const client = es();
-  const body = await client.search({
-    index: INDEX,
-    body: {
-      from,
-      size: 12,
-      query: {
-        match_all: {}
-      },
-      sort: [
-        { id: { order: "asc" } }
-      ]
-    }
-  });
-
-  const data = body.hits.hits.map((hit: any) => hit._source);
-  const total = (body.hits.total as { value: number; relation: string }).value
-
-  return { data, total };
+// Renombramos ProyectoResult a WorkshopResult
+export interface WorkshopResult {
+    data: Workshop[]; // Mantenemos 'data' como en el original
+    total: number;
 }
 
-export async function getNextWorkshopId(): Promise<number> {
-  const client = es();
+const PAGE_SIZE = 12; // Mantenemos el tamaño de página original
 
-  // Asegura índice para el contador (idempotente)
-  const exists = await client.indices.exists({ index: COUNTER_INDEX });
-  if (!exists) {
-    await client.indices.create({
-      index: COUNTER_INDEX,
-      body: {
-        mappings: {
-          properties: {
-            last_id: { type: "integer" },
-          },
-        },
-      },
-    } as any);
-    const lastId = await getLastWorkshopId();
-    await client.index({
-      index: COUNTER_INDEX,
-      id: COUNTER_ID,
-      document: { last_id: lastId },
-      refresh: true,
+// --- OPERACIONES DE LECTURA ---
+
+// 1. GetWorkshops: Listado paginado (Reemplaza getWorkshops())
+export async function GetWorkshops(from: number = 0, pageSize: number = PAGE_SIZE): Promise<WorkshopResult> {
+    const [data, total] = await mongoClient.$transaction([
+        mongoClient.workshop.findMany({
+            orderBy: { createdAt: 'asc' }, // Ordenamos por fecha de creación (reemplaza sort por 'id')
+            skip: from,
+            take: pageSize,
+        }),
+        mongoClient.workshop.count(),
+    ]);
+
+    return { data, total };
+}
+
+// 2. GetWorkshopByID (Nuevo, necesario para las operaciones de Update/Delete en el Service)
+export async function GetWorkshopByID(id: string): Promise<Workshop | null> {
+    return await mongoClient.workshop.findUnique({
+        where: { id }
     });
-  }
-
-  // Update atómico: si no existe, parte en 0; si existe, suma 1
-  const res: any = await client.update({
-    index: COUNTER_INDEX,
-    id: COUNTER_ID,
-    body: {
-      script: {
-        source: "ctx._source.last_id += 1",
-      },
-      upsert: {
-        last_id: 0,
-      },
-    },
-    _source: true,
-    refresh: "true",
-  });
-
-  // según versión del client puede venir en res.get o res.body.get
-  const source =
-    res.get?._source ||
-    res.body?.get?._source;
-
-  if (!source || typeof source.last_id !== "number") {
-    throw new Error("No se pudo obtener el nuevo ID para workshop");
-  }
-
-  return source.last_id;
 }
 
-export async function getLastWorkshopId(): Promise<number> {
-  const client = es();
-  const res = await client.search({
-    index: INDEX,
-    size: 1,
-    sort: [{ id: "desc" }],
-    _source: ["id"],
-  });
+// --- OPERACIONES DE MUTACIÓN ---
 
-  return (res.hits.hits[0]?._source as any)?.id ?? 0;
+// 3. CreateWorkshop (Reemplaza createWorkshop y solo acepta datos limpios, sin ID manual)
+export async function CreateWorkshop(workshop: any): Promise<Workshop> {
+    // El ID se genera automáticamente por MongoDB
+    return await mongoClient.workshop.create({
+        data: {
+            ...workshop,
+            visitas: 0, // Asumimos que se inicializa en 0
+        }
+    });
 }
 
-
-export async function createWorkshop(workshop: any,id: number) {
-  const client = es();
-  const body = await client.index({
-    index: INDEX,
-    body: {
-      id,
-      ...workshop
-    },
-    refresh: true,
-  });
-  return body;
+// 4. UpdateWorkshop (Reemplaza updateWorkshop y usa la sintaxis simple de Prisma)
+export async function UpdateWorkshop(id: string, workshop: any): Promise<Workshop> {
+    // Prisma usa el operador 'id' y el objeto 'data'
+    const updatedWorkshop = await mongoClient.workshop.update({
+        where: { id },
+        data: workshop
+    });
+    return updatedWorkshop;
 }
 
-export async function updateWorkshop(id: number, workshop: any) {
-  const client = es();
-
-  // Evita enviar undefined
-  const cleanWorkshop = Object.fromEntries(
-    Object.entries(workshop).filter(([, v]) => v !== undefined)
-  );
-
-  console.log("Clean workshop data:", cleanWorkshop);
-  const body = await client.updateByQuery({
-    index: INDEX,
-    refresh: true,
-    body: {
-      script: {
-        lang: 'painless',
-        source: Object.keys(cleanWorkshop)
-          .map((key) => `ctx._source.${key} = params.${key}`)
-          .join('; '),
-        params: cleanWorkshop,
-      },
-      query: {
-        term: { id }
-      },
-    },
-  });
-
-  return body;
+// 5. DeleteWorkshop (Reemplaza deleteWorkshop y usa la sintaxis simple de Prisma)
+export async function DeleteWorkshop(id: string): Promise<Workshop> {
+    // Prisma borra por el ID único
+    const deletedWorkshop = await mongoClient.workshop.delete({
+        where: { id }
+    });
+    return deletedWorkshop;
 }
 
-export async function deleteWorkshop(id: number) {
-  const client = es();
-  const body = await client.deleteByQuery({
-    index: INDEX,
-    body: {
-      query: {
-        match: { id }
-      }
-    },
-    refresh: true,
-  });
-  return body;
-} 
+// ELIMINADAS: 
+// - getNextWorkshopId(): Se elimina por completo.
+// - getLastWorkshopId(): Se elimina por completo.

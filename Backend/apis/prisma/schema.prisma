@@ -1,7 +1,6 @@
 datasource db {
   provider = "mongodb"
   url      = env("MONGODB_URL")
-  
 }
 
 generator client {
@@ -28,6 +27,12 @@ model Usuario {
 
   registros Registro[]
   sesiones  Session[]
+  practicas Practica[]
+  proyectos Proyecto[]
+  workshops Workshop[]
+  giras     Gira[]
+  becados   Becado[]
+  noticias  Noticia[]
 
   @@index([lockedUntil])
 }
@@ -36,7 +41,7 @@ model Registro {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   action    String
   resource  String?
-  details   Json?       // <— JSON real
+  details   Json?       
   userAgent String?
   timestamp DateTime @default(now())
 
@@ -61,4 +66,131 @@ model Session {
 
   @@index([userId, revokedAt, expiresAt])
   @@index([expiresAt])
+}
+
+model Practica {
+  // Campos obligatorios para MongoDB/Prisma
+  id                    String    @id @default(auto()) @map("_id") @db.ObjectId
+  created_at            DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt // Buenas prácticas
+  marca_temporal        String?
+  tipo_practica         String?   
+  nombre_contacto       String?
+  cargo_contacto        String?
+  correo_contacto       String?  
+  telefono_contacto     String?  
+  nombre_empresa        String?
+  sitio_web_empresa     String?   
+  unidad_empresa        String?
+  fechas_practica       String?
+  modalidad             String?   
+  sede_practica         String?
+  regimen_trabajo       String?   
+  labores               String?
+  beneficios            String?
+  requisitos_especiales String?
+  state                 Boolean?
+  visitas               Int?      @default(0) // 'integer' -> Int
+
+
+  autorId               String    @db.ObjectId
+  autor                 Usuario   @relation(fields: [autorId], references: [id])
+  
+  @@index([tipo_practica])
+  @@index([modalidad])
+  @@index([regimen_trabajo])
+}
+
+model Proyecto {
+  id                    String    @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  autores               String?    
+  titulo                String?   
+  area_desarrollo       String?    
+  descripcion           String?   
+  correo_contacto       String?    
+  telefono_contacto     String?    
+  fecha_publicacion     DateTime? 
+  videos                String[]   
+
+  autorId               String    @db.ObjectId
+  autor                 Usuario   @relation(fields: [autorId], references: [id])
+  
+
+  @@index([area_desarrollo])
+  @@index([fecha_publicacion])
+}
+
+model Workshop {
+  id                    String    @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt             DateTime  @default(now()) 
+  updatedAt             DateTime  @updatedAt
+  titulo                String?
+  descripcion           String?
+  fecha                 DateTime?
+  link                  String?
+
+  autorId               String    @db.ObjectId
+  autor                 Usuario   @relation(fields: [autorId], references: [id])
+  
+
+  @@index([titulo])
+  @@index([fecha])
+}
+
+model Gira{
+  id                    String    @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt             DateTime  @default(now()) 
+  updatedAt             DateTime  @updatedAt
+  titulo                String?
+  descripcion           String?
+  anio                  String?
+  lugares               String[]
+  videos                String[]
+
+  autorId               String    @db.ObjectId
+  autor                 Usuario   @relation(fields: [autorId], references: [id])
+  
+
+  @@index([titulo])
+  @@index([anio])
+}
+model Becado {
+  id                    String    @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  nombre                String?   
+  titulo                String?   
+  descripcion           String?   
+  fecha_publicacion     DateTime? 
+  videos                String[]  
+
+  autorId               String    @db.ObjectId
+  autor                 Usuario   @relation(fields: [autorId], references: [id])
+  
+
+  @@index([nombre])
+  @@index([titulo])
+  @@index([fecha_publicacion])
+}
+
+model Noticia {
+  id                    String    @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  titulo                String?     
+  descripcion           String?    
+  contenido             String?    
+  autor_externo         String?     
+  fecha_publicacion     DateTime?   
+  imagen                String?     
+
+  autorId               String    @db.ObjectId
+  autor                 Usuario   @relation(fields: [autorId], references: [id])
+  
+  @@index([titulo])
+  @@index([fecha_publicacion])
 }

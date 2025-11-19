@@ -1,31 +1,7 @@
-import { es } from "@/database/elastic";
+import { mongoClient } from "@/database/mongodb";
+import { Practica } from "@prisma/client"; // Importamos el tipo generado por Prisma
 
-// --- INTERFACES ---
-
-interface TermsBucket {
-  key: string;
-  doc_count: number;
-}
-
-/**
- * Interfaz unificada para Practica.
- * ¡ESTA ES LA CORRECCIÓN!
- */
-export interface Practica {
-  id?: string;
-  titulo?: string; // Título o labores
-  labores?: string; // Aseguramos que ambos existan
-  visitas?: number; // 1. Añadimos 'visitas' como número opcional
-  tipo_practica?: string;
-  created_at?: string;
-  state?: boolean;
-  nombre_empresa?: string;
-  sede_practica?: string;
-  requisitos_especiales?: string;
-  
-  // 2. Esto permite que 'visitas' (number) y otros campos (string) coexistan
-  [key: string]: any; 
-}
+export type { Practica };
 
 export interface PracticasResult {
   practicas: Practica[];
@@ -33,458 +9,216 @@ export interface PracticasResult {
 }
 
 export interface PracticaCSV {
-  total: number;
+    total: number;
+    errors: any[]; 
 }
 
-const FIELDS_PRACTICAS: string[] = [
-  "labores",
-  "titulo",
-  "nombre_empresa",
-  "sede_practica",
-  "requisitos_especiales",
-  "modalidad",
-  "beneficios",
-];
+// --- CONSTANTES ---
+const PAGE_SIZE = 10; 
 
-// --- FUNCIONES CRUD Y DE BÚSQUEDA ---
 
-/**
- * 1. LISTAR PRÁCTICAS (PAGINADO)
- */
-export async function GetPracticas(
-  tipo_practica: string,
-  indice: number = 0, 
-  size: number = 10
-): Promise<PracticasResult> {
-  const body = {
-    index: 'practicas',
-    from: indice,
-    size: size,
-    body: {
-      query: { 
-        match: {
-          tipo_practica: tipo_practica
-        }
-      },
-      _source: true
-    }
-  };
-  const response = await es().search(body);
-
-  const hits: Practica[] = response.hits.hits.map((hit) => ({
-    ...(hit._source as Practica),
-    id: hit._id
-  }));
+// 1. CreateNewPractica: Creación de una práctica
+export async function CreateNewPractica(data: any): Promise<PracticasResult> {
+  const practica = await mongoClient.practica.create({
+    data: {
+      ...data,
+      visitas: 0, // Asumimos que inicializa en 0
+    },
+  });
 
   return {
-    practicas: hits,
-    total: (response.hits.total as { value: number }).value,
+    practicas: [practica],
+    total: 1,
   };
 }
 
-/**
- * 2. BUSCAR PRÁCTICAS POR TÉRMINO (PAGINADO)
- */
-export async function SearchTermPracticas(
-  term: string,
-  tipo_practica: string,
-  indice: number = 0,
-  size: number = 10
-): Promise<PracticasResult> {
-  const body = {
-    index: "practicas",
-    from: indice,
-    size: size,
-    body: {
-      query: {
-        bool: {
-          must: [
-            { term: { "tipo_practica.keyword": `${tipo_practica}` } },
-            {
-              multi_match: {
-                query: term,
-                fields: FIELDS_PRACTICAS,
-                fuzziness: "AUTO"
-              }
-            }
-          ]
-        }
+export async function CreateBulkPracticas(dataArray: any[]): Promise<PracticaCSV> {
+  const creationPromises = dataArray.map(data => 
+    mongoClient.practica.create({
+      data: {
+        ...data,
+        visitas: 0,
       },
-      _source: true,
+    })
+  );
+
+  try {
+    const results = await Promise.all(creationPromises);
+    return {
+      total: results.length,
+      errors: [],
+    };
+  } catch (error) {
+    console.error("Error en CreateBulkPracticas:", error);
+    return {
+        total: 0,
+        errors: [{ message: "Fallo la inserción de datos masivos." }],
+    };
+  }
+}
+
+
+// Helper para crear el filtro de año
+function createYearFilter(year: string) {
+  const start = new Date(parseInt(year), 0, 1);
+  const end = new Date(parseInt(year) + 1, 0, 1);
+  return {
+    created_at: {
+      gte: start,
+      lt: end,
     },
   };
-
-  const response = await es().search(body);
-  
-  const hits: Practica[] = response.hits.hits.map((hit) => {
-    const id = hit._id;
-    if (!id) return null;
-    return {
-      ...(hit._source as Practica),
-      id: id
-    };
-  }).filter(Boolean) as Practica[];
-
-  return {
-    practicas: hits,
-    total: (response.hits.total as { value: number }).value,
-  };
 }
 
+// 3. GetPracticas: Listado normal/paginado
+export async function GetPracticas(type: string, indice: number, pageSize = PAGE_SIZE): Promise<PracticasResult> {
+  const filter: any = type !== 'all' ? { tipo_practica: type } : {};
 
-export async function GetPracticasByYear(
-  tipo_practica: string, 
-  año: string,
-  indice: number = 0, 
-  size: number = 10
-): Promise<PracticasResult> {
-  const body = {
-    index: 'practicas',
-    from: indice,
-    size: size,
-    body: {
-      query: {
-        bool: {
-          must: [
-            { term: { "tipo_practica.keyword": `${tipo_practica}` } },
-            {
-              range: {
-                created_at: {
-                  gte: `${año}-01-01`,
-                  lte: `${año}-12-31`
-                }
-              }
-            }
-          ]
-        }
-      },
-      _source: true
-    }
-  };
-  const response = await es().search(body);
-  
-  const hits: Practica[] = response.hits.hits.map((hit) => {
-    const id = hit._id;
-    if (!id) return null;
-    return {
-      ...(hit._source as Practica),
-      id: id
-    };
-  }).filter(Boolean) as Practica[];
+  const [practicas, total] = await mongoClient.$transaction([
+    mongoClient.practica.findMany({
+      where: filter,
+      orderBy: { created_at: 'desc' },
+      skip: indice,
+      take: pageSize,
+    }),
+    mongoClient.practica.count({ where: filter }),
+  ]);
 
-  const result: PracticasResult = {
-    practicas: hits,
-    total: (response.hits.total as { value: number; relation: string }).value,
-  };
-  return result ;
+  return { practicas, total };
 }
 
-/**
- * 4. OBTENER ÚLTIMO ID
- * (CORREGIDO)
- */
-export async function GetLastPracticaId(): Promise<number> {
-  const body = {
-    index: 'practicas',
-    size: 1,
-    body: {
-      query: { match_all: {} },
-      sort: [
-        { "id": { "order": "desc", "numeric_type": "long" } }
-      ],
-      _source: ["id"]
-    }
+// 4. GetPracticasByYear: Listado por año y paginado
+export async function GetPracticasByYear(type: string, year: string, indice: number, pageSize = PAGE_SIZE): Promise<PracticasResult> {
+  const yearFilter = createYearFilter(year);
+  const typeFilter: any = type !== 'all' ? { tipo_practica: type } : {};
+  const filter = {
+      ...typeFilter,
+      ...yearFilter,
   };
 
-  try {
-    const response = await es().search(body);
-    if (response.hits.hits.length === 0) {
-      return 0;
-    }
+  const [practicas, total] = await mongoClient.$transaction([
+    mongoClient.practica.findMany({
+      where: filter,
+      orderBy: { created_at: 'desc' },
+      skip: indice,
+      take: pageSize,
+    }),
+    mongoClient.practica.count({ where: filter }),
+  ]);
 
-    const hit = response.hits.hits[0];
-
-    // ✔️ CORRECCIÓN SOLICITADA
-    const rawId = (hit._source as Practica).id ?? "0";
-    const lastId = parseInt(rawId, 10);
-
-    return lastId;
-  } catch (e) {
-    console.error("Error GetLastPracticaId (¿'id' no es numérico?):", e);
-    return 99999;
-  }
+  return { practicas, total };
 }
 
-/**
- * 5. CREAR NUEVA PRÁCTICA
- */
-export async function CreateNewPractica(data: any, lastID: number): Promise<PracticasResult> {
-  const newID = lastID + 1;
-  const practicaData: Practica = {
-    id: newID.toString(),
-    state: true,
-    visitas: 0,
-    created_at: new Date().toISOString(),
-    ...data
-  };
-
-  await es().index({
-    index: 'practicas',
-    id: practicaData.id,
-    body: practicaData
-  });
-
-  return {
-    practicas: [practicaData],
-    total: 1
-  };
-}
-
-/**
- * 6. CREAR PRÁCTICAS EN LOTE (BULK)
- */
-export async function CreateBulkPracticas(dataArray: any[], lastID: number): Promise<PracticaCSV> {
-  if (!dataArray || dataArray.length === 0) {
-    return { total: 0 };
-  }
-
-  const bulkBody: any[] = [];
-  let currentID = lastID;
-  const now = new Date().toISOString();
-
-  for (const data of dataArray) {
-    currentID += 1;
-    const practicaData: Practica = {
-      id: currentID.toString(),
-      state: true,
-      visitas: 0,
-      created_at: now,
-      ...data
+// 5. SearchTermPracticas: Búsqueda por término
+export async function SearchTermPracticas(term: string, type: string, indice: number, pageSize = PAGE_SIZE): Promise<PracticasResult> {
+    const typeFilter: any = type !== 'all' ? { tipo_practica: type } : {};
+    
+    // Filtro de búsqueda en múltiples campos de texto (simulando búsqueda ES)
+    const searchFilter = {
+        OR: [
+            { nombre_empresa: { contains: term, mode: 'insensitive' } },
+            { labores: { contains: term, mode: 'insensitive' } },
+            { beneficios: { contains: term, mode: 'insensitive' } },
+            { requisitos_especiales: { contains: term, mode: 'insensitive' } },
+            { marca_temporal: { contains: term, mode: 'insensitive' } },
+        ]
     };
 
-    bulkBody.push({ index: { _index: 'practicas', _id: practicaData.id } });
-    bulkBody.push(practicaData);
-  }
+    const filter = {
+        ...typeFilter,
+        ...searchFilter
+    };
 
-  const response: any = await es().bulk({
-    refresh: true,
-    body: bulkBody
-  });
+    const [practicas, total] = await mongoClient.$transaction([
+        mongoClient.practica.findMany({
+            where: filter,
+            orderBy: { created_at: 'desc' },
+            skip: indice,
+            take: pageSize,
+        }),
+        mongoClient.practica.count({ where: filter }),
+    ]);
 
-  let successCount = 0;
-  if (response && Array.isArray(response.items)) {
-    for (const item of response.items) {
-      const op = item.index || item.create || item.update || item.delete;
-      if (op && !op.error) successCount += 1;
-    }
-  }
-
-  return { total: successCount };
+    return { practicas, total };
 }
 
-/**
- * 7. OBTENER PRÁCTICA POR ID
- */
+
+// 6. GetPracticasByID: Obtener una práctica por ID
 export async function GetPracticasByID(id: string): Promise<PracticasResult> {
-  const body = {
-    index: 'practicas',
-    id: id,
-    _source: true
-  };
-
-  const response = await es().get(body);
-  const result: PracticasResult = {
-    practicas: [{ ...(response._source as Practica), id: response._id }],
-    total: 1
-  };
-  return result;
-}
-
-/**
- * 8. ELIMINAR PRÁCTICA
- */
-export async function DeletePracticaByID(id: string): Promise<boolean> {
-  const body = {
-      index: 'practicas',
-      id: id,
-  };
-  try {
-      await es().delete(body);
-      return true;
-  } catch (error) {
-      console.error('Error deleting practica:', error);
-      return false;
-  }
-}
-
-/**
- * 9. DESACTIVAR PRÁCTICA
- */
-export async function desactivePracticaByID(id: string): Promise<boolean | { error: string }> {
-  try {
-      await es().update({
-          index: 'practicas',
-          id,
-          body: {
-              doc: {
-                  state: false
-              }
-          }
-      });
-      return true;
-  } catch (error) {
-      console.error('Error desactivando práctica:', error);
-      return { error: 'Error desactivando práctica' };
-  }
-}
-
-/**
- * 10. INCREMENTAR VISITAS
- */
-export async function incrementPracticasVisits(id: string): Promise<void> {
-  try {
-    await es().update({
-      index: "practicas",
-      id: id,
-      body: {
-        script: {
-          source: "ctx._source.visitas = (ctx._source.visitas ?: 0) + 1",
-          lang: "painless"
-        }
-      }
-    });
-  } catch (error) {
-    console.error(`Error incrementando visitas para practicas ${id}:`, error);
-  }
-}
-
-// --- FUNCIONES DE ESTADÍSTICAS ---
-
-/**
- * 11. OBTENER TOP 10 HISTÓRICO (por 'visitas')
- */
-export async function getTopPracticas(limit: number = 10): Promise<PracticasResult> {
-  const response = await es().search({
-    index: "practicas",
-    size: limit,
-    body: {
-      query: { match_all: {} },
-      sort: [
-        {
-          _script: {
-            type: "number",
-            script: {
-              lang: "painless",
-              source: "doc.containsKey('visitas') ? doc['visitas'].value : 0"
-            },
-            order: "desc"
-          }
-        }
-      ]
-    }
+  const practica = await mongoClient.practica.findUnique({
+    where: { id: id },
   });
 
-  const hits: Practica[] = response.hits.hits.map((hit) => {
-    const id = hit._id;
-    if (!id) return null;
-    return {
-      ...(hit._source as Practica),
-      id: id,
-      visitas: (hit._source as Practica).visitas || 0
-    };
-  }).filter(Boolean) as Practica[];
-  
-  return {
-    practicas: hits,
-    total: hits.length
-  };
-}
-
-/**
- * 12. OBTENER TOP 10 POR RANGO DE FECHAS (por 'logs')
- */
-export async function getTopPracticasByDateRange(
-  startDate: string, 
-  endDate: string, 
-  limit: number = 10
-): Promise<PracticasResult> {
-  
-  const logQueryBody = {
-    index: 'logs',
-    size: 0,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            { term: { action: 'view_practica' } },
-            {
-              range: {
-                timestamp: {
-                  gte: startDate,
-                  lte: endDate
-                }
-              }
-            }
-          ]
-        }
-      },
-      aggs: {
-        top_practicas: {
-          terms: {
-            field: 'targetId.keyword',
-            size: limit,
-            order: { _count: 'desc' }
-          }
-        }
-      }
-    }
-  };
-
-  const logResponse = await es().search(logQueryBody);
-  
-  const topPracticasAgg = logResponse.aggregations?.top_practicas as { buckets: TermsBucket[] };
-  const buckets = topPracticasAgg?.buckets || [];
-
-  if (buckets.length === 0) {
+  if (!practica) {
     return { practicas: [], total: 0 };
   }
 
-  const practicasIds = buckets.map((bucket: TermsBucket) => bucket.key);
-  const practicasVisitasMap = new Map<string, number>();
-  buckets.forEach((bucket: TermsBucket) => {
-    practicasVisitasMap.set(bucket.key, bucket.doc_count);
-  });
+  return { practicas: [practica], total: 1 };
+}
 
-  const practicasDetailsResponse = await es().search({
-    index: 'practicas',
-    size: limit,
-    body: {
-      query: {
-        ids: {
-          values: practicasIds
+// --- OPERACIONES DE ACTUALIZACIÓN / ELIMINACIÓN ---
+
+// 7. incrementPracticasVisits: Incrementar contador de visitas
+export async function incrementPracticasVisits(id: string): Promise<boolean> {
+  try {
+    await mongoClient.practica.update({
+      where: { id: id },
+      data: {
+        visitas: { increment: 1 }, // Usando el operador atómico de MongoDB
+      },
+    });
+    return true;
+  } catch (error) {
+    console.error("Error incrementando visitas:", error);
+    return false;
+  }
+}
+
+// 8. desactivePracticaByID: Cambiar el estado (toggle)
+export async function desactivePracticaByID(id: string): Promise<boolean> {
+    try {
+        const current = await mongoClient.practica.findUnique({
+            where: { id: id },
+            select: { state: true }
+        });
+
+        if (!current) {
+            return false;
         }
-      }
+
+        await mongoClient.practica.update({
+            where: { id: id },
+            data: {
+                state: !current.state,
+            },
+        });
+        return true;
+    } catch (error) {
+        console.error("Error al cambiar estado:", error);
+        return false;
     }
-  });
+}
 
-  const practicasConVisitas = practicasDetailsResponse.hits.hits.map((hit) => {
-    const practica = hit._source as Practica;
-    const id = hit._id; 
-    
-    if (!id) return null;
-    
-    return {
-      ...practica,
-      id: id,
-      visitas: practicasVisitasMap.get(id) || 0
-    };
-  })
-  .filter(Boolean) as Practica[];
 
-  const practicasOrdenadas = practicasConVisitas.sort((a, b) => (b.visitas ?? 0) - (a.visitas ?? 0));
+// 9. DeletePracticaByID: Eliminar una práctica
+export async function DeletePracticaByID(id: string): Promise<boolean> {
+  try {
+    await mongoClient.practica.delete({
+      where: { id: id },
+    });
+    return true;
+  } catch (error) {
+    console.error("Error al eliminar práctica:", error);
+    return false;
+  }
+}
 
-  return {
-    practicas: practicasOrdenadas,
-    total: practicasOrdenadas.length
-  };
+// 10. getTopPracticas: Obtener las N prácticas más visitadas
+export async function getTopPracticas(limit: number): Promise<Practica[]> {
+    const practicas = await mongoClient.practica.findMany({
+        orderBy: { visitas: 'desc' },
+        take: limit,
+        where: { state: true } // Asumimos que solo queremos las activas
+    });
+    return practicas;
 }

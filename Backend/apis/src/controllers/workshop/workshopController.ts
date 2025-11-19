@@ -1,65 +1,106 @@
+// Importamos las funciones del nuevo modelo de Prisma
+import { 
+    CreateWorkshop, 
+    DeleteWorkshop, 
+    GetWorkshops, 
+    UpdateWorkshop, 
+    WorkshopResult, // Importamos el tipo de resultado
+    Workshop // Importamos el tipo Workshop
+} from "@/models/workshops/workshopModel";
 import { NextRequest, NextResponse } from "next/server";
-import { createWorkshopInDb, deleteWorkshopInDb, getAllWorkshopsFromDb, updateWorkshopInDb } from "@/services/workshops/workshopsService";
-import { cookies } from "next/headers";
-import { verifyAccessToken,getUserIdFromSessionToken } from "@/lib/auth/login_tools";
+import { addLogEntry } from "@/models/admin/logModel"; 
+
+const PAGE_SIZE = 12; // Mantenemos el tamaño de página definido en el Modelo
+
+export async function getAllWorkshopsFromDb(pagina?: string): Promise<WorkshopResult> { 
+    // Calculamos el índice de inicio ('skip' en Prisma)
+    const pageNumber = Number(pagina) > 1 ? Number(pagina) : 1;
+    const indice = (pageNumber - 1) * PAGE_SIZE;
+
+    // Llamamos al nuevo modelo con el índice y el tamaño de página
+    const workshops = await GetWorkshops(indice, PAGE_SIZE);
+
+    if (!workshops) {
+        throw new Error("No se pudieron obtener los workshops");
+    }
+    return workshops;
+} 
 
 
-export async function workshopController(req: NextRequest) {
-  const pagina = req.nextUrl.searchParams.get('pagina') || '1';
-  const workshops = await getAllWorkshopsFromDb(pagina);
-  if (!workshops) {
-    return NextResponse.json(
-      { message: "No se encontraron workshops" },
-      { status: 404 }
+// AÑADIDO: 'userId' para la autoría (autorId en Prisma)
+export async function createWorkshopInDb(req: NextRequest, userId: string): Promise<Workshop> {
+    const workshop = await req.json().catch(() => ({} as any)); 
+    
+    // ELIMINADO: const id = await getNextWorkshopId();
+    
+    // AÑADIMOS el autorId al objeto de datos
+    const workshopData = {
+        ...workshop,
+        autorId: userId // Campo obligatorio para Prisma
+    };
+    
+    // Llamamos a la función de creación, que ahora solo espera el objeto
+    const result = await CreateWorkshop(workshopData);
+
+    if (!result) {
+        throw new Error("No se pudo crear el workshop");
+    }
+
+    // El log ahora usa el ID generado por MongoDB (result.id, que es un string)
+    await addLogEntry(
+        userId, 
+        'create_workshop', 
+        `Creó un workshop con ID ${result.id} con los datos: ${JSON.stringify(workshop)}`
     );
-  }
-  return NextResponse.json({ ok: true, data: workshops }, { status: 200 });
+    return result;
+} 
+
+// Nota: Ahora espera un ID de tipo string (MongoDB ObjectId)
+export async function updateWorkshopInDb(req: NextRequest, userId: string): Promise<Workshop> {
+    const { id, ...workshop } = await req.json().catch(() => ({} as any));
+    
+    // El ID debe ser string (MongoDB ObjectId)
+    if (!id || typeof id !== 'string') {
+         throw new Error("ID de workshop inválido");
+    }
+
+    // Llamamos al modelo que espera el ID (string) y los datos
+    const result = await UpdateWorkshop(id, workshop);
+
+    if (!result) {
+        throw new Error("No se pudo actualizar el workshop");
+    }
+
+    // El log usa el ID de MongoDB
+    await addLogEntry(
+        userId, 
+        'update_workshop', 
+        `Actualizó el workshop con ID ${id} con los datos: ${JSON.stringify(workshop)}`
+    );
+    return result;
 }
 
+// Nota: Ahora espera un ID de tipo string (MongoDB ObjectId)
+export async function deleteWorkshopInDb(req: NextRequest, userId: string): Promise<Workshop> {
+    const { id } = await req.json().catch(() => ({} as any));
 
-
-export async function adminWorkshopController(type: 'GET' | 'POST' | 'PUT' | 'DELETE',req:NextRequest, workshop?: any, id?: number) {
-  const jar = await cookies();
-  const token = jar.get('access_token')?.value;
-  const sessionToken = jar.get('refresh_token')?.value;
-  if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (!(await verifyAccessToken(token))) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // El ID debe ser string (MongoDB ObjectId)
+    if (!id || typeof id !== 'string') {
+         throw new Error("ID de workshop inválido");
     }
-  const userId = await getUserIdFromSessionToken(sessionToken || '');
-  const userIdNumber = userId ? parseInt(userId) : null;
-  
-  if (!userIdNumber) {
-    return NextResponse.json({ error: 'Invalid user ID' }, { status: 401 });
-  }
-  try{
-    switch (type) {
-      case 'POST':
-      const createdWorkshop = await createWorkshopInDb(req,userIdNumber);
-      if (!createdWorkshop) {
-        return NextResponse.json({ message: "No se pudo crear el workshop" }, { status: 500 });
-      }
-      return NextResponse.json({ ok: true, data: createdWorkshop }, { status: 201 });
+    
+    // Llamamos al modelo que espera el ID (string)
+    const result = await DeleteWorkshop(id);
 
-      case 'PUT':
-        const updatedWorkshop =  await updateWorkshopInDb(req,userIdNumber);
-        if (!updatedWorkshop) {
-          return NextResponse.json({ message: "No se pudo actualizar el workshop" }, { status: 500 });
-        }
-        return NextResponse.json({ ok: true, data: updatedWorkshop }, { status: 200 });
-
-      case 'DELETE':
-        const deletedWorkshop = await deleteWorkshopInDb(req,userIdNumber);
-        if (!deletedWorkshop) {
-          return NextResponse.json({ message: "No se pudo eliminar el workshop" }, { status: 500 });
-        }
-        return NextResponse.json({ ok: true, data: deletedWorkshop }, { status: 200 });
-
-      default:
-        return NextResponse.json({ message: "Método no permitido" }, { status: 405 });
+    if (!result) {
+        throw new Error("No se pudo eliminar el workshop");
     }
-  }catch(error:any){
-    return NextResponse.json({ message: error.message || "Error del servidor" }, { status: 500 });  
 
-  }
+    // El log usa el ID de MongoDB
+    await addLogEntry(
+        userId, 
+        'delete_workshop', 
+        `Eliminó el workshop con ID ${id}`
+    );
+    return result;
 }

@@ -1,32 +1,29 @@
-import {
-  listBecados,
-  BuscarBecados,
-  createBecadoService,
-  DeleteBecadoService,
-  PutBecadoService,
-  deleteBecadoIndiceService
-} from "@/services/becados/becadosService";
-import { BecadosResult, GetBecadosModel } from "@/models/becados/becadosModel";
+import {listBecados,BuscarBecados,createBecadoService,DeleteBecadoService,PutBecadoService,} from "@/services/becados/becadosService";
 
-export async function fetchBecados(
-  searchTerm: string | false
-): Promise<BecadosResult> {
+// Importamos los tipos y funciones correctas del nuevo modelo
+import { BecadosResult, GetBecados } from "@/models/becados/becadosModel"; 
+
+export async function fetchBecados(searchTerm: string | false): Promise<BecadosResult> {
   let response: BecadosResult;
 
+  // Asumimos paginación por defecto (índice 0) ya que el controlador original no recibía índice
   if (searchTerm) {
-    response = await BuscarBecados(searchTerm);
+    response = await BuscarBecados(searchTerm, 0);
   } else {
-    response = await listBecados();
+    response = await listBecados(0);
   }
-  if (!response) {
+  
+  if (!response || response.becados.length === 0) {
     throw new Error("No se encontraron becados");
   }
   return response;
 }
 
-export async function createBecadoController(formData: FormData) {
+// NOTA: Se añade userID porque Prisma requiere un autor obligatorio para crear el registro.
+// Deberás actualizar la llamada a esta función en tu archivo route.ts para pasar el ID del usuario.
+export async function createBecadoController(formData: FormData, userID: string) {
   try {
-    const response = await createBecadoService(formData);
+    const response = await createBecadoService(formData, userID);
     return response;
   } catch (error) {
     console.error("❌ Error al crear el becado:", error);
@@ -35,7 +32,8 @@ export async function createBecadoController(formData: FormData) {
 }
 
 export async function GetBecadosController() {
-  const becadosData = await GetBecadosModel();
+  // Usamos GetBecados del modelo refactorizado
+  const becadosData = await GetBecados(); 
   if (!becadosData) {
     throw new Error("No se pudieron obtener los becados");
   }
@@ -62,12 +60,3 @@ export async function PutBecadosController(id: string, formData: FormData) {
   }
 }
 
-export async function DeleteIndiceBecados() {
-  try {
-    const result = await deleteBecadoIndiceService();
-    return result;
-  } catch (error) {
-    console.error("Error al eliminar índice:", error);
-    throw error;
-  }
-}
