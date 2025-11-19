@@ -1,23 +1,12 @@
-// Importamos las funciones del nuevo modelo de Prisma
-import { 
-    CreateWorkshop, 
-    DeleteWorkshop, 
-    GetWorkshops, 
-    UpdateWorkshop, 
-    WorkshopResult, // Importamos el tipo de resultado
-    Workshop // Importamos el tipo Workshop
-} from "@/models/workshops/workshopModel";
+import { CreateWorkshop, DeleteWorkshop, GetWorkshops, UpdateWorkshop, WorkshopResult,Workshop } from "@/models/workshops/workshopModel";
 import { NextRequest, NextResponse } from "next/server";
 import { addLogEntry } from "@/models/admin/logModel"; 
 
-const PAGE_SIZE = 12; // Mantenemos el tamaño de página definido en el Modelo
+const PAGE_SIZE = 12;
 
 export async function getAllWorkshopsFromDb(pagina?: string): Promise<WorkshopResult> { 
-    // Calculamos el índice de inicio ('skip' en Prisma)
     const pageNumber = Number(pagina) > 1 ? Number(pagina) : 1;
     const indice = (pageNumber - 1) * PAGE_SIZE;
-
-    // Llamamos al nuevo modelo con el índice y el tamaño de página
     const workshops = await GetWorkshops(indice, PAGE_SIZE);
 
     if (!workshops) {
@@ -27,13 +16,8 @@ export async function getAllWorkshopsFromDb(pagina?: string): Promise<WorkshopRe
 } 
 
 
-// AÑADIDO: 'userId' para la autoría (autorId en Prisma)
 export async function createWorkshopInDb(req: NextRequest, userId: string): Promise<Workshop> {
     const workshop = await req.json().catch(() => ({} as any)); 
-    
-    // ELIMINADO: const id = await getNextWorkshopId();
-    
-    // AÑADIMOS el autorId al objeto de datos
     const workshopData = {
         ...workshop,
         autorId: userId // Campo obligatorio para Prisma
@@ -45,8 +29,6 @@ export async function createWorkshopInDb(req: NextRequest, userId: string): Prom
     if (!result) {
         throw new Error("No se pudo crear el workshop");
     }
-
-    // El log ahora usa el ID generado por MongoDB (result.id, que es un string)
     await addLogEntry(
         userId, 
         'create_workshop', 
@@ -97,10 +79,6 @@ export async function deleteWorkshopInDb(req: NextRequest, userId: string): Prom
     }
 
     // El log usa el ID de MongoDB
-    await addLogEntry(
-        userId, 
-        'delete_workshop', 
-        `Eliminó el workshop con ID ${id}`
-    );
+    await addLogEntry(userId, 'delete_workshop', `Eliminó el workshop con ID ${id}`);
     return result;
 }

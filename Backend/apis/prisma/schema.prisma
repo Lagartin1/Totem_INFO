@@ -105,7 +105,7 @@ model Proyecto {
   id                    String    @id @default(auto()) @map("_id") @db.ObjectId
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
-  autores               String?    
+  autores               String[]    
   titulo                String?   
   area_desarrollo       String?    
   descripcion           String?   
@@ -187,6 +187,7 @@ model Noticia {
   autor_externo         String?     
   fecha_publicacion     DateTime?   
   imagen                String?     
+  categorias             String[]
 
   autorId               String    @db.ObjectId
   autor                 Usuario   @relation(fields: [autorId], references: [id])

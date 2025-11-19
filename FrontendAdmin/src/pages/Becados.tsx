@@ -13,6 +13,7 @@ const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 export default function Becados() {
   const [becados, setBecados] = useState<Becado[]>([]);
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null); // Nuevo estado para errores
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const openModal = () => setIsModalOpen(true);
@@ -20,15 +21,27 @@ export default function Becados() {
 
   const baseUrl = BUILD_MODE ? API_BASE_URL : "http://localhost:3000";
 
-  // Función para cargar becados
+  // Función para cargar becados (MEJORADA)
   const fetchBecados = async () => {
     try {
       setLoading(true);
+      setErrorMsg(null);
+
       const res = await fetch(`${baseUrl}/api/becados`);
+
+      // 1. Verificar si el servidor respondió con éxito (Status 200-299)
+      if (!res.ok) {
+        // Si es error 500 o 404, lanzamos un error legible
+        throw new Error(`Error del servidor: ${res.status} ${res.statusText}`);
+      }
+
+      // 2. Si todo está bien, convertimos a JSON
       const json = await res.json();
       setBecados(json.becados ?? []);
-    } catch (err) {
-      console.error("Error al obtener becados:", err);
+      
+    } catch (err: any) {
+      console.error("❌ Error al obtener becados:", err);
+      setErrorMsg(err.message || "Error desconocido");
     } finally {
       setLoading(false);
     }
@@ -55,12 +68,23 @@ export default function Becados() {
       </div>
       <div className="p-6">
         <div className="py-10 flex flex-col items-center gap-6">
+          
+          {/* Mensaje de error visual si falla la carga */}
+          {errorMsg && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+              <strong className="font-bold">Error: </strong>
+              <span className="block sm:inline">{errorMsg}</span>
+            </div>
+          )}
+
           {loading && <Loading frase="Cargando becados..." />}
 
           <div className="relative w-full">
             <div className="flex gap-4 overflow-x-auto pb-4">
-              {!loading && slides.length > 0 && (
+              {!loading && slides.length > 0 ? (
                 <Carousel key={becados.length} slides={slides} />
+              ) : (
+                !loading && !errorMsg && <p className="text-gray-500">No hay becados registrados.</p>
               )}
             </div>
           </div>

@@ -1,18 +1,21 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { DeleteBecadosController, PutBecadosController } from "@/controllers/becados/becadosController";
 import { addLogEntry } from "@/models/admin/logModel";
 import { cookies } from "next/headers";
 import { verifyAccessToken, getUserIdFromSessionToken } from "@/lib/auth/login_tools";
 
-export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+// --- DELETE: Eliminar un becado específico ---
+export async function DELETE(
+  request: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    // 1. Autenticación
     const jar = await cookies();  
     const token = jar.get("access_token")?.value;
     const sessionToken = jar.get("refresh_token")?.value;
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    if (!(await verifyAccessToken(token))) {
+
+    if (!token || !(await verifyAccessToken(token))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -21,9 +24,13 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     
+    // 2. Obtener ID y Ejecutar
     const { id } = await params;
     const response = await DeleteBecadosController(id);
+    
+    // 3. Log y Respuesta
     await addLogEntry(userId, "deleteBecado", `Becado eliminado con ID: ${id}`);
+    
     return NextResponse.json(
       { message: "Becado eliminado correctamente", response },
       { status: 200 }
@@ -37,15 +44,18 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   }
 }
 
-export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+// --- PUT: Actualizar un becado específico ---
+export async function PUT(
+  request: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    // 1. Autenticación
     const jar = await cookies();  
     const token = jar.get("access_token")?.value;
     const sessionToken = jar.get("refresh_token")?.value;
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    if (!(await verifyAccessToken(token))) {
+
+    if (!token || !(await verifyAccessToken(token))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -54,10 +64,19 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     
+    // 2. Obtener Datos
     const { id } = await params;
-    const body = await request.formData();
+    
+    // El controlador espera FormData. Si enviaras JSON desde el front, esto fallaría.
+    // Asegúrate de que el frontend envíe FormData.
+    const formData = await request.formData(); 
+
+    // 3. Log
     await addLogEntry(userId, "updateBecado", `Becado actualizado con ID: ${id}`);
-    const response = await PutBecadosController(id, body);
+    
+    // 4. Ejecutar Controlador
+    const response = await PutBecadosController(id, formData);
+    
     return NextResponse.json(
       { message: "Becado actualizado correctamente", response },
       { status: 200 }

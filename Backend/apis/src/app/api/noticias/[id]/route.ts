@@ -1,30 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import { eliminarNoticia, actualizarNoticia } from "@/controllers/noticias/noticiasControllers";
 import { cookies } from "next/headers";
-import { verifyAccessToken,getUserIdFromSessionToken } from "@/lib/auth/login_tools";
-import { addLogEntry } from "@/services/admin/logs";
+import { 
+  verifyAccessToken, 
+  getUserIdFromSessionToken 
+} from "@/lib/auth/login_tools";
 
+type RouteParams = { params: Promise<{ id: string }> };
 
-
-// DELETE handler
-export async function DELETE(request: NextRequest, context: any) {
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const jar = await cookies();
     const token = jar.get('access_token')?.value;
     const sessionToken = jar.get('refresh_token')?.value;
-    if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      if (!(await verifyAccessToken(token))) {
+
+    if (!token || !(await verifyAccessToken(token))) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
-    const userId = await getUserIdFromSessionToken(sessionToken || '');
-    const userIdNumber = userId ? parseInt(userId) : null;
-    
-    if (!userIdNumber) {
-      return NextResponse.json({ error: 'Invalid user ID' }, { status: 401 });
     }
-    const { id } = context.params; // <- usar context sin tipar
-    const response = await eliminarNoticia(id); 
-    await addLogEntry(userIdNumber, 'delete_news', `Eliminó la noticia con ID ${id}`); 
+
+    const userId = await getUserIdFromSessionToken(sessionToken || '');
+    
+    if (!userId) {
+      return NextResponse.json({ error: 'Invalid user session' }, { status: 401 });
+    }
+
+    const { id } = await params;
+    const response = await eliminarNoticia(id, userId); 
 
     return NextResponse.json(
       { message: "Noticia eliminada correctamente", response },
@@ -39,27 +40,27 @@ export async function DELETE(request: NextRequest, context: any) {
   }
 }
 
-// PUT handler
-export async function PUT(request: NextRequest, context: any) {
+// --- PUT handler ---
+export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const jar = await cookies();
     const token = jar.get('access_token')?.value;
     const sessionToken = jar.get('refresh_token')?.value;
-    if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      if (!(await verifyAccessToken(token))) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
-    const userId = await getUserIdFromSessionToken(sessionToken || '');
-    const userIdNumber = userId ? parseInt(userId) : null;
-      
-    if (!userIdNumber) {
-      return NextResponse.json({ error: 'Invalid user ID' }, { status: 401 });
-    }
-    const { id } = context.params;
-    const body = await request.formData();
 
-    const response = await actualizarNoticia(id, body);
-    await addLogEntry(userIdNumber, 'update_news', `Actualizó la noticia con ID ${id}`);
+    if (!token || !(await verifyAccessToken(token))) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userId = await getUserIdFromSessionToken(sessionToken || '');
+      
+    if (!userId) {
+      return NextResponse.json({ error: 'Invalid user session' }, { status: 401 });
+    }
+
+    const { id } = await params;
+    const formData = await request.formData();
+    const response = await actualizarNoticia(id, formData, userId);
+
     return NextResponse.json(
       { message: "Noticia actualizada correctamente", response },
       { status: 200 }

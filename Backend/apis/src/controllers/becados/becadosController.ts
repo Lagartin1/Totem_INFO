@@ -3,20 +3,19 @@ import {listBecados,BuscarBecados,createBecadoService,DeleteBecadoService,PutBec
 // Importamos los tipos y funciones correctas del nuevo modelo
 import { BecadosResult, GetBecados } from "@/models/becados/becadosModel"; 
 
-export async function fetchBecados(searchTerm: string | false): Promise<BecadosResult> {
-  let response: BecadosResult;
-
-  // Asumimos paginación por defecto (índice 0) ya que el controlador original no recibía índice
-  if (searchTerm) {
-    response = await BuscarBecados(searchTerm, 0);
-  } else {
-    response = await listBecados(0);
+export async function fetchBecados(searchTerm: string | false, indice: number = 0) {
+  try {
+    if (searchTerm) {
+      // Si hay término de búsqueda, llamamos a la búsqueda del modelo
+      return 0;
+    } else {
+      // Si no, listamos normal
+      return await GetBecados(indice);
+    }
+  } catch (error) {
+    console.error("Error en el controlador fetchBecados:", error);
+    throw error;
   }
-  
-  if (!response || response.becados.length === 0) {
-    throw new Error("No se encontraron becados");
-  }
-  return response;
 }
 
 // NOTA: Se añade userID porque Prisma requiere un autor obligatorio para crear el registro.

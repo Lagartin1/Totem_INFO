@@ -18,11 +18,12 @@ const PAGE_SIZE = 10;
 
 
 // 1. CreateNewPractica: Creación de una práctica
-export async function CreateNewPractica(data: any): Promise<PracticasResult> {
+export async function CreateNewPractica(data: any, userId: string): Promise<PracticasResult> {
   const practica = await mongoClient.practica.create({
     data: {
       ...data,
       visitas: 0, // Asumimos que inicializa en 0
+      autorId: userId
     },
   });
 

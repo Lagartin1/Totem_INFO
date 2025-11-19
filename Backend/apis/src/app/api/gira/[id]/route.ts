@@ -1,29 +1,42 @@
-import { NextResponse } from "next/server";
-import { DeleteGirasController, PutGirasController } from "@/controllers/giras/girasController";
-import { addLogEntry } from "@/models/admin/logModel";
+import { NextRequest, NextResponse } from "next/server";
+import { 
+  DeleteGirasController, 
+  PutGirasController 
+} from "@/controllers/giras/girasController";
 import { cookies } from "next/headers";
-import { verifyAccessToken, getUserIdFromSessionToken } from "@/lib/auth/login_tools";
+import { 
+  verifyAccessToken, 
+  getUserIdFromSessionToken 
+} from "@/lib/auth/login_tools";
 
-export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+// DELETE: Eliminar una gira
+export async function DELETE(
+  request: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    // 1. Autenticación
     const jar = await cookies();  
     const token = jar.get("access_token")?.value;
     const sessionToken = jar.get("refresh_token")?.value;
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    if (!(await verifyAccessToken(token))) {
+
+    if (!token || !(await verifyAccessToken(token))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // 2. Obtener User ID (String)
     const userId = await getUserIdFromSessionToken(sessionToken || "");
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     
+    // 3. Obtener ID de la gira
     const { id } = await params;
-    const response = await DeleteGirasController(id);
-    await addLogEntry(userId, "deleteGira", `Gira eliminada con ID: ${id}`);
+
+    // 4. Ejecutar Controlador
+    // Pasamos el userId para que el controlador registre el LOG internamente
+    const response = await DeleteGirasController(id, userId);
+
     return NextResponse.json(
       { message: "Gira eliminada correctamente", response },
       { status: 200 }
@@ -37,27 +50,35 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   }
 }
 
-export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+// PUT: Actualizar una gira
+export async function PUT(
+  request: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    // 1. Autenticación
     const jar = await cookies();  
     const token = jar.get("access_token")?.value;
     const sessionToken = jar.get("refresh_token")?.value;
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    if (!(await verifyAccessToken(token))) {
+
+    if (!token || !(await verifyAccessToken(token))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // 2. Obtener User ID (String)
     const userId = await getUserIdFromSessionToken(sessionToken || "");
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     
+    // 3. Obtener datos
     const { id } = await params;
-    const body = await request.formData();
-    await addLogEntry(userId, "updateGira", `Gira actualizada con ID: ${id}`);
-    const response = await PutGirasController(id, body);
+    const formData = await request.formData();
+
+    // 4. Ejecutar Controlador
+    // Pasamos id, formData y userId. El controlador maneja la actualización y el LOG.
+    const response = await PutGirasController(id, formData, userId);
+
     return NextResponse.json(
       { message: "Gira actualizada correctamente", response },
       { status: 200 }

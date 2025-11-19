@@ -4,104 +4,36 @@ import Loader from "../components/Loader";
 import CardWorkshop from "../components/Card_Workshop";
 import Nav_button from "../components/Nav_Button";
 
+// Interfaz para tipado seguro
+interface Workshop {
+  id: string;
+  titulo: string;
+  descripcion: string;
+  link: string;
+  fecha: string;
+}
+
 export default function Workshop() {
   const [pagina, setPagina] = useState<number>(1);
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<Workshop[]>([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState<boolean>(false);
+  
+  // Estados para Toast
   const [toast, setToast] = useState<boolean>(false);
   const [toastmsg, setToastmsg] = useState<string | null>(null);
-  const [toastStatus, setToastStatus] = useState<"success" | "error">(
-    "success"
-  );
+  const [toastStatus, setToastStatus] = useState<"success" | "error">("success");
+
   const [totalWorkshops, setTotalWorkshops] = useState<number>(0);
   const n_pages = Math.max(1, Math.ceil(totalWorkshops / 12));
-  const [newWorkshopData, setNewWorkshopData] = useState<{
-    titulo: string;
-    link: string;
-    descripcion: string;
-  }>({ titulo: "", link: "", descripcion: "" });
+  
+  const [newWorkshopData, setNewWorkshopData] = useState({
+    titulo: "",
+    link: "",
+    descripcion: "",
+  });
 
-  const onChangeNewWorkshop = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setNewWorkshopData({
-      ...newWorkshopData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const onSave = async () => {
-    const performUpload = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch("/api/admin/administrar/workshops", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify(newWorkshopData),
-        });
-        const result = await response.json();
-        if (response.status !== 401) {
-          if (!result.ok) {
-            throw new Error(result.message || "Error creating workshop");
-          }
-          makeToast("Workshop creado exitosamente.", "success");
-        } else {
-          const responseRefresh = await fetch("/api/admin/auth/refresh", {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-          });
-          if (responseRefresh.ok) {
-            // Reintentar la creación del workshop después de refrescar el token
-            const retryResponse = await fetch(
-              "/api/admin/administrar/workshops",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  credentials: "include",
-                },
-
-                body: JSON.stringify(newWorkshopData),
-              }
-            );
-            const retryResult = await retryResponse.json();
-            if (!retryResult.ok) {
-              throw new Error(
-                retryResult.message ||
-                  "Error creating workshop after token refresh"
-              );
-            }
-            makeToast("Workshop creado exitosamente.", "success");
-          } else {
-            throw new Error(
-              "No autorizado. Por favor, inicie sesión de nuevo."
-            );
-          }
-        }
-        // resetear datos
-        setNewWorkshopData({ titulo: "", link: "", descripcion: "" });
-        setModal(false);
-        await cargar(pagina);
-      } catch (error) {
-        makeToast("Error al crear el workshop.", "error");
-      } finally {
-        setLoading(false);
-      }
-    };
-    try {
-      await performUpload();
-    } catch (error) {
-      makeToast("Error al crear el workshop.", "error");
-    }
-  };
-
+  // --- Helpers ---
   const makeToast = (message: string, status: "success" | "error") => {
     setToastmsg(message);
     setToastStatus(status);
@@ -109,34 +41,78 @@ export default function Workshop() {
     setTimeout(() => setToast(false), 3000);
   };
 
+  const onChangeNewWorkshop = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setNewWorkshopData({
+      ...newWorkshopData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // --- Cargar Datos (GET) ---
   const cargar = useCallback(async (page: number) => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/workshops?pagina=${page}`, {
+      // ✅ URL CORREGIDA: Apunta a la ruta estándar
+      const response = await fetch(`/api/workshop?pagina=${page}`, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
       });
+      
+      if (!response.ok) throw new Error("Error al cargar workshops");
+
       const result = await response.json();
-      if (!result.ok) {
-        throw new Error(result.message || "Error fetching workshops");
-      }
-      setData(result.data.data || []);
-      setTotalWorkshops(result.data.total || 0);
+      
+      // ✅ ADAPTACIÓN DE RESPUESTA: { data: [], total: N }
+      // Verifica si 'result.data' es el objeto contenedor o el array directo
+      const workshopsArray = Array.isArray(result.data) ? result.data : result.data?.data || [];
+      const total = result.data?.total || result.total || 0;
+
+      setData(workshopsArray);
+      setTotalWorkshops(total);
+
     } catch (error) {
-      makeToast("Error al cargar los workshops.", "error");
+      console.error(error);
+      makeToast("No se pudieron cargar los workshops.", "error");
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const onCancel = () => {
-    // resetear datos
-    setNewWorkshopData({ titulo: "", link: "", descripcion: "" });
-    setModal(false);
+  // --- Guardar Nuevo (POST) ---
+  const onSave = async () => {
+    if (!newWorkshopData.titulo || !newWorkshopData.link) {
+        makeToast("Título y Link son obligatorios", "error");
+        return;
+    }
+
+    setLoading(true);
+    try {
+      // ✅ URL CORREGIDA: Usamos la misma ruta base con método POST
+      const response = await fetch("/api/workshop", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newWorkshopData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error al crear");
+      }
+
+      makeToast("Workshop creado exitosamente.", "success");
+      setNewWorkshopData({ titulo: "", link: "", descripcion: "" });
+      setModal(false);
+      await cargar(1); // Recargar primera página
+      setPagina(1);
+
+    } catch (error: any) {
+      console.error(error);
+      makeToast(error.message || "Error al crear el workshop.", "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // --- Efectos ---
   useEffect(() => {
     cargar(pagina);
   }, [cargar, pagina]);
@@ -145,119 +121,138 @@ export default function Workshop() {
     await cargar(pagina);
   };
 
+  const onCancel = () => {
+    setNewWorkshopData({ titulo: "", link: "", descripcion: "" });
+    setModal(false);
+  };
+
   return (
-    <main className="p-6 w-full min-h-screen ">
+    <main className="p-6 w-full min-h-screen">
       <div className="px-30 py-10">
         <Nav_button Title="Volver" Link="/dashboard" />
       </div>
-      {loading ? <Loader /> : null}
-      {toast ? (
-        <Toast message={toastmsg as string} status={toastStatus} />
-      ) : null}
-      <div className="bg-white shadow-md rounded-lg h-lvh flex flex-col justify-center items-center">
-        <h1 className="text-2xl font-bold mb-4">
-          Administracion Información Workshop
+
+      {loading && <Loader />}
+      {toast && <Toast message={toastmsg as string} status={toastStatus} />}
+
+      <div className="bg-white shadow-md rounded-lg min-h-[80vh] flex flex-col items-center py-10">
+        <h1 className="text-2xl font-bold mb-8 text-gray-800">
+          Administración de Workshops
         </h1>
-        <div className="flex flex-row justify-center items-center w-full">
-          <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-4 mt-20 ml-20 mr-20 overflow-y-auto">
-            {!loading && data.length === 0 ? (
-              <div className="flex flex-col items-center justify-center col-span-3">
-                <p>No hay workshops disponibles.</p>
-              </div>
-            ) : null}
-            {!loading && data.length > 0
-              ? data.map((workshop) => (
-                  <CardWorkshop
-                    onUpdate={onUpdate}
-                    showToast={makeToast}
-                    showLoader={setLoading}
-                    key={workshop.id}
-                    {...workshop}
-                  />
-                ))
-              : null}
-            {!loading && data.length > 0 ? (
-              <div className="col-span-3 flex justify-center">
-                <div className="s flex flex-col mt-5 bg-gray-800/50 items-center justify-center rounded-3xl">
-                  <div className="flex flex-row items-center gap-8 m-5">
-                    <button
-                      onClick={() => setPagina(pagina - 1)}
-                      disabled={pagina === 1}
-                      className="text-xl rounded-2xl text-white bg-orange-400 disabled:bg-gray-700 hover:bg-orange-500 w-30 h-12 shadow-2xl">
-                      Anterior
-                    </button>
-                    <span className=" text-white text-nowrap">
-                      Página {pagina} de {n_pages}
-                    </span>
-                    <button
-                      onClick={() => setPagina(pagina + 1)}
-                      disabled={pagina === n_pages}
-                      className="text-xl rounded-2xl text-white bg-orange-500 disabled:bg-gray-700 hover:bg-orange-600 w-30 h-12 shadow-2xl">
-                      Siguiente
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ) : null}
-          </div>
-          <div className="flex flex-col justify-center items-center p-4">
-            <h2 className="text-xl font-semibold mb-4">
-              Agregar Nuevo Workshop
-            </h2>
-            <button
-              className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-              onClick={() => setModal(true)}>
-              Agregar Workshop
-            </button>
-          </div>
-          {modal && (
-            <div
-              className="fixed inset-0 bg-black/20 w-full h-full top-1/2 left-1/2 
-                              transform -translate-x-1/2 -translate-y-1/2 transition 
-                              ease-out inset backdrop-blur-sm flex items-center justify-center z-50 ">
-              <div className="flex flex-col  bg-white rounded-xl text-justify items-center p-6">
-                <h2 className="text-2xl font-bold mb-4">Nuevo Workshop</h2>
-                <input
-                  type="text"
-                  name="titulo"
-                  placeholder="Título"
-                  value={newWorkshopData.titulo}
-                  onChange={onChangeNewWorkshop}
-                  required
-                  className="border border-gray-300 rounded-md p-2 mb-4 w-80"
+
+        {/* Grid de Cards */}
+        <div className="w-full max-w-6xl px-4 mb-8">
+          {data.length === 0 && !loading ? (
+            <div className="text-center text-gray-500 py-10">
+              <p>No hay workshops disponibles.</p>
+            </div>
+          ) : (
+            <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-6">
+              {data.map((workshop) => (
+                <CardWorkshop
+                  key={workshop.id}
+                  {...workshop}
+                  onUpdate={onUpdate}
+                  showToast={makeToast}
+                  showLoader={setLoading}
                 />
-                <input
-                  type="text"
-                  name="link"
-                  placeholder="Link al video del Workshop"
-                  value={newWorkshopData.link}
-                  onChange={onChangeNewWorkshop}
-                  required
-                  className="border border-gray-300 rounded-md p-2 mb-4 w-80"
-                />
-                <textarea
-                  name="descripcion"
-                  placeholder="Descripción(opcional)"
-                  value={newWorkshopData.descripcion}
-                  onChange={onChangeNewWorkshop}
-                  className="border border-gray-300 rounded-md p-2 mb-4 w-80 h-32"
-                />
-                <div className="flex gap-4">
-                  <button
-                    className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-                    onClick={onSave}>
-                    Guardar
-                  </button>
-                  <button
-                    className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-                    onClick={onCancel}>
-                    Cancelar
-                  </button>
-                </div>
-              </div>
+              ))}
             </div>
           )}
         </div>
+
+        {/* Paginación */}
+        {!loading && data.length > 0 && (
+            <div className="flex items-center gap-4 mb-8 bg-gray-100 px-6 py-3 rounded-full shadow-sm">
+            <button
+                onClick={() => setPagina(pagina - 1)}
+                disabled={pagina === 1}
+                className="px-4 py-2 rounded-lg bg-orange-500 text-white disabled:bg-gray-300 hover:bg-orange-600 transition-colors"
+            >
+                Anterior
+            </button>
+            <span className="text-gray-700 font-medium">
+                Página {pagina} de {n_pages}
+            </span>
+            <button
+                onClick={() => setPagina(pagina + 1)}
+                disabled={pagina === n_pages}
+                className="px-4 py-2 rounded-lg bg-orange-500 text-white disabled:bg-gray-300 hover:bg-orange-600 transition-colors"
+            >
+                Siguiente
+            </button>
+            </div>
+        )}
+
+        {/* Botón Agregar */}
+        <button
+          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 shadow-md transition-colors font-semibold"
+          onClick={() => setModal(true)}
+        >
+          + Agregar Nuevo Workshop
+        </button>
+
+        {/* Modal */}
+        {modal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-8 transform transition-all scale-100">
+              <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">Nuevo Workshop</h2>
+              
+              <div className="space-y-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Título</label>
+                    <input
+                        type="text"
+                        name="titulo"
+                        placeholder="Ej: Taller de React"
+                        value={newWorkshopData.titulo}
+                        onChange={onChangeNewWorkshop}
+                        className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none"
+                    />
+                </div>
+                
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Link de YouTube</label>
+                    <input
+                        type="text"
+                        name="link"
+                        placeholder="https://youtube.com/..."
+                        value={newWorkshopData.link}
+                        onChange={onChangeNewWorkshop}
+                        className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none"
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                    <textarea
+                        name="descripcion"
+                        placeholder="Detalles del evento..."
+                        value={newWorkshopData.descripcion}
+                        onChange={onChangeNewWorkshop}
+                        rows={4}
+                        className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                    />
+                </div>
+              </div>
+
+              <div className="flex gap-4 mt-8">
+                <button
+                  className="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-medium transition-colors"
+                  onClick={onSave}
+                >
+                  Guardar
+                </button>
+                <button
+                  className="flex-1 bg-red-500 text-white py-3 rounded-lg hover:bg-red-600 font-medium transition-colors"
+                  onClick={onCancel}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );

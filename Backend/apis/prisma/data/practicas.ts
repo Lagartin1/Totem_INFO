@@ -1,4 +1,4 @@
-[
+export const practicasData = [
   {
     "created_at": "2025-11-10T12:00:00Z",
     "marca_temporal": "2025-11-10 12:00",
@@ -208,4 +208,4 @@
     "state": true,
     "visitas": 0
   }
-]
+];

@@ -1,18 +1,13 @@
-
+import { NextRequest } from "next/server";
 import { getPracticaDetails } from "@/controllers/practicas/practicasController";
-import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  try {                                
-    const { id } = await params;
-  
-    return await getPracticaDetails(id);
+export async function GET(
+  request: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
+  // Extraemos el ID de la promesa params (Next.js 15 standard)
+  const { id } = await params;
 
-  } catch (error) {
-    console.error(error);
-    return new NextResponse(
-      JSON.stringify({ error: "Error interno del servidor" }), 
-      { status: 500 }
-    );
-  }
+  // Tu controlador ya retorna un NextResponse, así que lo retornamos directamente
+  return await getPracticaDetails(id);
 }

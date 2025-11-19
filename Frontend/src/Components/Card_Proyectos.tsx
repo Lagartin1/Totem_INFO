@@ -2,6 +2,7 @@ import { useState } from "react";
 import Modal_Proyecto from "./Modal_Proyectos";
 import type { Proyecto } from "../types/index";
 
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 
@@ -13,6 +14,10 @@ export default function Card_Proyectos({ proyecto }: ProyectoProps) {
   const [open, setOpen] = useState(false);
 
   const baseUrl = BUILD_MODE ? API_BASE_URL : "http://localhost:3000";
+
+  const autoresDisplay = Array.isArray(proyecto.autores)
+  ? proyecto.autores.join(', ') 
+  : (proyecto.autores || 'Autor Desconocido'); 
 
   return (
     <>
@@ -41,7 +46,7 @@ export default function Card_Proyectos({ proyecto }: ProyectoProps) {
         )}
 
         <h3 className="font-bold text-lg mb-1">{proyecto.titulo}</h3>
-        <p className="text-gray-600 text-sm">{proyecto.autores}</p>
+        <p className="text-gray-600 text-sm">{autoresDisplay}</p>
         <p className="text-gray-500 text-sm mb-4">{proyecto.area_desarrollo}</p>
         <p className="text-gray-500 text-sm mb-4">
           {proyecto.correo_contacto} | {proyecto.telefono_contacto}
