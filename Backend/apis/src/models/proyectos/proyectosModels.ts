@@ -94,7 +94,6 @@ export async function CreateProyecto(data: any): Promise<Proyecto> {
     return await mongoClient.proyecto.create({
         data: {
             ...data,
-            visitas: 0,
         }
     });
 }

@@ -1,5 +1,6 @@
 import { mongoClient } from "@/database/mongodb";
 import { Practica } from "@prisma/client"; // Importamos el tipo generado por Prisma
+import { ObjectId } from "bson";
 
 export type { Practica };
 
@@ -9,21 +10,23 @@ export interface PracticasResult {
 }
 
 export interface PracticaCSV {
-    total: number;
-    errors: any[]; 
+  total: number;
+  errors: any[];
 }
 
 // --- CONSTANTES ---
-const PAGE_SIZE = 10; 
-
+const PAGE_SIZE = 10;
 
 // 1. CreateNewPractica: Creación de una práctica
-export async function CreateNewPractica(data: any, userId: string): Promise<PracticasResult> {
+export async function CreateNewPractica(
+  data: any,
+  userId: string
+): Promise<PracticasResult> {
   const practica = await mongoClient.practica.create({
     data: {
       ...data,
       visitas: 0, // Asumimos que inicializa en 0
-      autorId: userId
+      autorId: new ObjectId(userId).toString(),
     },
   });
 
@@ -33,8 +36,10 @@ export async function CreateNewPractica(data: any, userId: string): Promise<Prac
   };
 }
 
-export async function CreateBulkPracticas(dataArray: any[]): Promise<PracticaCSV> {
-  const creationPromises = dataArray.map(data => 
+export async function CreateBulkPracticas(
+  dataArray: any[]
+): Promise<PracticaCSV> {
+  const creationPromises = dataArray.map((data) =>
     mongoClient.practica.create({
       data: {
         ...data,
@@ -52,12 +57,11 @@ export async function CreateBulkPracticas(dataArray: any[]): Promise<PracticaCSV
   } catch (error) {
     console.error("Error en CreateBulkPracticas:", error);
     return {
-        total: 0,
-        errors: [{ message: "Fallo la inserción de datos masivos." }],
+      total: 0,
+      errors: [{ message: "Fallo la inserción de datos masivos." }],
     };
   }
 }
-
 
 // Helper para crear el filtro de año
 function createYearFilter(year: string) {
@@ -72,13 +76,17 @@ function createYearFilter(year: string) {
 }
 
 // 3. GetPracticas: Listado normal/paginado
-export async function GetPracticas(type: string, indice: number, pageSize = PAGE_SIZE): Promise<PracticasResult> {
-  const filter: any = type !== 'all' ? { tipo_practica: type } : {};
+export async function GetPracticas(
+  type: string,
+  indice: number,
+  pageSize = PAGE_SIZE
+): Promise<PracticasResult> {
+  const filter: any = type !== "all" ? { tipo_practica: type } : {};
 
   const [practicas, total] = await mongoClient.$transaction([
     mongoClient.practica.findMany({
       where: filter,
-      orderBy: { created_at: 'desc' },
+      orderBy: { created_at: "desc" },
       skip: indice,
       take: pageSize,
     }),
@@ -89,18 +97,23 @@ export async function GetPracticas(type: string, indice: number, pageSize = PAGE
 }
 
 // 4. GetPracticasByYear: Listado por año y paginado
-export async function GetPracticasByYear(type: string, year: string, indice: number, pageSize = PAGE_SIZE): Promise<PracticasResult> {
+export async function GetPracticasByYear(
+  type: string,
+  year: string,
+  indice: number,
+  pageSize = PAGE_SIZE
+): Promise<PracticasResult> {
   const yearFilter = createYearFilter(year);
-  const typeFilter: any = type !== 'all' ? { tipo_practica: type } : {};
+  const typeFilter: any = type !== "all" ? { tipo_practica: type } : {};
   const filter = {
-      ...typeFilter,
-      ...yearFilter,
+    ...typeFilter,
+    ...yearFilter,
   };
 
   const [practicas, total] = await mongoClient.$transaction([
     mongoClient.practica.findMany({
       where: filter,
-      orderBy: { created_at: 'desc' },
+      orderBy: { created_at: "desc" },
       skip: indice,
       take: pageSize,
     }),
@@ -111,38 +124,42 @@ export async function GetPracticasByYear(type: string, year: string, indice: num
 }
 
 // 5. SearchTermPracticas: Búsqueda por término
-export async function SearchTermPracticas(term: string, type: string, indice: number, pageSize = PAGE_SIZE): Promise<PracticasResult> {
-    const typeFilter: any = type !== 'all' ? { tipo_practica: type } : {};
-    
-    // Filtro de búsqueda en múltiples campos de texto (simulando búsqueda ES)
-    const searchFilter = {
-        OR: [
-            { nombre_empresa: { contains: term, mode: 'insensitive' } },
-            { labores: { contains: term, mode: 'insensitive' } },
-            { beneficios: { contains: term, mode: 'insensitive' } },
-            { requisitos_especiales: { contains: term, mode: 'insensitive' } },
-            { marca_temporal: { contains: term, mode: 'insensitive' } },
-        ]
-    };
+export async function SearchTermPracticas(
+  term: string,
+  type: string,
+  indice: number,
+  pageSize = PAGE_SIZE
+): Promise<PracticasResult> {
+  const typeFilter: any = type !== "all" ? { tipo_practica: type } : {};
 
-    const filter = {
-        ...typeFilter,
-        ...searchFilter
-    };
+  // Filtro de búsqueda en múltiples campos de texto (simulando búsqueda ES)
+  const searchFilter = {
+    OR: [
+      { nombre_empresa: { contains: term, mode: "insensitive" } },
+      { labores: { contains: term, mode: "insensitive" } },
+      { beneficios: { contains: term, mode: "insensitive" } },
+      { requisitos_especiales: { contains: term, mode: "insensitive" } },
+      { marca_temporal: { contains: term, mode: "insensitive" } },
+    ],
+  };
 
-    const [practicas, total] = await mongoClient.$transaction([
-        mongoClient.practica.findMany({
-            where: filter,
-            orderBy: { created_at: 'desc' },
-            skip: indice,
-            take: pageSize,
-        }),
-        mongoClient.practica.count({ where: filter }),
-    ]);
+  const filter = {
+    ...typeFilter,
+    ...searchFilter,
+  };
 
-    return { practicas, total };
+  const [practicas, total] = await mongoClient.$transaction([
+    mongoClient.practica.findMany({
+      where: filter,
+      orderBy: { created_at: "desc" },
+      skip: indice,
+      take: pageSize,
+    }),
+    mongoClient.practica.count({ where: filter }),
+  ]);
+
+  return { practicas, total };
 }
-
 
 // 6. GetPracticasByID: Obtener una práctica por ID
 export async function GetPracticasByID(id: string): Promise<PracticasResult> {
@@ -177,29 +194,28 @@ export async function incrementPracticasVisits(id: string): Promise<boolean> {
 
 // 8. desactivePracticaByID: Cambiar el estado (toggle)
 export async function desactivePracticaByID(id: string): Promise<boolean> {
-    try {
-        const current = await mongoClient.practica.findUnique({
-            where: { id: id },
-            select: { state: true }
-        });
+  try {
+    const current = await mongoClient.practica.findUnique({
+      where: { id: id },
+      select: { state: true },
+    });
 
-        if (!current) {
-            return false;
-        }
-
-        await mongoClient.practica.update({
-            where: { id: id },
-            data: {
-                state: !current.state,
-            },
-        });
-        return true;
-    } catch (error) {
-        console.error("Error al cambiar estado:", error);
-        return false;
+    if (!current) {
+      return false;
     }
-}
 
+    await mongoClient.practica.update({
+      where: { id: id },
+      data: {
+        state: !current.state,
+      },
+    });
+    return true;
+  } catch (error) {
+    console.error("Error al cambiar estado:", error);
+    return false;
+  }
+}
 
 // 9. DeletePracticaByID: Eliminar una práctica
 export async function DeletePracticaByID(id: string): Promise<boolean> {
@@ -216,10 +232,10 @@ export async function DeletePracticaByID(id: string): Promise<boolean> {
 
 // 10. getTopPracticas: Obtener las N prácticas más visitadas
 export async function getTopPracticas(limit: number): Promise<Practica[]> {
-    const practicas = await mongoClient.practica.findMany({
-        orderBy: { visitas: 'desc' },
-        take: limit,
-        where: { state: true } // Asumimos que solo queremos las activas
-    });
-    return practicas;
+  const practicas = await mongoClient.practica.findMany({
+    orderBy: { visitas: "desc" },
+    take: limit,
+    where: { state: true }, // Asumimos que solo queremos las activas
+  });
+  return practicas;
 }

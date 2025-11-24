@@ -71,7 +71,6 @@ export async function CreateNoticia(data: any): Promise<Noticia> {
     return await mongoClient.noticia.create({
         data: {
             ...data,
-            visitas: 0, // Asumimos que se inicializa en 0
         }
     });
 }

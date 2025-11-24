@@ -4,9 +4,24 @@ import { noticiasData } from './data/noticias.ts';
 import { becadosData } from './data/becados.ts';
 import { proyectosData } from './data/proyectos.ts';
 import { workshopsData } from './data/workshops.ts';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 //import {girasData} from "./data/giras.ts"; <- por si acaso
 
 const prisma = new PrismaClient();
+
+const __filename = fileURLToPath(import.meta.url);
+
+// 2. Obtén el directorio del archivo
+const __dirname = path.dirname(__filename);
+
+const envPath = path.resolve(__dirname, "../config/.env");
+console.log("Cargando .env desde:", envPath);
+
+// Indica a dotenv que cargue el .env desde esa ruta
+dotenv.config({ path: envPath });
+
 
 async function main() {
   console.log('🌱 Iniciando Seed...');

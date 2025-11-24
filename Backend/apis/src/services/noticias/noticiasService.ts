@@ -34,8 +34,7 @@ export async function fetchNoticias(indice: number = 0): Promise<NoticiaResult> 
 export async function createNoticiaService(formData: FormData, autorId: string): Promise<Noticia> {
     const titulo = formData.get("titulo") as string;
     const contenido = formData.get("contenido") as string;
-    const resumen = (formData.get("resumen") as string) || '';
-    const categoria = (formData.get("categoria") as string) || 'General';
+    const categorias = (formData.getAll("categorias") as string[]) || 'General';
     const imagenRaw = formData.get("imagen"); 
     const fecha_publicacion = new Date(); // Usamos la fecha de creación
 
@@ -61,8 +60,7 @@ export async function createNoticiaService(formData: FormData, autorId: string):
     const result = await CreateNoticia({
       titulo,
       contenido,
-      resumen,
-      categoria,
+      categorias,
       imagen: imagenUrl, // Se mapea a imagenUrl
       fecha_publicacion,
       autorId: autorId // Campo requerido por Prisma
