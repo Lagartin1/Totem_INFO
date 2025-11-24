@@ -12,21 +12,25 @@ export interface WorkshopResult {
     total: number;
 }
 
-const PAGE_SIZE = 12; // Mantenemos el tamaño de página original
+const PAGE_SIZE = 6; // Mantenemos el tamaño de página original
 
 // --- OPERACIONES DE LECTURA ---
 
 // 1. GetWorkshops: Listado paginado (Reemplaza getWorkshops())
-export async function GetWorkshops(from: number = 0, pageSize: number = PAGE_SIZE): Promise<WorkshopResult> {
+export async function GetWorkshops(from: number = 0, _pageSize?: number): Promise<WorkshopResult> {
+    // Forzar tamaño de página a PAGE_SIZE (siempre 6)
+    const take = PAGE_SIZE;
+
     const [data, total] = await mongoClient.$transaction([
         mongoClient.workshop.findMany({
-            orderBy: { createdAt: 'asc' }, // Ordenamos por fecha de creación (reemplaza sort por 'id')
+            orderBy: { createdAt: 'desc' },
             skip: from,
-            take: pageSize,
+            take,
         }),
         mongoClient.workshop.count(),
     ]);
 
+    // Devuelve los items (máx. 6) y el total de items en la colección
     return { data, total };
 }
 

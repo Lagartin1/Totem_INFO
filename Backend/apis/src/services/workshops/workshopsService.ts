@@ -2,12 +2,13 @@ import { CreateWorkshop, DeleteWorkshop, GetWorkshops, UpdateWorkshop, WorkshopR
 import { NextRequest, NextResponse } from "next/server";
 import { addLogEntry } from "../admin/logs"; 
 
-const PAGE_SIZE = 12; // Mantenemos el tamaño de página definido en el Modelo
+const PAGE_SIZE = 6; // Mantenemos el tamaño de página definido en el Modelo
 
-export async function getAllWorkshopsFromDb(pagina?: string): Promise<WorkshopResult> { 
+export async function getAllWorkshopsFromDbService(pagina?: string): Promise<WorkshopResult> { 
     // Calculamos el índice de inicio ('skip' en Prisma)
     const pageNumber = Number(pagina) > 1 ? Number(pagina) : 1;
     const indice = (pageNumber - 1) * PAGE_SIZE;
+    console.log(`Fetching workshops for page ${pageNumber}, skip index ${indice}`);
 
     // Llamamos al nuevo modelo con el índice y el tamaño de página
     const workshops = await GetWorkshops(indice, PAGE_SIZE);

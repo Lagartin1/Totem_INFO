@@ -1,13 +1,13 @@
 import { CreateWorkshop, DeleteWorkshop, GetWorkshops, UpdateWorkshop, WorkshopResult,Workshop } from "@/models/workshops/workshopModel";
+import {getAllWorkshopsFromDbService} from "@/services/workshops/workshopsService";
 import { NextRequest, NextResponse } from "next/server";
 import { addLogEntry } from "@/models/admin/logModel"; 
 
-const PAGE_SIZE = 12;
+
 
 export async function getAllWorkshopsFromDb(pagina?: string): Promise<WorkshopResult> { 
-    const pageNumber = Number(pagina) > 1 ? Number(pagina) : 1;
-    const indice = (pageNumber - 1) * PAGE_SIZE;
-    const workshops = await GetWorkshops(indice, PAGE_SIZE);
+    // mandamos al service
+    const workshops = await getAllWorkshopsFromDbService(pagina);
 
     if (!workshops) {
         throw new Error("No se pudieron obtener los workshops");
