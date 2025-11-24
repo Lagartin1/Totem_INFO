@@ -24,8 +24,6 @@ export default function YouTubePlayer({
 }: YouTubePlayerProps) {
   const [statePlayer, setStatePlayer] = useState<'playing' | 'paused' | 'ended'|null >(null);
   const playerRef = useRef<any>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const sliderRef = useRef<HTMLInputElement | null>(null);
   const [player, setPlayer] = useState<any>(null);
   const [isPaused, setIsPaused] = useState(false);
@@ -37,6 +35,7 @@ export default function YouTubePlayer({
   const [currentTime, setCurrentTime] = useState(0);
   const [seeking, setSeeking] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [isError, setIsError] = useState(false);
 
   // Cargar YouTube IFrame API
   useEffect(() => {
@@ -87,15 +86,14 @@ export default function YouTubePlayer({
         },
         events: {
           onReady: (event: any) => {
-            setPlayer(event.target);  
+            setPlayer(event.target);
             setDuration(event.target.getDuration());
             trackTime();
             setLoading(false);
           },
           onStateChange: (event: any) => {
-            const state = event.data;            
+            const state = event.data;                      
             if (state === 2) {
-              drawFrame();
               setStatePlayer('paused');
               setIsPaused(true);
             } else if (state === 1) {
@@ -110,15 +108,21 @@ export default function YouTubePlayer({
             } else if (state === 5) {
               setStatePlayer('ended');
               setIsPaused(true);
+            }else{
+              setIsPaused(false);
             }
+          },onError:()=>{
+            setIsError(true);
+            setLoading(false)
           }
-        }
-      });
+        },  
+      }
+      );
     };
 
     initializePlayer();
   }, [apiReady, videoId]);
-
+  
   // Cambiar video cuando videoId cambia
   useEffect(() => {
     if (playerRef.current && videoId) {
@@ -189,19 +193,6 @@ export default function YouTubePlayer({
       playerRef.current.seekTo(currentTime, true);
     }
     setSeeking(false);
-  };
-
-  const drawFrame = () => {
-    if (!videoRef.current || !canvasRef.current) return;
-
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    const ctx = canvas.getContext("2d");
-    if (ctx) ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
   };
 
   const resume = () => {
@@ -331,8 +322,20 @@ export default function YouTubePlayer({
           />
         )}
         
-        {/* Sugerencias al pausar */}
+        {/* Overlay Error */}
+        <div 
+            className={`absolute inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-10 cursor-pointer   ${isError ? "block" : "hidden"}`}
+          >
+            <div className="bg-white/90 rounded-lg p-6 flex flex-col items-center justify-center">  
+              <h2 className="text-2xl font-bold mb-4 text-red-600">Error al cargar el video</h2>
+              <p className="text-center mb-4">Lo sentimos, ha ocurrido un error al reproducir este video de YouTube. Por favor, reintente más tarde o utilize el codigo Qr propocionado para visualizar el contenido.</p>
+            </div>
+        </div>
+
+
+
         {/* OVERLAY blur con boton play */}
+
         
           <div 
             className={`absolute inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-10 cursor-pointer   ${isPaused ? "block" : "hidden"}`}

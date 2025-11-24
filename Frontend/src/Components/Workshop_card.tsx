@@ -97,6 +97,8 @@ export default function CardWorkshop(porps: {title: string, date: string, descri
         return;
       }
 
+      const MIN_WIDTH = 200; // reject tiny placeholder thumbs
+      const MIN_HEIGHT = 120;
       let tried = 0;
 
       const tryKey = () => {
@@ -107,9 +109,17 @@ export default function CardWorkshop(porps: {title: string, date: string, descri
         const key = thumbKeys[tried];
         const url = `https://img.youtube.com/vi/${videoId}/${key}.jpg`;
         const img = new Image();
+
+        // If neither onload nor onerror fire (rare), use a timeout to continue
+        let timeoutId: number | undefined = undefined;
+        const clear = () => {
+          if (timeoutId) window.clearTimeout(timeoutId);
+        };
+
         img.onload = () => {
-          // Make sure it's not a 404 placeholder (some servers return a small image)
-          if (img.naturalWidth && img.naturalHeight) {
+          clear();
+          // Reject very small images (YouTube sometimes serves small placeholders)
+          if ((img.naturalWidth || 0) >= MIN_WIDTH && (img.naturalHeight || 0) >= MIN_HEIGHT) {
             resolve(url);
           } else {
             tried++;
@@ -117,9 +127,18 @@ export default function CardWorkshop(porps: {title: string, date: string, descri
           }
         };
         img.onerror = () => {
+          clear();
           tried++;
           tryKey();
         };
+
+        // 2s timeout per attempt
+        timeoutId = window.setTimeout(() => {
+          // treat as failure and continue
+          tried++;
+          tryKey();
+        }, 2000);
+
         img.src = url;
       };
 
@@ -182,8 +201,8 @@ export default function CardWorkshop(porps: {title: string, date: string, descri
                             flex items-center justify-center hover:bg-red-600 p-2 gap-2"
                 onClick={() => setModal(false)}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className='h-7'>
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className='h-7'>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
                 </svg>
                 <span className='text-xl'> Volver </span>
 
