@@ -1,16 +1,13 @@
 import Headers from "../Components/Header"
 import Boton_Landing from "../Components/Boton_Landing"
-import Nav_button from "../Components/Nav_Button"
+import NavBar from "../Components/NavBar"
 
 function Practicas (){
 
     return(
         <main className="min-h-screen w-full flex flex-col bg-white-500">
-            <Headers/>
-            <div className="px-30 py-10">
-                <Nav_button Title="Volver" Link="/"/>
-            </div>
-            <div className="flex flex-col items-center text-justify m-5 gap-20 ">
+            <NavBar/>
+            <div className="flex flex-col items-center text-justify mt-40 gap-20 ">
                 <Boton_Landing Title="Prácticas Profesionales" Link="/practicas/practicas-profesionales" page={1}/>
                 <Boton_Landing Title="Práctica Inicial" Link="/practicas/practicas-iniciales" page={1}   />
             </div>

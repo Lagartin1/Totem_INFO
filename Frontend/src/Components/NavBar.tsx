@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo_uach from "../assets/logoUach.png";
 import logo_inf from "../assets/UACh_Informatica.png";
@@ -7,6 +8,10 @@ import logo_inf from "../assets/UACh_Informatica.png";
 
 export default function NavBar() {
   const navigate = useNavigate();
+  const [modalList, setModalList] =  useState(false);
+  const onClickModalList = () => {
+    setModalList(!modalList);
+  }
 
   return (
     <header className=" w-full flex flex-col items-center py-4 px-6 z-50">
@@ -24,9 +29,38 @@ export default function NavBar() {
                 </a>
             </li>
             <li className="inline-block mx-4">
-              <a className="text-2xl font-semibold hover:text-blue-600 transition-colors duration-300" onClick={() => navigate("/practicas")}>
+              <button className="text-2xl font-semibold hover:text-blue-600 transition-colors duration-300" onClick={onClickModalList}>
                 Prácticas
-              </a>
+              </button>
+              { modalList && (  
+                <div className="absolute top-20 left-115s bg-white/70 border border-gray-300 rounded-lg shadow-lg z-50">
+                  <ul className="py-2">
+                    <li>
+                      <a 
+                        className="block px-4 py-2 hover:bg-gray-100 text-2xl font-semibold"
+                        onClick={() => {
+                          navigate("/practicas/practicas-profesionales");
+                          onClickModalList();
+                        } 
+                      }>
+                        Prácticas Profesionales
+                      </a>
+                    </li>
+                    <li>
+                      <a 
+                        className="block px-4 py-2 hover:bg-gray-100 text-2xl font-semibold"
+                        onClick={() => {
+                          navigate("/practicas/practicas-iniciales");
+                          onClickModalList();
+                        } 
+                      }
+                      >
+                        Práctica Inicial
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              )}
             </li>
             <li className="inline-block mx-4">      
               <a className="text-2xl font-semibold hover:text-blue-600 transition-colors duration-300" onClick={() => navigate("/tesis")}>

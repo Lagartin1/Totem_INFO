@@ -41,9 +41,8 @@ export default function PracticasProfesionales() {
 
   const n_pages = Math.max(1, Math.ceil(data.total / 10));
 
-  const baseUrl = BUILD_MODE ? API_BASE_URL : 'http://localhost:3000';
-
-  // 🔹 Cargar lista general
+  const baseUrl = BUILD_MODE ? API_BASE_URL : 'http://localhost:3000';  
+  
   useEffect(() => {
     setLoading(true);
     fetch(`${baseUrl}/api/practicas/profesional?pagina=${paginaActual}`)
