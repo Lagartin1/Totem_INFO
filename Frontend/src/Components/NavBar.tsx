@@ -40,7 +40,7 @@ export default function NavBar() {
                       <a 
                         className="block px-4 py-2 hover:bg-gray-100 text-2xl font-semibold"
                         onClick={() => {
-                          navigate("/practicas/practicas-profesionales");
+                          navigate("/practicas-profesionales");
                           onClickModalList();
                         } 
                       }>
@@ -51,7 +51,7 @@ export default function NavBar() {
                       <a 
                         className="block px-4 py-2 hover:bg-gray-100 text-2xl font-semibold"
                         onClick={() => {
-                          navigate("/practicas/practicas-iniciales");
+                          navigate("/practicas-iniciales");
                           onClickModalList();
                         } 
                       }

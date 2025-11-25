@@ -2,7 +2,7 @@ import React from "react";
 
 import Loader from "../Components/Loader";
 import CardWorkshop from "../Components/Workshop_card";
-import Nav_button from "../Components/Nav_Button";
+import NavBar from "../Components/NavBar";
 
 
 
@@ -55,10 +55,8 @@ export default function Workshops() {
     <main className="min-h-screen min-w-screen w-full flex flex-col items-center bg-white-500">
       {loading && <Loader frase="Cargando video..." />}
       {loadingPage && <Loader frase="Cargando página..." />}
-      <div className="absolute w-50 h-20 top-10 left-10">
-        <Nav_button Title="Volver" Link="/"/>
-      </div>
-      <div className="mt-40 flex flex-row gap-20 justify-center">
+      <NavBar />
+      <div className="mt-20 flex flex-row gap-20 justify-center">
         <div className="flex flex-col gap-2">
           <div className="grid grid-cols-3 gap-10">
             {workshops.map((workshop) => ( 
