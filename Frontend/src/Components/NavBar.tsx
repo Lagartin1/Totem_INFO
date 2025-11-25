@@ -9,13 +9,14 @@ import logo_inf from "../assets/UACh_Informatica.png";
 export default function NavBar() {
   const navigate = useNavigate();
   const [modalList, setModalList] =  useState(false);
-  const onClickModalList = () => {
+  const onClickModalList = (e?: React.MouseEvent<HTMLElement>) => {
+    e?.preventDefault();
     setModalList(!modalList);
-  }
+  };
 
   return (
     <header className=" w-full flex flex-col items-center py-4 px-6 z-50">
-        <nav className="relative top-10 w-4/5 h-30 bg-white/70 flex items-center  rounded-4xl justify-start shadow-md z-50">
+        <nav className="relative top-10 w-4/5 h-30 bg-white/70 flex items-center  rounded-4xl justify-start shadow-md z-[9999]">
           <img src={logo_uach} alt="Logo UACh" className="h-20 pl-5" />
           <img
             src={logo_inf}

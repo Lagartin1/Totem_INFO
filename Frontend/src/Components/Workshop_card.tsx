@@ -175,12 +175,11 @@ export default function CardWorkshop(porps: {title: string, date: string, descri
       </div>
     </div>
       {modal && ( <div> 
-        <div
-            onClick={() => setModal(false)}
-            className="fixed inset-0 bg-black/5 w-full h-full top-1/2 left-1/2 
-                transform -translate-x-1/2 -translate-y-1/2 transition 
-                ease-out inset backdrop-blur-sm flex items-center justify-center z-50">
-          <div onClick={(e) => e.stopPropagation()} className="flex h-[75vh] w-[90vw] bg-slate-400 rounded-xl flex-row items-center relative">
+            <div
+                className="fixed inset-0 bg-black/5 w-full h-full top-1/2 left-1/2 
+                                transform -translate-x-1/2 -translate-y-1/2 transition 
+                                ease-out inset backdrop-blur-sm flex items-center justify-center z-50">
+              <div className="flex h-[75vh] w-[90vw] bg-slate-400 rounded-xl flex-row items-center relative">
           
                 <div className="w-full p-5">
                   <YouTubePlayer videoId={evaluateYoutubeId(porps.link) ?? ''} className="w-full" setLoading={porps.setLoading} />
