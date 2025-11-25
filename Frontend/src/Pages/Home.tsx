@@ -1,12 +1,13 @@
 import Boton_Landing from "../Components/Boton_Landing"
 import Header from "../Components/Header"
 import NoticiasSection from "../Components/Noticias_Section";
+import NavBar from "../Components/NavBar";
 
 function Home() {
 
   return (
     <main className='min-h-screen w-full flex flex-col items-center bg-white-500'>
-      <Header/>
+      <NavBar/>
       <div className="container flex flex-col">
           <div className="items-center grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-10 p-20">
             <Boton_Landing Title="Prácticas" Link="/practicas"/>

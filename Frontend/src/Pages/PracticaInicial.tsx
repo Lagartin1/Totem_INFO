@@ -4,6 +4,7 @@ import CardPracticas from "../Components/Card_Practicas";
 import Header from "../Components/Header";
 import Search_Bar from "../Components/Search_Bar";
 import Nav_button from "../Components/Nav_Button";
+import NavBar from "../Components/NavBar";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
@@ -81,7 +82,7 @@ export default function PracticasIniciales() {
 
   return (
     <main className="min-h-screen p-6">
-      <Header />
+           <NavBar />
       <div className="px-30 py-10">
         <Nav_button Title="Volver" Link="/practicas" />
       </div>
