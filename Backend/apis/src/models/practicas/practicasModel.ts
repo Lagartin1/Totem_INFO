@@ -15,7 +15,7 @@ export interface PracticaCSV {
 }
 
 // --- CONSTANTES ---
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 6;
 
 // 1. CreateNewPractica: Creación de una práctica
 export async function CreateNewPractica(
@@ -63,18 +63,6 @@ export async function CreateBulkPracticas(
   }
 }
 
-// Helper para crear el filtro de año
-function createYearFilter(year: string) {
-  const start = new Date(parseInt(year), 0, 1);
-  const end = new Date(parseInt(year) + 1, 0, 1);
-  return {
-    created_at: {
-      gte: start,
-      lt: end,
-    },
-  };
-}
-
 // 3. GetPracticas: Listado normal/paginado
 export async function GetPracticas(
   type: string,
@@ -96,32 +84,88 @@ export async function GetPracticas(
   return { practicas, total };
 }
 
-// 4. GetPracticasByYear: Listado por año y paginado
+
+// 4a. GetPracticasByYear: solo obtiene los candidatos de la base de datos (sin paginar ni filtrar por preferencia)
 export async function GetPracticasByYear(
   type: string,
-  year: string,
-  indice: number,
-  pageSize = PAGE_SIZE
-): Promise<PracticasResult> {
-  const yearFilter = createYearFilter(year);
+  year: string
+): Promise<any[]> {
+  const start = new Date(parseInt(year), 0, 1);
+  const end = new Date(parseInt(year) + 1, 0, 1);
+
   const typeFilter: any = type !== "all" ? { tipo_practica: type } : {};
-  const filter = {
+
+  // Traemos candidatos que tengan cualquiera de las dos fechas dentro del rango.
+  // Nota: `fechas_practica` se almacena como string, por lo que no podemos comparar con Date;
+  // en su lugar filtramos por presencia del año en la cadena.
+  const where: any = {
     ...typeFilter,
-    ...yearFilter,
+    OR: [
+      { created_at: { gte: start, lt: end } },
+      { fechas_practica: { contains: year } },
+    ],
   };
 
-  const [practicas, total] = await mongoClient.$transaction([
-    mongoClient.practica.findMany({
-      where: filter,
-      orderBy: { created_at: "desc" },
-      skip: indice,
-      take: pageSize,
-    }),
-    mongoClient.practica.count({ where: filter }),
-  ]);
+  // Solo recuperación desde BD; la lógica de preferencia y paginación queda aparte.
+  const candidates = await mongoClient.practica.findMany({
+    where,
+    orderBy: { created_at: "desc" },
+  });
 
-  return { practicas, total };
+  return candidates;
 }
+
+
+
+export async function GetPracticaYears(tipo_practica: string): Promise<number[]> {
+  const typeFilter: any = tipo_practica !== "all" ? { tipo_practica: tipo_practica } : {};
+
+  const yearsData = await mongoClient.practica.findMany({
+    where: typeFilter,
+    select: {
+      created_at: true,
+      fechas_practica: true, // ahora también traemos el campo string
+    },
+  });
+
+  const yearsSet = new Set<number>();
+  const yearRegex = /\b(19|20)\d{2}\b/g;
+
+  yearsData.forEach((item) => {
+    if (item.created_at) {
+      yearsSet.add(item.created_at.getFullYear());
+    }
+
+    const fechas = item.fechas_practica;
+    if (fechas && typeof fechas === "string") {
+      const matches = fechas.match(yearRegex);
+      if (matches) {
+        matches.forEach((m) => {
+          const y = parseInt(m, 10);
+          if (!isNaN(y)) yearsSet.add(y);
+        });
+      } else {
+        // Si no se encontraron años con regex, intentar parsear la cadena como fecha completa
+        const parsed = Date.parse(fechas);
+        if (!isNaN(parsed)) {
+          yearsSet.add(new Date(parsed).getFullYear());
+        }
+      }
+    }
+  });
+
+  const yearsArray = Array.from(yearsSet).sort((a, b) => b - a); // Orden descendente
+  return yearsArray;
+}
+
+
+
+
+
+
+
+
+
 
 // 5. SearchTermPracticas: Búsqueda por término
 export async function SearchTermPracticas(

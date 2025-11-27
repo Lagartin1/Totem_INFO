@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PracticasResult, GetPracticasByID, incrementPracticasVisits, GetPracticasByYear, SearchTermPracticas,getTopPracticas } from "@/models/practicas/practicasModel";
-import { listPracticas, insertNewPractica, insertCsvPracticas, csvToJson, CleanArray, validatePracticaData, deletePractica, togglePracticaState } from "@/services/practicas/practicasService";
+import { PracticasResult, GetPracticasByID, incrementPracticasVisits, SearchTermPracticas,getTopPracticas } from "@/models/practicas/practicasModel";
+import { listPracticas, insertNewPractica, insertCsvPracticas, csvToJson, CleanArray, validatePracticaData, deletePractica, togglePracticaState,GetAvailablePracticaYears } from "@/services/practicas/practicasService";
 import { addLogEntry } from "@/models/admin/logModel";
 
 const PAGE_SIZE = 10;
@@ -20,7 +20,7 @@ export async function fetchPracticas(
       data = await SearchTermPracticas(searchTerm, tipo_practica, indice, PAGE_SIZE);
     } else if (year) {
       // 2. Filtro por año
-      data = await GetPracticasByYear(tipo_practica, year, indice, PAGE_SIZE);
+      data = await listPracticas(year, indice, tipo_practica);
     } else {
       // 3. Listado normal (a través del servicio)
       data = await listPracticas(false, indice, tipo_practica);
@@ -34,12 +34,26 @@ export async function fetchPracticas(
   }
 }
 
+export async function fetchYearsPracticas(tipo_practica: string) {
+    try {
+        // Usamos el modelo para obtener los años disponibles
+        const years = await GetAvailablePracticaYears(tipo_practica);
+        return years;
+    } catch (error) {
+        console.error("Error en fetchYearsPracticas:", error);
+        throw new Error("Error al obtener los años de prácticas");
+    }
+}   
+
+
+
+
 export async function adminController(req: NextRequest, infotype: string, userID: string) {
     try {
         if (infotype === 'form') {
             // --- Creación Manual ---
             const body = await req.json().catch(() => ({} as any));
-            const result = await insertNewPractica(body);
+            const result = await insertNewPractica(body, userID);
             
             if (!result) {
                 return new NextResponse(JSON.stringify({ error: 'No se pudo crear la práctica' }), { status: 500 });

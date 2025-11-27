@@ -1,4 +1,4 @@
-import {PracticasResult,PracticaCSV,GetPracticas,GetPracticasByYear,SearchTermPracticas,CreateNewPractica,CreateBulkPracticas,DeletePracticaByID,desactivePracticaByID} from "@/models/practicas/practicasModel";
+import {PracticasResult,PracticaCSV,GetPracticas,GetPracticasByYear,SearchTermPracticas,CreateNewPractica,CreateBulkPracticas,DeletePracticaByID,desactivePracticaByID, GetPracticaYears} from "@/models/practicas/practicasModel";
 
 // Headers requeridos para la validación del CSV
 const requiredHeaders = [
@@ -24,11 +24,34 @@ const PAGE_SIZE = 10; // Definimos un tamaño de página por defecto para el ser
 
 export async function listPracticas(year: string | false, indice: number, type: string): Promise<PracticasResult> {
     console.log("listPracticas params:", { year, indice, type });
-    
-    // Llamamos a las funciones del modelo que ahora usan Prisma
-    const practicasData = year
-        ? await GetPracticasByYear(type, year, indice)
-        : await GetPracticas(type, indice);
+
+    let practicasData: PracticasResult;
+
+    // Si nos pasan un año válido (string), obtenemos prácticas y filtramos por año usando la "fecha efectiva"
+    if (year && typeof year === 'string') {
+        // Obtener candidatas (usamos GetPracticas para luego filtrar; si la fuente está paginada,
+        // esto asume que la página solicitada contiene las prácticas que interesan).
+        
+        const yearNum = parseInt(year, 10);
+        if (isNaN(yearNum)) {
+            throw new Error("Año inválido");
+        }
+        const candidates = await GetPracticasByYear(type, year);
+        
+        const start = new Date(yearNum, 0, 1);
+        const end = new Date(yearNum + 1, 0, 1);
+
+        const filtered = filterAndSortByEffectiveDate(candidates, start, end);
+
+        practicasData = {
+            // Mantener la estructura PracticasResult (practicas + posible total)
+            practicas: filtered,
+            total: filtered.length
+        } as PracticasResult;
+    } else {
+        // Sin año: comportamiento normal paginado
+        practicasData = await GetPracticas(type, indice);
+    }
 
     if (!practicasData || practicasData.practicas.length === 0) {
         throw new Error("No se encontraron prácticas");
@@ -48,15 +71,44 @@ export async function BuscarPracticas(term: string, type: string, indice: number
 }
 
 
-export async function insertNewPractica(data: any): Promise<PracticasResult> {
+
+export async function GetAvailablePracticaYears(tipo_practica: string): Promise<any> {
+    try {
+        const years = await GetPracticaYears(tipo_practica);
+        return years;
+    } catch (error) {
+        console.error("Error en GetAvailablePracticaYears (servicio):", error);
+        throw new Error("Error al obtener los años de prácticas desde el servicio");
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export async function insertNewPractica(data: any, userId: string): Promise<PracticasResult> {
     // ELIMINADO: const lastID = await GetLastPracticaId(); 
-    // Ahora Prisma genera el ID automáticamente
-    const practicasData: PracticasResult = await CreateNewPractica(data);
+    // Ahora Prisma genera el ID automáticamente; se requiere userId para autorId
+    const createdResult = await CreateNewPractica(data, userId);
     
-    if (!practicasData) {
+    if (!createdResult || !createdResult.practicas || createdResult.practicas.length === 0) {
         throw new Error('No se pudo crear la práctica');
     }
-    return practicasData;
+
+    // CreateNewPractica ya retorna PracticasResult
+    return createdResult;
 }
 
 
@@ -176,4 +228,32 @@ export async function togglePracticaState(id: string): Promise<boolean | { error
         console.error('Error al cambiar el estado de la práctica:', error);
         return { error: 'Error al cambiar el estado de la práctica' };
     }
+}
+
+
+// Helper: obtener la "fecha efectiva" de una práctica (preferir fecha_practica si es mayor)
+function getEffectiveDate(practica: any): Date | null {
+  const created = practica.created_at ? new Date(practica.created_at) : null;
+  const fecha = practica.fecha_practica ? new Date(practica.fecha_practica) : null;
+
+  if (!created && !fecha) return null;
+  if (created && fecha) return fecha.getTime() > created.getTime() ? fecha : created;
+  return fecha || created;
+}
+
+// Helper interno: filtrar y ordenar prácticas por año usando la fecha efectiva
+function filterAndSortByEffectiveDate(candidates: any[], start: Date, end: Date): any[] {
+  const filtered = candidates.filter((p: any) => {
+    const effective = getEffectiveDate(p);
+    if (!effective) return false;
+    return effective.getTime() >= start.getTime() && effective.getTime() < end.getTime();
+  });
+
+  filtered.sort((a: any, b: any) => {
+    const aEff = getEffectiveDate(a)!;
+    const bEff = getEffectiveDate(b)!;
+    return bEff.getTime() - aEff.getTime();
+  });
+
+  return filtered;
 }

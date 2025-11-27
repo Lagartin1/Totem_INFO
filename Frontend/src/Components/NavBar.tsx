@@ -17,11 +17,11 @@ export default function NavBar() {
   return (
     <header className=" w-full flex flex-col items-center py-4 px-6 z-50">
         <nav className="relative top-10 w-4/5 h-30 bg-white/70 flex items-center  rounded-4xl justify-start shadow-md z-[9999]">
-          <img src={logo_uach} alt="Logo UACh" className="h-20 pl-5" />
+          <img src={logo_uach} alt="Logo UACh" className="h-20 pl-5" onClick={() => navigate("/")} />
           <img
             src={logo_inf}
             alt="Logo UACh Informatica"
-            className="h-15 pl-5 pr-10"
+            className="h-15 pl-5 pr-10" onClick={() => navigate("/")}
           />
           <ul> 
             <li className="inline-block mx-6">
@@ -40,7 +40,7 @@ export default function NavBar() {
                       <a 
                         className="block px-4 py-2 hover:bg-gray-100 text-2xl font-semibold"
                         onClick={() => {
-                          navigate("/practicas-profesionales");
+                          navigate("/practicas/profesionales");
                           onClickModalList();
                         } 
                       }>
@@ -51,7 +51,7 @@ export default function NavBar() {
                       <a 
                         className="block px-4 py-2 hover:bg-gray-100 text-2xl font-semibold"
                         onClick={() => {
-                          navigate("/practicas-iniciales");
+                          navigate("/practicas/iniciales");
                           onClickModalList();
                         } 
                       }
