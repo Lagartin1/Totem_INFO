@@ -18,11 +18,11 @@ export async function createGiraController(formData: FormData, userID: string) {
   }
 }
 
-export async function GetGirasController() {
+export async function GetGirasController(pagina?: string): Promise<GiraResult> {
   // Llamamos a la función del servicio que obtiene los datos paginados
-  const girasData = await GetGirasServices(); 
+  const girasData = await GetGirasServices(pagina); 
   
-  if (!girasData || girasData.giras.length === 0) {
+  if (!girasData) {
     throw new Error("No se pudieron obtener las giras");
   }
   return girasData;

@@ -84,7 +84,7 @@ export default function NavBar() {
               </a>
             </li>
             <li className="inline-block mx-4">
-              <a className="text-2xl font-semibold hover:text-blue-600 transition-colors duration-300" onClick={() => navigate("/workshops")}>
+              <a className="text-2xl font-semibold hover:text-blue-600 transition-colors duration-300" onClick={() => navigate("/giras")}>
                 Gira estudios
               </a>
             </li> 

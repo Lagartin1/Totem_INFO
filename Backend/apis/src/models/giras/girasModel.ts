@@ -11,17 +11,19 @@ export interface GiraResult {
     total: number;
 }
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 6;
 
 // --- OPERACIONES DE LECTURA ---
 
 // 1. GetGiras: Listado paginado (Reemplaza getGiras() y GetGirasModel())
 export async function GetGiras(indice: number = 0, pageSize: number = PAGE_SIZE): Promise<GiraResult> {
+    const take = PAGE_SIZE;
+
     const [giras, total] = await mongoClient.$transaction([
         mongoClient.gira.findMany({
             orderBy: { createdAt: 'desc' }, // O por el campo 'anio' si es preferible
             skip: indice,
-            take: pageSize,
+            take,
         }),
         mongoClient.gira.count(),
     ]);
@@ -66,7 +68,6 @@ export async function CreateGira(data: any): Promise<Gira> {
     return await mongoClient.gira.create({
         data: {
             ...data,
-            visitas: 0, // Asumimos que inicializa visitas en 0
         }
     });
 }

@@ -12,16 +12,17 @@ import {
 // ✅ GET: Obtener todas las giras
 export async function GET(request: NextRequest) {
   try {
-    // Nota: Si en el futuro actualizas GetGirasController para aceptar paginación 
-    // (como hiciste con Noticias), aquí deberías leer searchParams.
-    // Por ahora, usamos el controlador tal cual se definió (sin argumentos).
-    const response = await GetGirasController();
+    // Extraemos el parámetro 'pagina' de la URL
+    const searchParams = request.nextUrl.searchParams;
+    const pagina = searchParams.get("pagina") || "1";
+
+    const response = await GetGirasController(pagina);
     
     return NextResponse.json(response, { status: 200 });
   } catch (error) {
-    console.error("Error en GET /giras:", error);
+    console.error("Error en GET /gira:", error);
     return NextResponse.json(
-      { error: "Error al buscar giras" },
+      { error: "Error al obtener giras" },
       { status: 500 }
     );
   }
