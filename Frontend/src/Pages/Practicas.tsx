@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import CardPracticas from "../Components/Card_Practicas";
 import NavBar from "../Components/NavBar";
@@ -36,6 +36,8 @@ export default function Practicas() {
   const [years, setYears] = useState<number[]>([]);
   const [filterModalidad, setFilterModalidad] = useState<boolean>(false);
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
+  const filterRef = useRef<HTMLDivElement | null>(null);
+  const filterButtonRef = useRef<HTMLButtonElement | null>(null);
 
 
   const [data, setData] = useState<PracticasData>({ practicas: [], total: 0 });
@@ -69,6 +71,24 @@ export default function Practicas() {
     cargar(paginaActual,selectedYear);
   }, [paginaActual,selectedYear,param]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (
+        filterModalidad &&
+        filterRef.current &&
+        !filterRef.current.contains(target) &&
+        filterButtonRef.current &&
+        !filterButtonRef.current.contains(target)
+      ) {
+        setFilterModalidad(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [filterModalidad]);
+
 
   const setPagina = (newPagina: number) => {
     const bounded = Math.min(Math.max(newPagina, 1), n_pages);
@@ -83,9 +103,9 @@ export default function Practicas() {
           <div className="flex flex-col gap-2">
             {!loading && (
                 
-              <div className="flex flex-row gap-2 mb-4 items-center bg-white/80 p-2 rounded-2xl justify-center w-1/3">
+              <div className="flex flex-row gap-2 mb-4 items-center bg-white/95 p-2 rounded-2xl justify-center w-1/3 ">
                 <label htmlFor="years" className="font-semibold">Filtrar por Año:</label>
-                <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={() => {
+                <button ref={filterButtonRef} className="bg-blue-500 text-white px-4 py-2 rounded" onClick={() => {
                   if (filterModalidad) {
                     setFilterModalidad(false);
                   } else {
@@ -94,8 +114,8 @@ export default function Practicas() {
                 }}>
                   Seleccionar Año
                 </button>
-                {filterModalidad && ( 
-              <div className="absolute mt-12 bg-white border border-gray-300 rounded shadow-lg z-10">
+                  {filterModalidad && ( 
+                <div ref={filterRef} className="absolute top-70 bg-white border border-gray-300 rounded shadow-lg z-10 max-h-70 overflow-y-auto">
                 <ul>
                   <li
                     key={"all_years"}
@@ -123,6 +143,7 @@ export default function Practicas() {
                       {year}
                     </li>
                   ))}
+                  
                 </ul>
               </div>
             )} 

@@ -6,7 +6,6 @@ import Home from './Pages/Home';
 import Becados from './Pages/Becados';
 import Proyectos from './Pages/Proyectos';
 import Practicas from './Pages/Practicas';
-import Tesis from './Pages/Tesis';
 import Workshops from './Pages/Workshops';
 import Giras from './Pages/Giras';
 
@@ -18,7 +17,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/becados" element={<Becados />} />
         <Route path="/proyectos" element={<Proyectos />} />
         <Route path="/practicas/:type" element={<Practicas/>} /> 
-        <Route path="/tesis" element={<Tesis />} />
+        <Route path="/proyectos/:type" element={<Proyectos/>} />
         <Route path="/workshops" element={<Workshops />} /> 
         <Route path="/giras" element={<Giras />} />
       </Routes>
