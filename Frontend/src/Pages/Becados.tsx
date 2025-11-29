@@ -1,89 +1,118 @@
-import { useEffect, useState } from "react";
-import Headers from "../Components/Header";
+import React from "react";
+import Loader from "../Components/Loader";
 import Card_Becados from "../Components/Card_Becados";
-import Nav_button from "../Components/Nav_Button";
-import type { Becado } from "../types/index";
-import Loading from "../Components/Loader";
-import Carousel from "../Components/Carousel";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
+import NavBar from "../Components/NavBar";
 
 export default function Becados() {
-  const [data, setData] = useState<Becado[]>([]);
-  const [sData, setSData] = useState<Becado[]>([]);
-  const [hasSearched, setHasSearched] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = React.useState<boolean>(false);
+  const [loadingPage, setLoadingPage] = React.useState<boolean>(false);
+  const [becados, setBecados] = React.useState<any[]>([]);
+  const [page, setPage] = React.useState<number>(1);
+  const [totalPages, setTotalPages] = React.useState<number>(1);
 
-  const baseUrl = BUILD_MODE ? API_BASE_URL : "http://localhost:3000";
-  
-  useEffect(() => {
-    setLoading(true);
-    fetch(`${baseUrl}/api/becados`)
-      .then((res) => res.json())
-      .then((json) => {
-        setData(json.becados ?? []);
+  React.useEffect(() => {
+    setLoadingPage(true);
+    fetch(`/api/becados?pagina=${page}`)  // Ajusta pageSize según sea necesario
+      .then(response => response.json())
+      .then(data => {
+        setBecados(data.becados || data.data || []);
+        setTotalPages(Math.ceil((data.total || 0) / 6)); // Asumiendo un pageSize de 6
+        console.log(data);
+        setLoadingPage(false);
       })
-      .catch((err) => console.error("Error en fetch inicial:", err))
-      .finally(() => {
+      .catch(error => {
+        console.error('Error al obtener los becados:', error);
+        setLoadingPage(false);
+      });
+  }, [page]);
+
+  const fetchNewPage = (newPage: number) => {
+    setLoading(true);
+    fetch(`/api/becados?pagina=${newPage}`)  // Ajusta pageSize según sea necesario
+      .then(response => response.json())
+      .then(data => {
+        setBecados(data.becados || data.data || []);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error al obtener los becados:', error);
         setLoading(false);
       });
-  }, []);
-
-  // Volver a la lista inicial
-  const handleVolver = () => {
-    setSData([]);
-    setHasSearched(false);
-  };
-
-  // Datos a mostrar
-  const displayedData = hasSearched ? sData : data;
-
-  const slides = displayedData.map((becado) => (
-    <Card_Becados
-      key={becado.id}
-      becado={becado}
-    />
-  ));
+  }
 
   return (
-    <main className="p-6 w-full min-h-screen">
-      <Headers />
-      <div className="px-30 py-10">
-        <Nav_button Title="Volver" Link="/" />
-      </div>
-
-      <div className="py-10 flex flex-col items-center gap-6">
-
-        {/* Loading Spinner */}
-        {loading && <Loading frase="Cargando becados..." />}
-
-        {/* Lista de resultados */}
-        {!loading && displayedData.length > 0 && (
-          <>
-           <div className="relative w-full">
-            <div className="flex gap-4 overflow-x-auto pb-4">
-              {!loading && slides.length > 0 && (
-                <Carousel key={displayedData.length} slides={slides} />
-              )}
-            </div>
+    <main className="min-h-screen min-w-screen w-full flex flex-col items-center bg-white-500">
+      {loading && <Loader frase="Cargando becados..." />}
+      {loadingPage && <Loader frase="Cargando página..." />}
+      <NavBar />
+      <div className="mt-20 flex flex-row gap-20 justify-center">
+        <div className="flex flex-col gap-2">
+          <div className="grid grid-cols-3 gap-10">
+            {becados.map((becado) => ( 
+              <Card_Becados 
+                key={becado.id}
+                {...becado}
+              />
+            ))}
           </div>
+          <div className="flex items-center justify-center mt-4 space-x-2">
+            <button
+              type="button"
+              onClick={() => fetchNewPage(Math.max(1, page - 1))}
+              className="px-3 py-1 text-sm rounded bg-gray-200 hover:bg-gray-300 focus:outline-none disabled:opacity-50"
+              aria-label="Anterior"
+              disabled={page <= 1}
+            >
+              ‹
+            </button>
 
-            {/* Botón "Volver" solo si se hizo una búsqueda */}
-            {hasSearched && (
-              <div className="flex flex-col mt-8 bg-gray-800/20 items-center rounded-3xl">
-                <div
-                  className="flex items-center justify-center rounded-2xl p-10 w-60 h-40 bg-gray-700 shadow-2xl shadow-gray-500 cursor-pointer"
-                  onClick={handleVolver}>
-                  <h3 className="text-balance text-2xl p-5 text-white">
-                    Volver a la lista
-                  </h3>
-                </div>
-              </div>
+            {Array.from(
+              { length: Math.max(1, Math.ceil(totalPages || 1)) },
+              (_, i) => {
+              const p = i + 1;
+              const isActive = p === page;
+              return (
+                <button
+                key={p}
+                type="button"
+                onClick={() => setPage(p)}
+                className={`px-3 py-1 text-sm rounded focus:outline-none ${
+                  isActive
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  : "bg-gray-200 hover:bg-gray-300"
+                }`}
+                aria-label={`Página ${p}`}
+                >
+                {p}
+                </button>
+              );
+              }
             )}
-          </>
-        )}
-      </div>
+
+            <button
+              type="button"
+              onClick={() => fetchNewPage(Math.min(Math.max(1, Math.ceil(totalPages || 1)), page + 1))}
+              className="px-3 py-1 text-sm rounded bg-gray-200 hover:bg-gray-300 focus:outline-none disabled:opacity-50"
+              aria-label="Siguiente"
+              disabled={page >= Math.max(1, Math.ceil(totalPages || 1))}
+            >
+              ›
+            </button>
+          </div>
+        </div>
+        <div className="flex flex-col bg-slate-500 rounded-lg w-1/4 items-center" >
+          <h1 className="text-white text-4xl font-bold justify-center p-10 mt-20 ">Becados</h1>
+          <p className="text-white/90 text-lg font-semibold text-center justify-center p-5 mt-5">
+          Los Becados de Informática representan el talento académico y el compromiso estudiantil
+          de nuestra carrera de Ingeniería Civil en Informática. Estos estudiantes destacados
+          han demostrado excelencia académica y dedicación en sus estudios, obteniendo reconocimientos
+          y apoyo financiero para continuar su formación profesional.
+          A través del programa de becas, promovemos la igualdad de oportunidades y fomentamos
+          el desarrollo de futuros profesionales que contribuirán significativamente al campo
+          de la tecnología y la innovación en nuestro país.
+          </p>
+        </div>
+      </div>  
     </main>
   );
 }

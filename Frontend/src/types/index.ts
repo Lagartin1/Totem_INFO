@@ -35,5 +35,7 @@ export interface Gira {
   descripcion: string;
   anio: string;
   lugares: string[];
+  portada?: string;
   videos: string[];
+  imagenes: string[];
 }

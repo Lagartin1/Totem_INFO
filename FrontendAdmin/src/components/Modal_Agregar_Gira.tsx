@@ -100,6 +100,14 @@ export default function Modal_Agregar_Gira({
             className="border p-2 rounded"
           />
 
+          <label className="text-sm text-gray-600">Imagen de Portada</label>
+          <input
+            name="portada"
+            type="file"
+            accept="image/*"
+            className="border p-2 rounded"
+          />
+
           <label className="text-sm text-gray-600">
             Videos (puedes subir varios)
           </label>
@@ -108,6 +116,27 @@ export default function Modal_Agregar_Gira({
             type="file"
             accept="video/*"
             multiple
+            className="border p-2 rounded"
+          />
+
+          <label className="text-sm text-gray-600">
+            Imágenes (puedes subir varias)
+          </label>
+          <input
+            name="imagenes"
+            type="file"
+            accept="image/*"
+            multiple
+            className="border p-2 rounded"
+          />
+
+          <label className="text-sm text-gray-600">
+            Lugares visitados (separados por comas)
+          </label>
+          <input
+            name="lugares"
+            type="text"
+            placeholder="Lugar 1, Lugar 2, Lugar 3"
             className="border p-2 rounded"
           />
 

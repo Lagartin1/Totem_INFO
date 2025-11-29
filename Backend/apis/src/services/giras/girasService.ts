@@ -21,8 +21,9 @@ const PAGE_SIZE = 10;
 export async function listGiras(indice: number = 0): Promise<GiraResult> {
   // Usamos el nuevo GetGiras del modelo de Prisma
   const response = await GetGiras(indice, PAGE_SIZE);
-  if (!response || response.giras.length === 0) {
-    throw new Error("No se encontraron giras");
+  // Si no hay giras, devolvemos una respuesta válida con array vacío
+  if (!response) {
+    return { giras: [], total: 0 };
   }
   return response;
 }
@@ -32,15 +33,14 @@ export async function GetGirasServices(pagina?: string): Promise<GiraResult> {
   // Calculamos el índice de inicio ('skip' en Prisma)
   const pageNumber = Number(pagina) > 1 ? Number(pagina) : 1;
   const indice = (pageNumber - 1) * PAGE_SIZE;
-  console.log(
-    `Fetching giras for page ${pageNumber}, skip index ${indice}`
-  );
+  console.log(`Fetching giras for page ${pageNumber}, skip index ${indice}`);
 
   // Usamos un size de 20 para replicar el comportamiento original de GetGirasModel
   const giras = await GetGiras(indice, 6);
 
-  if (!giras || giras.giras.length === 0) {
-    throw new Error("No se pudieron cargar las giras");
+  // Si no hay giras, devolvemos una respuesta válida con array vacío
+  if (!giras) {
+    return { giras: [], total: 0 };
   }
   return giras;
 }
@@ -51,13 +51,12 @@ export async function BuscarGiras(
   indice: number = 0
 ): Promise<GiraResult> {
   const response = await SearchGiras(term, indice, PAGE_SIZE);
-  if (!response || response.giras.length === 0) {
-    throw new Error("No se encontraron giras con ese término");
+  // Si no hay resultados, devolvemos una respuesta válida con array vacío
+  if (!response) {
+    return { giras: [], total: 0 };
   }
   return response;
 }
-
-// --- CREACIÓN ---
 
 // AÑADIDO: 'autorId' es obligatorio por el esquema de Prisma.
 export async function createGiraService(
@@ -71,10 +70,13 @@ export async function createGiraService(
       (formData.get("descripcion") as string) || "Sin descripción disponible.";
     const anio =
       (formData.get("anio") as string) || new Date().getFullYear().toString();
-    const lugares = formData
-      .getAll("lugares")
-      .filter((a) => typeof a === "string" && a.trim() !== "") as string[];
+    const lugares = formData.get("lugares") as string;
+    const lugaresArray = lugares 
+      ? lugares.split(",").map(lugar => lugar.trim()).filter(lugar => lugar !== "")
+      : [];
+    const portadaFile = formData.get("portada");
     const videosRaw = formData.getAll("videos") as (string | File)[];
+    const imagenesRaw = formData.getAll("imagenes") as (string | File)[];
 
     let videoUrls: string[] = [];
     for (const video of videosRaw) {
@@ -95,13 +97,45 @@ export async function createGiraService(
       }
     }
 
-    // Llamamos a la función de creación de Prisma con datos limpios
+    let portadaUrl: string | undefined;
+
+    if (portadaFile instanceof File && portadaFile.size > 0) {
+      const bytes = await portadaFile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const fileName = `${randomUUID()}_${portadaFile.name}`;
+      const filePath = path.join(process.cwd(), "public", "uploads", fileName);
+      await writeFile(filePath, buffer);
+      portadaUrl = `/uploads/${fileName}`;
+    } else if (
+      typeof portadaFile === "string" &&
+      portadaFile.startsWith("http")
+    ) {
+      portadaUrl = portadaFile;
+    }
+
+    let imagenUrls: string[] = [];
+
+    // Lógica de manejo de imagen(es) (archivo(s) o URL(s))
+    for (const img of imagenesRaw) {
+      if (img instanceof File && img.size > 0) {
+        const bytes = await img.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+        const fileName = `${randomUUID()}_${img.name}`;
+        const filePath = path.join(process.cwd(), "public", "uploads", fileName);
+        await writeFile(filePath, buffer);
+        imagenUrls.push(`/uploads/${fileName}`);
+      } else if (typeof img === "string" && img.startsWith("http")) {
+        imagenUrls.push(img);
+      }
+    }
     const nuevaGira = await CreateGira({
       titulo,
       descripcion,
       anio,
-      lugares,
+      lugares: lugaresArray,
+      portada: portadaUrl || "",
       videos: videoUrls,
+      imagenes: imagenUrls,
       autorId: autorId, // Campo requerido por Prisma
     });
 
@@ -129,7 +163,7 @@ export async function PutGirasService(
   if (!hasData) throw new Error("No se recibieron datos para actualizar");
 
   try {
-    // 1. Obtener gira actual para gestionar videos
+    // 1. Obtener gira actual para gestionar multimedia
     const giraActual = await GetGiraByID(id);
     if (!giraActual) throw new Error("Gira no encontrada");
 
@@ -137,11 +171,38 @@ export async function PutGirasService(
       ? [...giraActual.videos]
       : [];
 
-    // 2. Eliminar videos existentes si se indica
-    if (formData.get("eliminarVideos") === "true" && videoUrls.length > 0) {
+    let imagenUrls: string[] = Array.isArray(giraActual.imagenes)
+      ? [...giraActual.imagenes]
+      : [];
+
+    let portadaUrl: string = giraActual.portada || "";
+
+    // 2. Manejar videos existentes
+    const videosExistentes = formData.getAll("videosExistentes");
+    if (videosExistentes.length > 0) {
+      videoUrls = videosExistentes.filter(
+        (video) => typeof video === "string" && video.trim() !== ""
+      ) as string[];
+    }
+
+    // 3. Manejar imágenes existentes
+    const imagenesExistentes = formData.getAll("imagenesExistentes");
+    if (imagenesExistentes.length > 0) {
+      imagenUrls = imagenesExistentes.filter(
+        (imagen) => typeof imagen === "string" && imagen.trim() !== ""
+      ) as string[];
+    }
+
+    // 4. Manejar portada existente
+    const portadaExistente = formData.get("portadaExistente");
+    if (portadaExistente && typeof portadaExistente === "string") {
+      portadaUrl = portadaExistente;
+    }
+
+    // 4. Eliminar videos si se indica
+    if (formData.get("eliminarVideos") === "true") {
       for (const url of videoUrls) {
         if (url.startsWith("/uploads/")) {
-          // Borrar solo archivos locales
           const oldPath = path.join(process.cwd(), "public", url);
           await unlink(oldPath).catch(() => {});
         }
@@ -149,7 +210,27 @@ export async function PutGirasService(
       videoUrls = [];
     }
 
-    // 3. Subir/añadir nuevos videos
+    // 5. Eliminar imágenes si se indica
+    if (formData.get("eliminarImagenes") === "true") {
+      for (const url of imagenUrls) {
+        if (url.startsWith("/uploads/")) {
+          const oldPath = path.join(process.cwd(), "public", url);
+          await unlink(oldPath).catch(() => {});
+        }
+      }
+      imagenUrls = [];
+    }
+
+    // 6. Eliminar portada si se indica
+    if (formData.get("eliminarPortada") === "true") {
+      if (portadaUrl && portadaUrl.startsWith("/uploads/")) {
+        const oldPath = path.join(process.cwd(), "public", portadaUrl);
+        await unlink(oldPath).catch(() => {});
+      }
+      portadaUrl = "";
+    }
+
+    // 6. Subir/añadir nuevos videos
     const nuevosVideos = formData.getAll("videos");
     for (const video of nuevosVideos) {
       if (video instanceof File && video.size > 0) {
@@ -169,9 +250,54 @@ export async function PutGirasService(
       }
     }
 
-    // 4. Construir objeto de actualización
-    const updateDoc: Partial<Gira> & { videos: string[]; lugares?: string[] } =
-      { videos: videoUrls };
+    // 7. Subir/añadir nuevas imágenes
+    const nuevasImagenes = formData.getAll("imagenes");
+    for (const imagen of nuevasImagenes) {
+      if (imagen instanceof File && imagen.size > 0) {
+        const bytes = await imagen.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+        const fileName = `${randomUUID()}_${imagen.name}`;
+        const filePath = path.join(
+          process.cwd(),
+          "public",
+          "uploads",
+          fileName
+        );
+        await writeFile(filePath, buffer);
+        imagenUrls.push(`/uploads/${fileName}`);
+      } else if (typeof imagen === "string" && imagen.startsWith("http")) {
+        imagenUrls.push(imagen);
+      }
+    }
+
+    // 8. Subir/cambiar nueva portada
+    const nuevaPortada = formData.get("portada");
+    if (nuevaPortada instanceof File && nuevaPortada.size > 0) {
+      // Eliminar portada anterior si existe
+      if (portadaUrl && portadaUrl.startsWith("/uploads/")) {
+        const oldPath = path.join(process.cwd(), "public", portadaUrl);
+        await unlink(oldPath).catch(() => {});
+      }
+      
+      // Subir nueva portada
+      const bytes = await nuevaPortada.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const fileName = `${randomUUID()}_${nuevaPortada.name}`;
+      const filePath = path.join(
+        process.cwd(),
+        "public",
+        "uploads",
+        fileName
+      );
+      await writeFile(filePath, buffer);
+      portadaUrl = `/uploads/${fileName}`;
+    } else if (typeof nuevaPortada === "string" && nuevaPortada.startsWith("http")) {
+      portadaUrl = nuevaPortada;
+    }
+
+    // 8. Construir objeto de actualización
+    const updateDoc: Partial<Gira> & { videos: string[]; imagenes: string[]; lugares?: string[]; portada?: string } =
+      { videos: videoUrls, imagenes: imagenUrls, portada: portadaUrl };
 
     ["titulo", "descripcion", "anio"].forEach((key) => {
       const value = formData.get(key);
@@ -181,14 +307,24 @@ export async function PutGirasService(
     });
 
     // Manejo especial de lugares (array)
-    const lugaresForm = formData
-      .getAll("lugares")
-      .filter((a) => typeof a === "string" && a.trim() !== "") as string[];
-    if (lugaresForm.length > 0) {
-      updateDoc.lugares = lugaresForm;
+    const lugaresForm = formData.getAll("lugares[]");
+    if (lugaresForm.length === 0) {
+      // Si no vienen como array, intentar como string separado por comas
+      const lugaresString = formData.get("lugares") as string;
+      if (lugaresString) {
+        const lugaresArray = lugaresString.split(",").map(lugar => lugar.trim()).filter(lugar => lugar !== "");
+        if (lugaresArray.length > 0) {
+          updateDoc.lugares = lugaresArray;
+        }
+      }
+    } else {
+      const lugaresArray = lugaresForm.filter((a) => typeof a === "string" && a.trim() !== "") as string[];
+      if (lugaresArray.length > 0) {
+        updateDoc.lugares = lugaresArray;
+      }
     }
 
-    // 5. Llamar a la función de actualización de Prisma
+    // 9. Llamar a la función de actualización de Prisma
     const result = await UpdateGira(id, updateDoc);
     return result;
   } catch (error) {
@@ -206,6 +342,7 @@ export async function DeleteGiraService(id: string): Promise<any> {
     // 1. Obtener la gira para borrar los archivos asociados
     const gira = await GetGiraByID(id);
 
+    // Borrar videos
     if (gira?.videos && gira.videos.length > 0) {
       for (const videoPath of gira.videos) {
         if (videoPath.startsWith("/uploads/")) {
@@ -219,6 +356,33 @@ export async function DeleteGiraService(id: string): Promise<any> {
           });
         }
       }
+    }
+
+    // Borrar imágenes
+    if (gira?.imagenes && gira.imagenes.length > 0) {
+      for (const imagenPath of gira.imagenes) {
+        if (imagenPath.startsWith("/uploads/")) {
+          // Borrar solo archivos locales
+          const fullPath = path.join(process.cwd(), "public", imagenPath);
+          await unlink(fullPath).catch((err) => {
+            console.warn(
+              `⚠️ No se pudo borrar la imagen o no existe: ${imagenPath}`,
+              err
+            );
+          });
+        }
+      }
+    }
+
+    // Borrar imagen de portada
+    if (gira?.portada && gira.portada.startsWith("/uploads/")) {
+      const fullPath = path.join(process.cwd(), "public", gira.portada);
+      await unlink(fullPath).catch((err) => {
+        console.warn(
+          `⚠️ No se pudo borrar la imagen de portada o no existe: ${gira.portada}`,
+          err
+        );
+      });
     }
 
     // 2. Borrar de la base de datos de MongoDB con Prisma

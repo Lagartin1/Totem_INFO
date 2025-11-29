@@ -143,11 +143,13 @@ model Gira{
   id                    String    @id @default(auto()) @map("_id") @db.ObjectId
   createdAt             DateTime  @default(now()) 
   updatedAt             DateTime  @updatedAt
-  titulo                String?
+  titulo                String
   descripcion           String?
-  anio                  String?
+  anio                  String
   lugares               String[]
+  portada               String?
   videos                String[]
+  imagenes              String[]
 
   autorId               String    @db.ObjectId
   autor                 Usuario   @relation(fields: [autorId], references: [id])

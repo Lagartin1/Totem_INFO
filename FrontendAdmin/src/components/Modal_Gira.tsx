@@ -24,40 +24,116 @@ export default function Modal_Gira({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
       onClick={onClose}>
       <div
-        className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 max-h-[80vh] overflow-y-auto relative"
+        className="bg-white rounded-2xl shadow-xl w-full max-w-4xl p-6 max-h-[90vh] overflow-y-auto relative"
         onClick={(e) => e.stopPropagation()}>
-        {Array.isArray(gira.videos) && gira.videos.length > 0 ? (
-          <div className="flex gap-2 overflow-x-auto mb-4">
-            {gira.videos.map((videoUrl, index) => (
-              <video
-                key={index}
-                className="w-full h-40 rounded-lg flex-shrink-0 object-cover"
-                controls
-                controlsList="nodownload"
-                disablePictureInPicture
-                preload="metadata">
-                <source src={`${baseUrl}${videoUrl}`} type="video/mp4" />
-                Tu navegador no soporta la reproducción de video.
-              </video>
-            ))}
-          </div>
-        ) : (
-          <div className="w-full h-40 bg-gray-200 rounded-lg mb-4 flex items-center justify-center text-gray-500 text-sm">
-            Sin videos
-          </div>
-        )}
+        
         {/* Título */}
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">
           {gira.titulo}
         </h2>
 
-        {/* Contenido */}
-        <div className="space-y-3 text-gray-700">
+        {/* Información básica */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
-            <span className="font-semibold">Descripción:</span>
-            {gira.descripcion && <p className="mt-1">{gira.descripcion}</p>}
+            <div className="space-y-3 text-gray-700">
+              <div>
+                <span className="font-semibold">Año:</span>
+                <p className="mt-1">{gira.anio}</p>
+              </div>
+              {gira.descripcion && (
+                <div>
+                  <span className="font-semibold">Descripción:</span>
+                  <p className="mt-1">{gira.descripcion}</p>
+                </div>
+              )}
+              {gira.lugares && gira.lugares.length > 0 && (
+                <div>
+                  <span className="font-semibold">Lugares visitados:</span>
+                  <ul className="mt-1 list-disc list-inside">
+                    {gira.lugares.map((lugar, index) => (
+                      <li key={index}>{lugar}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
           </div>
+
+          {/* Portada */}
+          {gira.portada && (
+            <div>
+              <span className="font-semibold text-gray-700">Portada:</span>
+              <img
+                src={`${baseUrl}${gira.portada}`}
+                alt="Portada de la gira"
+                className="w-full h-48 rounded-lg object-cover mt-2"
+              />
+            </div>
+          )}
         </div>
+
+        {/* Videos */}
+        {Array.isArray(gira.videos) && gira.videos.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-3">Videos ({gira.videos.length})</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {gira.videos.map((videoUrl, index) => (
+                <video
+                  key={index}
+                  className="w-full h-48 rounded-lg object-cover"
+                  controls
+                  controlsList="nodownload"
+                  disablePictureInPicture
+                  preload="metadata">
+                  <source src={`${baseUrl}${videoUrl}`} type="video/mp4" />
+                  Tu navegador no soporta la reproducción de video.
+                </video>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Imágenes */}
+        {Array.isArray(gira.imagenes) && gira.imagenes.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-3">Imágenes ({gira.imagenes.length})</h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {gira.imagenes.map((imagenUrl, index) => (
+                <img
+                  key={index}
+                  src={`${baseUrl}${imagenUrl}`}
+                  alt={`Imagen ${index + 1} de la gira`}
+                  className="w-full h-32 rounded-lg object-cover cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={() => {
+                    // Opcional: abrir en modal grande para vista detallada
+                    window.open(`${baseUrl}${imagenUrl}`, '_blank');
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Mensaje si no hay multimedia */}
+        {(!gira.videos || gira.videos.length === 0) && 
+         (!gira.imagenes || gira.imagenes.length === 0) && (
+          <div className="text-center py-8 text-gray-500">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+              className="w-12 h-12 mx-auto mb-2">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Z"
+              />
+            </svg>
+            <p>No hay contenido multimedia disponible</p>
+          </div>
+        )}
 
         {/* Botón */}
         <div className="flex justify-end mt-6">

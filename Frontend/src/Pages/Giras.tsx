@@ -13,29 +13,43 @@ export default function Giras() {
   React.useEffect(() => {
     setLoadingPage(true);
     fetch(`/api/gira?pagina=${page}`) // Ajusta pageSize según sea necesario
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+      })
       .then((data) => {
         console.log("Respuesta API:", data);
-        setGiras(data.giras);
-        setTotalPages(Math.ceil(data.total / 6)); // Asumiendo un pageSize de 6
+        setGiras(data.giras || []);
+        setTotalPages(data.total > 0 ? Math.ceil(data.total / 6) : 1); // Asumiendo un pageSize de 6
         console.log(data);
         setLoadingPage(false);
       })
       .catch((error) => {
         console.error("Error al obtener las giras:", error);
+        setGiras([]);
+        setTotalPages(1);
+        setLoadingPage(false);
       });
   }, [page]);
 
   const fetchNewPage = (newPage: number) => {
     setLoading(true);
     fetch(`/api/gira?pagina=${newPage}`) // Ajusta pageSize según sea necesario
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+      })
       .then((data) => {
-        setGiras(data.giras);
+        setGiras(data.giras || []);
         setLoading(false);
       })
       .catch((error) => {
         console.error("Error al obtener las giras:", error);
+        setGiras([]);
         setLoading(false);
       });
   };
@@ -48,61 +62,77 @@ export default function Giras() {
       <div className="mt-20 flex flex-row gap-20 justify-center">
         <div className="flex flex-col gap-2">
           <div className="grid grid-cols-3 gap-10">
-            {giras.map((gira) => (
-              <Card_Giras
-                key={gira.link}
-                title={gira.titulo}
-                date={gira.fecha}
-                description={gira.descripcion}
-                link={gira.link}
-                setLoading={setLoading}
-              />
-            ))}
+            {giras.length > 0 ? (
+              giras.map((gira) => (
+                <Card_Giras
+                  key={gira.id}
+                  gira={gira}
+                />
+              ))
+            ) : (
+              !loadingPage && (
+                <div className="col-span-3 flex flex-col items-center justify-center p-12 text-center">
+                  <div className="text-6xl mb-4">📍</div>
+                  <h3 className="text-2xl font-semibold text-gray-700 mb-2">
+                    No hay giras disponibles
+                  </h3>
+                  <p className="text-gray-500 text-lg">
+                    Por el momento no hay giras académicas programadas. 
+                    <br />
+                    Vuelve pronto para conocer las próximas experiencias educativas.
+                  </p>
+                </div>
+              )
+            )}
           </div>
           <div className="flex items-center justify-center mt-4 space-x-2">
-            <button
-              type="button"
-              onClick={() => fetchNewPage(Math.max(1, page - 1))}
-              className="px-3 py-1 text-sm rounded bg-gray-200 hover:bg-gray-300 focus:outline-none disabled:opacity-50"
-              aria-label="Anterior"
-              disabled={page <= 1}>
-              ‹
-            </button>
+            {giras.length > 0 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => fetchNewPage(Math.max(1, page - 1))}
+                  className="px-3 py-1 text-sm rounded bg-gray-200 hover:bg-gray-300 focus:outline-none disabled:opacity-50"
+                  aria-label="Anterior"
+                  disabled={page <= 1}>
+                  ‹
+                </button>
 
-            {Array.from(
-              { length: Math.max(1, Math.ceil(totalPages || 1)) },
-              (_, i) => {
-                const p = i + 1;
-                const isActive = p === page;
-                return (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => setPage(p)}
-                    className={`px-3 py-1 text-sm rounded focus:outline-none ${
-                      isActive
-                        ? "bg-blue-600 text-white hover:bg-blue-700"
-                        : "bg-gray-200 hover:bg-gray-300"
-                    }`}
-                    aria-label={`Página ${p}`}>
-                    {p}
-                  </button>
-                );
-              }
+                {Array.from(
+                  { length: Math.max(1, Math.ceil(totalPages || 1)) },
+                  (_, i) => {
+                    const p = i + 1;
+                    const isActive = p === page;
+                    return (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => setPage(p)}
+                        className={`px-3 py-1 text-sm rounded focus:outline-none ${
+                          isActive
+                            ? "bg-blue-600 text-white hover:bg-blue-700"
+                            : "bg-gray-200 hover:bg-gray-300"
+                        }`}
+                        aria-label={`Página ${p}`}>
+                        {p}
+                      </button>
+                    );
+                  }
+                )}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    fetchNewPage(
+                      Math.min(Math.max(1, Math.ceil(totalPages || 1)), page + 1)
+                    )
+                  }
+                  className="px-3 py-1 text-sm rounded bg-gray-200 hover:bg-gray-300 focus:outline-none disabled:opacity-50"
+                  aria-label="Siguiente"
+                  disabled={page >= Math.max(1, Math.ceil(totalPages || 1))}>
+                  ›
+                </button>
+              </>
             )}
-
-            <button
-              type="button"
-              onClick={() =>
-                fetchNewPage(
-                  Math.min(Math.max(1, Math.ceil(totalPages || 1)), page + 1)
-                )
-              }
-              className="px-3 py-1 text-sm rounded bg-gray-200 hover:bg-gray-300 focus:outline-none disabled:opacity-50"
-              aria-label="Siguiente"
-              disabled={page >= Math.max(1, Math.ceil(totalPages || 1))}>
-              ›
-            </button>
           </div>
         </div>
         <div className="flex flex-col bg-slate-500 rounded-lg w-1/4 items-center">

@@ -18,8 +18,12 @@ export default function Card_Gira({ gira, onDelete, onAdded }: CardGiraProps) {
   const [editOpen, setEditOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Gira>>(gira);
-  const [selectedFile, setSelectedFile] = useState<File[] | null>(null);
+  const [selectedVideos, setSelectedVideos] = useState<File[] | null>(null);
+  const [selectedImagenes, setSelectedImagenes] = useState<File[] | null>(null);
+  const [selectedPortada, setSelectedPortada] = useState<File | null>(null);
   const [removeVideos, setRemoveVideos] = useState(false);
+  const [removeImagenes, setRemoveImagenes] = useState(false);
+  const [removePortada, setRemovePortada] = useState(false);
 
   const baseUrl = BUILD_MODE ? API_BASE_URL : "http://localhost:3000";
 
@@ -90,24 +94,66 @@ export default function Card_Gira({ gira, onDelete, onAdded }: CardGiraProps) {
         }
       });
 
-      // Videos (array de strings o archivos)
-      if (Array.isArray(editData.videos)) {
+      // Lugares
+      if (Array.isArray(editData.lugares) && editData.lugares.length > 0) {
+        editData.lugares.forEach((lugar) => {
+          formData.append("lugares[]", lugar);
+        });
+      }
+
+      // Videos existentes
+      if (Array.isArray(editData.videos) && !removeVideos) {
         editData.videos.forEach((video) => {
-          // Si ya es una URL, la enviamos como texto
           if (typeof video === "string" && video.startsWith("/uploads")) {
-            formData.append("videos[]", video);
+            formData.append("videosExistentes[]", video);
           }
         });
       }
 
-      if (selectedFile) {
-        selectedFile.forEach((file) => {
-          formData.append("videos[]", file);
+      // Imágenes existentes
+      if (Array.isArray(editData.imagenes) && !removeImagenes) {
+        editData.imagenes.forEach((imagen) => {
+          if (typeof imagen === "string" && imagen.startsWith("/uploads")) {
+            formData.append("imagenesExistentes[]", imagen);
+          }
         });
       }
 
+      // Portada existente
+      if (editData.portada && !removePortada && !selectedPortada) {
+        formData.append("portadaExistente", editData.portada);
+      }
+
+      // Nuevos videos
+      if (selectedVideos) {
+        selectedVideos.forEach((file) => {
+          formData.append("videos", file);
+        });
+      }
+
+      // Nuevas imágenes
+      if (selectedImagenes) {
+        selectedImagenes.forEach((file) => {
+          formData.append("imagenes", file);
+        });
+      }
+
+      // Nueva portada
+      if (selectedPortada) {
+        formData.append("portada", selectedPortada);
+      }
+
+      // Flags para eliminar
       if (removeVideos) {
         formData.append("eliminarVideos", "true");
+      }
+
+      if (removeImagenes) {
+        formData.append("eliminarImagenes", "true");
+      }
+
+      if (removePortada) {
+        formData.append("eliminarPortada", "true");
       }
 
       const performPut = async () => {
@@ -164,29 +210,60 @@ export default function Card_Gira({ gira, onDelete, onAdded }: CardGiraProps) {
     <>
       {/* Card */}
       <div className="relative min-w-[350px] max-w-[350px] border rounded-xl shadow-sm p-4 flex-shrink-0 snap-center bg-white">
-        {/* Galería de videos */}
-        {Array.isArray(gira.videos) && gira.videos.length > 0 ? (
-          <div className="flex gap-2 overflow-x-auto mb-4">
-            {gira.videos.map((videoUrl, index) => (
-              <video
-                key={index}
-                className="w-full h-40 rounded-lg flex-shrink-0 object-cover"
-                controls
-                controlsList="nodownload"
-                disablePictureInPicture
-                preload="metadata">
-                <source src={`${baseUrl}${videoUrl}`} type="video/mp4" />
-                Tu navegador no soporta la reproducción de video.
-              </video>
-            ))}
+        {/* Vista previa de multimedia */}
+        <div className="mb-4">
+          {/* Mostrar portada si existe */}
+          {gira.portada && (
+            <div className="mb-2">
+              <img
+                src={`${baseUrl}${gira.portada}`}
+                alt="Portada"
+                className="w-full h-32 rounded-lg object-cover"
+              />
+            </div>
+          )}
+          
+          {/* Galería de videos e imágenes */}
+          <div className="flex gap-2 overflow-x-auto">
+            {/* Videos */}
+            {Array.isArray(gira.videos) && gira.videos.length > 0 && 
+              gira.videos.slice(0, 2).map((videoUrl, index) => (
+                <video
+                  key={`video-${index}`}
+                  className="w-24 h-20 rounded flex-shrink-0 object-cover"
+                  preload="metadata">
+                  <source src={`${baseUrl}${videoUrl}`} type="video/mp4" />
+                </video>
+              ))
+            }
+            
+            {/* Imágenes */}
+            {Array.isArray(gira.imagenes) && gira.imagenes.length > 0 && 
+              gira.imagenes.slice(0, 3).map((imagenUrl, index) => (
+                <img
+                  key={`imagen-${index}`}
+                  src={`${baseUrl}${imagenUrl}`}
+                  alt={`Imagen ${index + 1}`}
+                  className="w-24 h-20 rounded flex-shrink-0 object-cover"
+                />
+              ))
+            }
           </div>
-        ) : (
-          <div className="w-full h-40 bg-gray-200 rounded-lg mb-4 flex items-center justify-center text-gray-500 text-sm">
-            Sin videos
+          
+          {/* Contador de multimedia */}
+          <div className="mt-2 text-xs text-gray-600">
+            {(gira.videos?.length || 0) + (gira.imagenes?.length || 0) > 0 ? (
+              <span>
+                {gira.videos?.length || 0} video{(gira.videos?.length || 0) !== 1 ? 's' : ''} • {gira.imagenes?.length || 0} imagen{(gira.imagenes?.length || 0) !== 1 ? 'es' : ''}
+              </span>
+            ) : (
+              <span className="text-gray-400">Sin multimedia</span>
+            )}
           </div>
-        )}
+        </div>
 
         <h3 className="font-bold text-lg mb-1">{gira.titulo}</h3>
+        <p className="text-sm text-gray-600 mb-2">{gira.anio}</p>
 
         <button
           onClick={() => setOpen(true)}
@@ -217,10 +294,18 @@ export default function Card_Gira({ gira, onDelete, onAdded }: CardGiraProps) {
         onClose={() => setEditOpen(false)}
         editData={editData}
         setEditData={setEditData}
-        selectedVideos={selectedFile}
-        setSelectedVideos={setSelectedFile}
+        selectedVideos={selectedVideos}
+        setSelectedVideos={setSelectedVideos}
+        selectedImagenes={selectedImagenes}
+        setSelectedImagenes={setSelectedImagenes}
+        selectedPortada={selectedPortada}
+        setSelectedPortada={setSelectedPortada}
         removeVideos={removeVideos}
         setRemoveVideos={setRemoveVideos}
+        removeImagenes={removeImagenes}
+        setRemoveImagenes={setRemoveImagenes}
+        removePortada={removePortada}
+        setRemovePortada={setRemovePortada}
         handleEdit={handleEdit}
         editing={editing}
       />
