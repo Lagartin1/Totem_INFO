@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import Card_Noticias from "./Card_Noticias";
 import type { Noticia } from "../types/index";
+import Carousel_Main from "../Components/Carousel_Main";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
@@ -28,7 +29,6 @@ export default function Noticias_Section() {
     selectedNoticia && console.log("Noticia seleccionada:", selectedNoticia);
   }
 
-
   return (
     <div className="p-6">
       <h2 className="text-2xl font-bold mb-4">Noticias</h2>
@@ -46,7 +46,10 @@ export default function Noticias_Section() {
       )}
 
       {/* Carrusel de noticias */}
-      <div className="relative">
+        <Carousel_Main
+        noticias={noticias}
+        />
+{/*       <div className="relative">
         <div ref={carouselRef} className="flex gap-4 overflow-x-auto pb-4">
           {noticias.map((n) => (
             <Card_Noticias
@@ -56,7 +59,7 @@ export default function Noticias_Section() {
             />
           ))}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

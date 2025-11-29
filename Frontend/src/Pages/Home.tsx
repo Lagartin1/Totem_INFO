@@ -1,24 +1,17 @@
-import Boton_Landing from "../Components/Boton_Landing"
-import Header from "../Components/Header"
+import Boton_Landing from "../Components/Boton_Landing";
+import Header from "../Components/Header";
 import NoticiasSection from "../Components/Noticias_Section";
 import NavBar from "../Components/NavBar";
 
 function Home() {
-
   return (
-    <main className='min-h-screen w-full flex flex-col items-center bg-white-500'>
-      <NavBar/>
+    <main className="min-h-screen w-full flex flex-col items-center bg-white-500">
+      <NavBar />
       <div className="container flex flex-col">
-          <div className="items-center grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-10 p-20">
-            <Boton_Landing Title="Prácticas" Link="/practicas"/>
-            <Boton_Landing Title="Tesis" Link="/tesis"/>
-            <Boton_Landing Title="Proyectos" Link="/proyectos"/>
-            <Boton_Landing Title="Becados" Link="/becados"/>
-          </div>
-          <NoticiasSection/>
-        </div>
+        <NoticiasSection />
+      </div>
     </main>
-  )
+  );
 }
 
-export default Home
+export default Home;

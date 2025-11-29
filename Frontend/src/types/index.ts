@@ -10,7 +10,6 @@ export interface Proyecto {
   videos: string[];
 }
 
-
 export interface Noticia {
   id: string;
   titulo: string;
