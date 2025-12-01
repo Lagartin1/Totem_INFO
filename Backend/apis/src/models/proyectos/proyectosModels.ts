@@ -44,7 +44,7 @@ export async function SearchProyectos(searchTerm: string, indice: number = 0, pa
             { titulo: { contains: searchTerm, mode: 'insensitive' } },
             { descripcion: { contains: searchTerm, mode: 'insensitive' } },
             { area_desarrollo: { contains: searchTerm, mode: 'insensitive' } },
-            { autores: { contains: searchTerm } } // Si 'autores' es un array, se busca si contiene el término
+            { autores: { has: searchTerm } } // Si 'autores' es un array, se busca si contiene el término
         ]
     };
 
