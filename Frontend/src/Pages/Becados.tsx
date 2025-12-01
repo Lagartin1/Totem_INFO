@@ -3,6 +3,9 @@ import Loader from "../Components/Loader";
 import Card_Becados from "../Components/Card_Becados";
 import NavBar from "../Components/NavBar";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
+
 export default function Becados() {
   const [loading, setLoading] = React.useState<boolean>(false);
   const [loadingPage, setLoadingPage] = React.useState<boolean>(false);
@@ -10,9 +13,11 @@ export default function Becados() {
   const [page, setPage] = React.useState<number>(1);
   const [totalPages, setTotalPages] = React.useState<number>(1);
 
+  const baseUrl = BUILD_MODE ? API_BASE_URL : "http://localhost:3000";
+
   React.useEffect(() => {
     setLoadingPage(true);
-    fetch(`/api/becados?pagina=${page}`)  // Ajusta pageSize según sea necesario
+    fetch(`${baseUrl}/api/becados?pagina=${page}`)  // Usar la URL completa del backend
       .then(response => response.json())
       .then(data => {
         setBecados(data.becados || data.data || []);
@@ -28,7 +33,7 @@ export default function Becados() {
 
   const fetchNewPage = (newPage: number) => {
     setLoading(true);
-    fetch(`/api/becados?pagina=${newPage}`)  // Ajusta pageSize según sea necesario
+    fetch(`${baseUrl}/api/becados?pagina=${newPage}`)  // Usar la URL completa del backend
       .then(response => response.json())
       .then(data => {
         setBecados(data.becados || data.data || []);
@@ -51,7 +56,7 @@ export default function Becados() {
             {becados.map((becado) => ( 
               <Card_Becados 
                 key={becado.id}
-                {...becado}
+                becado={becado}
               />
             ))}
           </div>

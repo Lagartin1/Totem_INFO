@@ -101,7 +101,6 @@ export async function CreateBecado(data: any): Promise<Becado> {
     return await mongoClient.becado.create({
         data: {
             ...data,
-            visitas: 0, 
         }
     });
 }

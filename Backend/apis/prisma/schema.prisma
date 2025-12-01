@@ -167,7 +167,9 @@ model Becado {
   titulo                String?   
   descripcion           String?   
   fecha_publicacion     DateTime? 
+  portada               String?
   videos                String[]  
+  imagenes              String[]
 
   autorId               String    @db.ObjectId
   autor                 Usuario   @relation(fields: [autorId], references: [id])

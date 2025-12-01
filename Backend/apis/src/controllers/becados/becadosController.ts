@@ -6,10 +6,10 @@ import { BecadosResult, GetBecados } from "@/models/becados/becadosModel";
 export async function fetchBecados(searchTerm: string | false, indice: number = 0) {
   try {
     if (searchTerm) {
-      // Si hay término de búsqueda, llamamos a la búsqueda del modelo
-      return 0;
+      // Si hay término de búsqueda, llamamos a la búsqueda del servicio
+      return await BuscarBecados(searchTerm, indice);
     } else {
-      // Si no, listamos normal
+      // Si no, listamos normal usando el servicio
       return await GetBecados(indice);
     }
   } catch (error) {

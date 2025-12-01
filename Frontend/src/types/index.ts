@@ -25,7 +25,9 @@ export interface Becado {
   titulo: string;
   descripcion: string;
   fecha_publicacion: string;
+  portada?: string;
   videos: string[];
+  imagenes: string[];
 }
 
 export interface Gira {

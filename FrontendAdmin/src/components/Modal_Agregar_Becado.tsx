@@ -70,7 +70,7 @@ export default function Modal_Agregar_Becado({
         bg-black/20 backdrop-blur-md transition-all duration-300"
       onClick={closeModal}>
       <div
-        className="bg-white p-6 rounded-lg w-96 shadow-lg"
+        className="bg-white p-6 rounded-lg w-[500px] max-h-[90vh] overflow-y-auto shadow-lg"
         onClick={(e) => e.stopPropagation()}>
         <h3 className="text-xl font-semibold mb-4">Agregar Nuevo Becado</h3>
 
@@ -78,6 +78,14 @@ export default function Modal_Agregar_Becado({
           onSubmit={handleSubmit}
           className="flex flex-col gap-3"
           encType="multipart/form-data">
+          <input
+            name="nombre"
+            type="text"
+            placeholder="Nombre del becado"
+            className="border p-2 rounded"
+            required
+          />
+
           <input
             name="titulo"
             type="text"
@@ -91,6 +99,35 @@ export default function Modal_Agregar_Becado({
             placeholder="Descripción"
             className="border p-2 rounded"
             required
+          />
+
+          <input
+            name="fecha_publicacion"
+            type="date"
+            className="border p-2 rounded"
+            required
+          />
+
+          <label className="text-sm text-gray-600">
+            Imagen de portada
+          </label>
+          <input
+            name="portada"
+            type="file"
+            accept="image/*"
+            className="border p-2 rounded"
+            required
+          />
+
+          <label className="text-sm text-gray-600">
+            Imágenes adicionales (puedes subir varias)
+          </label>
+          <input
+            name="imagenes"
+            type="file"
+            accept="image/*"
+            multiple
+            className="border p-2 rounded"
           />
 
           <label className="text-sm text-gray-600">

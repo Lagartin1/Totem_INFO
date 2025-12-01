@@ -9,7 +9,10 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = request.nextUrl;
     const searchTerm = searchParams.get("search");
-    const response = await fetchBecados(searchTerm || false);
+    const pagina = parseInt(searchParams.get("pagina") || "1");
+    const indice = (pagina - 1) * 10; // 10 items por página
+    
+    const response = await fetchBecados(searchTerm || false, indice);
 
     return NextResponse.json(response, { status: 200 });
   } catch (error) {

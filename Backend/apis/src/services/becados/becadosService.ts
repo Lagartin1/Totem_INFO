@@ -5,7 +5,7 @@ import { randomUUID } from "crypto";
 // Importaciones de las funciones del nuevo modelo de Prisma
 import {BecadosResult,Becado, GetBecados,SearchBecado,SearchBecadoYear,GetBecadoByID, CreateBecado, DeleteBecado, UpdateBecado, } from "@/models/becados/becadosModel";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 6;
 
 // Añadimos el parámetro 'indice' para la paginación
 export async function listBecados(indice: number = 0): Promise<BecadosResult> {
@@ -54,10 +54,15 @@ export async function createBecadoService(formData: FormData, autorId: string): 
     const titulo = formData.get("titulo") as string;
     const descripcion = (formData.get("descripcion") as string) || "Sin descripción disponible.";
     const videosRaw = formData.getAll("videos") || [];
+    const imagenesRaw = formData.getAll("imagenes") || [];
+    const portadaRaw = formData.get("portada") || "";
     const fecha_publicacion = new Date();
 
     let videoUrls: string[] = [];
+    let imagenesUrls: string[] = [];
+    let portadaUrl: string | undefined;
 
+    // Procesar videos
     for (const video of videosRaw) {
       if (video instanceof File && video.size > 0) {
         const bytes = await video.arrayBuffer();
@@ -71,6 +76,32 @@ export async function createBecadoService(formData: FormData, autorId: string): 
       }
     }
 
+    // Procesar imágenes
+    for (const imagen of imagenesRaw) {
+      if (imagen instanceof File && imagen.size > 0) {
+        const bytes = await imagen.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+        const fileName = `${randomUUID()}_${imagen.name}`;
+        const filePath = path.join(process.cwd(), "public", "uploads", fileName);
+        await writeFile(filePath, buffer);
+        imagenesUrls.push(`/uploads/${fileName}`);
+      } else if (typeof imagen === "string" && imagen.startsWith("http")) {
+        imagenesUrls.push(imagen);
+      }
+    }
+
+    // Procesar portada
+    if (portadaRaw instanceof File && portadaRaw.size > 0) {
+      const bytes = await portadaRaw.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const fileName = `${randomUUID()}_${portadaRaw.name}`;
+      const filePath = path.join(process.cwd(), "public", "uploads", fileName);
+      await writeFile(filePath, buffer);
+      portadaUrl = `/uploads/${fileName}`;
+    } else if (typeof portadaRaw === "string" && portadaRaw.startsWith("http")) {
+      portadaUrl = portadaRaw;
+    }
+
     // Llamamos a la función de creación de Prisma con datos limpios
     const nuevoBecado = await CreateBecado({
         nombre,
@@ -78,6 +109,8 @@ export async function createBecadoService(formData: FormData, autorId: string): 
         descripcion,
         fecha_publicacion,
         videos: videoUrls,
+        imagenes: imagenesUrls,
+        portada: portadaUrl,
         autorId // Campo requerido por Prisma
     });
     
@@ -123,8 +156,14 @@ export async function PutBecadoService(id: string, formData: FormData): Promise<
         let videoUrls: string[] = Array.isArray(becadoActual.videos)
             ? [...becadoActual.videos]
             : [];
+        
+        let imagenesUrls: string[] = Array.isArray(becadoActual.imagenes)
+            ? [...becadoActual.imagenes]
+            : [];
+            
+        let portadaUrl: string | null = becadoActual.portada || null;
 
-        // 2. Eliminar videos existentes si se indica
+        // 2. Eliminar archivos existentes si se indica
         if (formData.get("eliminarVideos") === "true" && videoUrls.length > 0) {
             for (const url of videoUrls) {
                 if (url.startsWith('/uploads/')) { // Borrar solo archivos locales
@@ -134,8 +173,26 @@ export async function PutBecadoService(id: string, formData: FormData): Promise<
             }
             videoUrls = [];
         }
+        
+        if (formData.get("eliminarImagenes") === "true" && imagenesUrls.length > 0) {
+            for (const url of imagenesUrls) {
+                if (url.startsWith('/uploads/')) { // Borrar solo archivos locales
+                    const oldPath = path.join(process.cwd(), "public", url);
+                    await unlink(oldPath).catch(() => {});
+                }
+            }
+            imagenesUrls = [];
+        }
+        
+        if (formData.get("eliminarPortada") === "true" && portadaUrl) {
+            if (portadaUrl.startsWith('/uploads/')) { // Borrar solo archivos locales
+                const oldPath = path.join(process.cwd(), "public", portadaUrl);
+                await unlink(oldPath).catch(() => {});
+            }
+            portadaUrl = null;
+        }
 
-        // 3. Subir/añadir nuevos videos
+        // 3. Subir/añadir nuevos archivos
         const nuevosVideos = formData.getAll("videos");
         for (const video of nuevosVideos) {
             if (video instanceof File && video.size > 0) {
@@ -149,9 +206,45 @@ export async function PutBecadoService(id: string, formData: FormData): Promise<
                 videoUrls.push(video);
             }
         }
+        
+        const nuevasImagenes = formData.getAll("imagenes");
+        for (const imagen of nuevasImagenes) {
+            if (imagen instanceof File && imagen.size > 0) {
+                const bytes = await imagen.arrayBuffer();
+                const buffer = Buffer.from(bytes);
+                const fileName = `${randomUUID()}_${imagen.name}`;
+                const filePath = path.join(process.cwd(), "public", "uploads", fileName);
+                await writeFile(filePath, buffer);
+                imagenesUrls.push(`/uploads/${fileName}`);
+            } else if (typeof imagen === "string" && imagen.startsWith("http")) {
+                imagenesUrls.push(imagen);
+            }
+        }
+        
+        const nuevaPortada = formData.get("portada");
+        if (nuevaPortada instanceof File && nuevaPortada.size > 0) {
+            // Si hay una nueva portada, eliminar la anterior
+            if (portadaUrl && portadaUrl.startsWith('/uploads/')) {
+                const oldPath = path.join(process.cwd(), "public", portadaUrl);
+                await unlink(oldPath).catch(() => {});
+            }
+            
+            const bytes = await nuevaPortada.arrayBuffer();
+            const buffer = Buffer.from(bytes);
+            const fileName = `${randomUUID()}_${nuevaPortada.name}`;
+            const filePath = path.join(process.cwd(), "public", "uploads", fileName);
+            await writeFile(filePath, buffer);
+            portadaUrl = `/uploads/${fileName}`;
+        } else if (typeof nuevaPortada === "string" && nuevaPortada.startsWith("http")) {
+            portadaUrl = nuevaPortada;
+        }
 
         // 4. Construir objeto de actualización (sin FormData)
-        const updateDoc: Partial<Becado> & { videos: string[] } = { videos: videoUrls };
+        const updateDoc: Partial<Becado> & { videos: string[], imagenes: string[], portada: string | null } = { 
+            videos: videoUrls,
+            imagenes: imagenesUrls,
+            portada: portadaUrl
+        };
 
         ["nombre", "titulo", "descripcion"].forEach((key) => {
             const value = formData.get(key);
@@ -180,6 +273,7 @@ export async function DeleteBecadoService(id: string): Promise<any> {
     // 1. Obtener el becado para borrar los archivos asociados (Lógica de archivo movida al Service)
     const becado = await GetBecadoByID(id);
 
+    // Eliminar videos
     if (becado?.videos && becado.videos.length > 0) {
       for (const videoPath of becado.videos) {
           if (videoPath.startsWith('/uploads/')) { // Borrar solo archivos locales
@@ -189,6 +283,26 @@ export async function DeleteBecadoService(id: string): Promise<any> {
             });
           }
       }
+    }
+    
+    // Eliminar imágenes
+    if (becado?.imagenes && becado.imagenes.length > 0) {
+      for (const imagenPath of becado.imagenes) {
+          if (imagenPath.startsWith('/uploads/')) { // Borrar solo archivos locales
+            const fullPath = path.join(process.cwd(), "public", imagenPath);
+            await unlink(fullPath).catch((err) => {
+                console.warn(`⚠️ No se pudo borrar la imagen o no existe: ${imagenPath}`, err);
+            });
+          }
+      }
+    }
+    
+    // Eliminar portada
+    if (becado?.portada && becado.portada.startsWith('/uploads/')) {
+      const fullPath = path.join(process.cwd(), "public", becado.portada);
+      await unlink(fullPath).catch((err) => {
+          console.warn(`⚠️ No se pudo borrar la portada o no existe: ${becado.portada}`, err);
+      });
     }
 
     // 2. Borrar de la base de datos de MongoDB con Prisma

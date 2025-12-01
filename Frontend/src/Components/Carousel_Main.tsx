@@ -103,6 +103,7 @@ export default function Carousel_Main({ noticias }: CarouselMainProps) {
     setCurrentIndex((prev) => (prev === items.length - 1 ? 0 : prev + 1));
     setTranslateX((prev) => prev - slideDistance); // Mueve hacia la izquierda
     handleTransitionEndRight();
+    console.log("TranslateX:", translateX);
   };
 
   const handleTransitionEndRight = () => {
@@ -113,8 +114,7 @@ export default function Carousel_Main({ noticias }: CarouselMainProps) {
       setEnableTransition(false);
       setCurrentIndex(2);
       // Calcular la posición correcta del primer elemento real
-      const slideWidth = trackRef.current?.children[2]?.clientWidth ?? 600;
-      const newPosition = -(2 * slideWidth); // index 2 = primer slide real
+      const newPosition = -700; 
       setTranslateX(newPosition);
 
       // Reactivar transiciones después de un frame
@@ -129,6 +129,7 @@ export default function Carousel_Main({ noticias }: CarouselMainProps) {
     setCurrentIndex((prev) => (prev === 0 ? items.length - 1 : prev - 1));
     setTranslateX((prev) => prev + slideDistance); // Mueve hacia la derecha
     handleTransitionEndLeft();
+    console.log("TranslateX:", translateX);
   };
 
   const handleTransitionEndLeft = () => {
@@ -139,10 +140,7 @@ export default function Carousel_Main({ noticias }: CarouselMainProps) {
       // En clon del último → saltar al último real
       setCurrentIndex(items.length - 3);
       // Calcular la posición correcta del último elemento real
-      const lastIndex = items.length - 3; // primer slide del final
-      const slideWidth =
-        trackRef.current?.children[lastIndex]?.clientWidth ?? 600;
-      const newPosition = -(lastIndex * slideWidth);
+      const newPosition = - (700 + ((noticias.length - 1) * slideDistance));
       setTranslateX(newPosition);
 
       // Reactivar transiciones después de un frame
@@ -191,7 +189,6 @@ export default function Carousel_Main({ noticias }: CarouselMainProps) {
       <div className="w-screen h-full overflow-hidden">
         <div className="relative w-full mx-auto">
           <div
-            ref={trackRef}
             className="flex gap-4 select-none cursor-grab active:cursor-grabbing min-w-[615px] flex-shrink-0"
             style={{
               transform: `translateX(${translateX + dragOffset}px)`,
@@ -210,32 +207,12 @@ export default function Carousel_Main({ noticias }: CarouselMainProps) {
             {items.map((n, index) => {
               const isCenter = index === currentIndex;
 
-              // Determinar si es un clone que debe crecer
-              let shouldBeCenter = false;
-
-              // Lógica para clones existentes
-              if (index === 0) {
-                // Clone del penúltimo elemento - crece cuando su elemento real está centrado
-                shouldBeCenter = currentIndex === items.length - 4;
-              } else if (index === 1) {
-                // Clone del último elemento - crece cuando su elemento real está centrado
-                shouldBeCenter = currentIndex === items.length - 3;
-              } else if (index === items.length - 2) {
-                // Clone del primer elemento - crece cuando el primer elemento real está centrado
-                shouldBeCenter = currentIndex === 2;
-              } else if (index === items.length - 1) {
-                // Clone del segundo elemento - crece cuando el segundo elemento real está centrado
-                shouldBeCenter = currentIndex === 3;
-              }
-
-              const finalIsCenter = isCenter || shouldBeCenter;
-
               return (
                 /* Slide Actual */
                 <div
                   key={index}
                   className={`${
-                    finalIsCenter ? "w-[900px] h-[500px]" : "w-[600px] h-80"
+                    isCenter ? "w-[900px] h-[500px]" : "w-[600px] h-80"
                   } rounded-full relative overflow-hidden flex-shrink-0 transition-all duration-500`}
                   style={{
                     backgroundImage: n.imagen
@@ -248,7 +225,7 @@ export default function Carousel_Main({ noticias }: CarouselMainProps) {
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
                     <h2
                       className={`${
-                        finalIsCenter ? "text-2xl" : "text-lg"
+                        isCenter ? "text-2xl" : "text-lg"
                       } font-bold text-center px-4 transition-all duration-500`}>
                       {n.titulo}
                     </h2>
