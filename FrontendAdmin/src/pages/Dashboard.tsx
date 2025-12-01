@@ -137,11 +137,6 @@ export default function Dashboard() {
               </button>
               <button
                 className="w-40 h-40 bg-orange-400 rounded-2xl text-xl hover:bg-slate-700"
-                onClick={() => navigate("/tesis")}>
-                Administrar Tesis
-              </button>
-              <button
-                className="w-40 h-40 bg-orange-400 rounded-2xl text-xl hover:bg-slate-700"
                 onClick={() => navigate("/becados")}>
                 Administrar Becados
               </button>
