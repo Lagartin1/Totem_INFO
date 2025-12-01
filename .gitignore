@@ -147,3 +147,8 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
 Docker/*.tar
+
+
+# Python evn
+
+Backend/synchronizer/venv*

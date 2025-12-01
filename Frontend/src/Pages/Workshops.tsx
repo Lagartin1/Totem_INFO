@@ -6,10 +6,6 @@ import NavBar from "../Components/NavBar";
 
 
 
-
-
-
-
 export default function Workshops() {
   const [loading, setLoading] = React.useState<boolean>(false);
   const [loadingPage, setLoadingPage] = React.useState<boolean>(false);
