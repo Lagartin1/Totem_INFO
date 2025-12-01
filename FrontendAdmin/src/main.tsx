@@ -14,8 +14,6 @@ import Workshop from "./pages/Workshop";
 import Proyectos from "./pages/Proyectos";
 import TopPracticas from "./pages/TopPracticas";
 import Becados from "./pages/Becados";
-import Tesis from "./pages/AdminTesis";
-import TopTesis from "./pages/TopTesis";
 import Gira from "./pages/Gira";
 
 createRoot(document.getElementById("root")!).render(
@@ -40,8 +38,6 @@ createRoot(document.getElementById("root")!).render(
             element={<PracticasExistentes />}
           />
           <Route path="/proyectos" element={<Proyectos />} />
-          <Route path="/tesis" element={<Tesis />} />
-          <Route path="/tesis/top-visitadas" element={<TopTesis />} />
           <Route path="/gira" element={<Gira />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
