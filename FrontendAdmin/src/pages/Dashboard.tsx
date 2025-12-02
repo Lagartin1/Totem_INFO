@@ -1,8 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import UserCard from "../components/User_Cards";
-import { useCallback } from "react";
 import Toast from "../components/Toast";
+import IconJobOffer from "../assets/icons/001-job-offer.png";
+import IconClosure from "../assets/icons/002-closure.png";
+import IconNews from "../assets/icons/003-news.png";
+import IconStudent from "../assets/icons/004-student.png";
+import IconWorkshop from "../assets/icons/005-workshop.png";
+import IconEarth from "../assets/icons/006-earth.png";
 
 interface User {
   id: string;
@@ -34,7 +39,8 @@ export default function Dashboard() {
     setToastmsg(message);
     setToastStatus(status);
     setToast(true);
-    setTimeout(() => setToast(true), 3000);
+    // ⬇️ antes estabas dejando el toast en true
+    setTimeout(() => setToast(false), 3000);
   };
 
   const cargar = useCallback(async () => {
@@ -73,6 +79,7 @@ export default function Dashboard() {
       }
       return response;
     };
+
     try {
       const res = await performFetch();
       if (res === null) return;
@@ -102,95 +109,169 @@ export default function Dashboard() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+const modules = [
+  {
+    title: "Noticias",
+    description: "Crear y editar noticias del sitio",
+    path: "/noticias",
+    icon: IconNews,
+  },
+  {
+    title: "Proyectos",
+    description: "Administrar proyectos vigentes",
+    path: "/proyectos",
+    icon: IconClosure,
+  },
+  {
+    title: "Prácticas",
+    description: "Gestionar ofertas y top visitas",
+    path: "/admin-practicas",
+    icon: IconJobOffer,
+  },
+  {
+    title: "Workshops",
+    description: "Configurar talleres y charlas",
+    path: "/workshop",
+    icon: IconWorkshop,
+  },
+  {
+    title: "Becados",
+    description: "Control de estudiantes becados",
+    path: "/becados",
+    icon: IconStudent,
+  },
+  {
+    title: "Gira",
+    description: "Administrar información de giras",
+    path: "/gira",
+    icon: IconEarth,
+  },
+];
+
   return (
-    <main className="p-6 w-full min-h-screen ">
-      {toast ? (
-        <Toast message={toastmsg as string} status={toastStatus} />
-      ) : null}
-      <div className="bg-white shadow-md rounded-lg h-lvh flex flex-col justify-center items-center">
-        <div className="w-full max-w-4xl">
-          <h1 className="text-3xl font-bold">Panel de Administración</h1>
-          <p>Bienvenido al panel de administración.</p>
-          <div className="flex flex-row gap-20 ">
-            <div className="grid grid-cols-3 gap-4 text-white mt-24">
-              <button
-                className="w-40 h-40 bg-orange-400 rounded-2xl text-xl hover:bg-slate-700"
-                onClick={() => navigate("/noticias")}>
-                {" "}
-                Administrar Noticias{" "}
-              </button>
-              <button
-                className="w-40 h-40 bg-orange-400 rounded-2xl text-xl hover:bg-slate-700"
-                onClick={() => navigate("/proyectos")}>
-                {" "}
-                Administrar Proyectos
-              </button>
-              <button
-                className="w-40 h-40 bg-orange-400 rounded-2xl text-xl hover:bg-slate-700"
-                onClick={() => navigate("/admin-practicas")}>
-                Administrar Practicas
-              </button>
-              <button
-                className="w-40 h-40 bg-orange-400 rounded-2xl text-xl hover:bg-slate-700"
-                onClick={() => navigate("/workshop")}>
-                Administrar Workshops
-              </button>
-              <button
-                className="w-40 h-40 bg-orange-400 rounded-2xl text-xl hover:bg-slate-700"
-                onClick={() => navigate("/becados")}>
-                Administrar Becados
-              </button>
-              <button
-                className="w-40 h-40 bg-orange-400 rounded-2xl text-xl hover:bg-slate-700"
-                onClick={() => navigate("/gira")}>
-                Administrar Gira
-              </button>
+    <main className="min-h-screen w-full bg-slate-100 p-6">
+      {toast && <Toast message={toastmsg as string} status={toastStatus} />}
+
+      <div className="max-w-[90rem] mx-auto w-full px-6">
+        <div className="bg-white/90 shadow-sm border border-slate-200 rounded-3xl p-8 md:p-10">
+          {/* HEADER */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">
+                Panel de Administración
+              </h1>
+              <p className="text-slate-500 mt-1">
+                Bienvenido al panel de administración. Desde aquí puedes gestionar
+                el contenido y los usuarios de la plataforma.
+              </p>
             </div>
-            <div className="span-col-2 mt-6 flex flex-col gap-4">
-              <div className="flex flex-col items-center">
-                <h2 className="text-2xl font-semibold mt-4 font-sans">
-                  {" "}
-                  Autorización de Usuarios
-                </h2>
-                <p>Lista de usuarios pendientes:</p>
+          </div>
+
+          {/* CONTENIDO PRINCIPAL */}
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* MÓDULOS */}
+            <section className="flex-1">
+              <h2 className="text-lg font-semibold text-slate-800 mb-3">
+                Módulos principales
+              </h2>
+              <p className="text-sm text-slate-500 mb-5">
+                Selecciona una sección para administrar su contenido.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                {modules.map((mod) => (
+                  <button
+                    key={mod.path}
+                    onClick={() => navigate(mod.path)}
+                    className="group relative flex flex-col items-start gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-left shadow-sm hover:-translate-y-1 hover:border-blue-500 hover:bg-blue-50 hover:shadow-md transition transform"
+                  >
+                    {/* Icono simple con letra (podrías cambiarlo luego por SVG o Heroicons) */}
+                    <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 mb-1">
+                      <img
+                        src={mod.icon}
+                        alt={`Icono ${mod.title}`}
+                        className="w-6 h-6 opacity-80"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-800">
+                        Administrar {mod.title}
+                      </h3>
+                      <p className="text-xs text-slate-500 mt-1">
+                        {mod.description}
+                      </p>
+                    </div>
+                  </button>
+                ))}
               </div>
-              {data.length === 0 && (
-                <p className="font-extrabold ">No hay usuarios pendientes.</p>
-              )}
-              {data.map((user) => (
-                <UserCard
-                  key={user.id}
-                  id={user.id}
-                  nombre={user.nombre}
-                  apellido={user.apellido}
-                  username={user.username}
-                  email={user.email}
-                  onUpdated={handleUpdated}
-                  showToast={makeToast}
-                />
-              ))}
+            </section>
+
+            {/* AUTORIZACIÓN DE USUARIOS */}
+            <section className="w-full lg:w-80 xl:w-96 flex flex-col gap-3">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-5 shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="text-lg font-semibold text-slate-800">
+                    Autorización de Usuarios
+                  </h2>
+                  <span className="rounded-full bg-slate-800 text-white text-xs px-3 py-1">
+                    {data.length} pendientes
+                  </span>
+                </div>
+                <p className="text-sm text-slate-500 mb-4">
+                  Revisa y autoriza el acceso de nuevos usuarios.
+                </p>
+
+                <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
+                  {data.length === 0 && !loading && (
+                    <p className="text-sm font-medium text-slate-500">
+                      No hay usuarios pendientes.
+                    </p>
+                  )}
+                  {loading && (
+                    <p className="text-sm text-slate-400">
+                      Cargando usuarios...
+                    </p>
+                  )}
+                  {data.map((user) => (
+                    <UserCard
+                      key={user.id}
+                      id={user.id}
+                      nombre={user.nombre}
+                      apellido={user.apellido}
+                      username={user.username}
+                      email={user.email}
+                      onUpdated={handleUpdated}
+                      showToast={makeToast}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Paginación */}
               {!loading && n_paginas > 1 && (
-                <div className="flex flex-col bg-gray-800/40 items-center rounded-3xl">
-                  <div className="flex flex-row items-center gap-4 m-2">
+                <div className="rounded-2xl bg-slate-900 text-white px-4 py-3 flex flex-col items-center gap-2 shadow-md">
+                  <span className="text-sm font-medium">
+                    Página {pagina} de {n_paginas}
+                  </span>
+                  <div className="flex gap-3">
                     <button
                       onClick={() => chagePage(pagina - 1)}
                       disabled={pagina === 1}
-                      className="rounded-2xl text-white bg-orange-400 disabled:bg-gray-700 hover:bg-orange-500 w-20 h-12 shadow-2xl">
+                      className="rounded-xl bg-orange-400 px-4 py-2 text-sm font-semibold disabled:bg-slate-600 hover:bg-orange-500 transition"
+                    >
                       Anterior
                     </button>
-                    <span className="font-bold text-white">
-                      Página {pagina} de {n_paginas}
-                    </span>
                     <button
                       onClick={() => chagePage(pagina + 1)}
                       disabled={pagina === n_paginas}
-                      className="text-xl rounded-2xl text-white bg-orange-500 disabled:bg-gray-700 hover:bg-orange-600 w-20 h-12 shadow-2xl">
+                      className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold disabled:bg-slate-600 hover:bg-orange-600 transition"
+                    >
                       Siguiente
                     </button>
                   </div>
                 </div>
               )}
-            </div>
+            </section>
           </div>
         </div>
       </div>
