@@ -37,13 +37,14 @@ export async function CreateNewPractica(
 }
 
 export async function CreateBulkPracticas(
-  dataArray: any[]
+  dataArray: any[], userID: string
 ): Promise<PracticaCSV> {
   const creationPromises = dataArray.map((data) =>
     mongoClient.practica.create({
       data: {
         ...data,
         visitas: 0,
+        autorId: userID,
       },
     })
   );
