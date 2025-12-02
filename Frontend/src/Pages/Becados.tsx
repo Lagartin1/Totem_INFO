@@ -1,6 +1,6 @@
 import React from "react";
 import Loader from "../Components/Loader";
-import Card_Becados from "../Components/Card_Becados";
+import Card_Main from "../Components/Card_Main";
 import NavBar from "../Components/NavBar";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -54,9 +54,10 @@ export default function Becados() {
         <div className="flex flex-col gap-2">
           <div className="grid grid-cols-3 gap-10">
             {becados.map((becado) => ( 
-              <Card_Becados 
+              <Card_Main 
                 key={becado.id}
-                becado={becado}
+                item={becado}
+                type="becado"
               />
             ))}
           </div>

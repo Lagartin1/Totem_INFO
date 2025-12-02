@@ -1,6 +1,6 @@
 import React from "react";
 import Loader from "../Components/Loader";
-import Card_Giras from "../Components/Card_Giras";
+import Card_Main from "../Components/Card_Main";
 import NavBar from "../Components/NavBar";
 
 export default function Giras() {
@@ -64,9 +64,10 @@ export default function Giras() {
           <div className="grid grid-cols-3 gap-10">
             {giras.length > 0 ? (
               giras.map((gira) => (
-                <Card_Giras
+                <Card_Main
                   key={gira.id}
-                  gira={gira}
+                  item={gira}
+                  type="gira"
                 />
               ))
             ) : (

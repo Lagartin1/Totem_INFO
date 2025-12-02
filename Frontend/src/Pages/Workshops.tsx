@@ -1,14 +1,7 @@
 import React from "react";
-
 import Loader from "../Components/Loader";
-import CardWorkshop from "../Components/Workshop_card";
+import Card_Main from "../Components/Card_Main";
 import NavBar from "../Components/NavBar";
-
-
-
-
-
-
 
 export default function Workshops() {
   const [loading, setLoading] = React.useState<boolean>(false);
@@ -16,7 +9,6 @@ export default function Workshops() {
   const [workshops,setWorkshops] = React.useState<any[]>([]);
   const [page, setPage] = React.useState<number>(1);
   const [totalPages, setTotalPages] = React.useState<number>(1);
-
 
   React.useEffect(() => {
     setLoadingPage(true);
@@ -48,8 +40,6 @@ export default function Workshops() {
         setLoading(false);
       });
   }
-  
-
 
   return (
     <main className="min-h-screen min-w-screen w-full flex flex-col items-center bg-white-500">
@@ -60,14 +50,10 @@ export default function Workshops() {
         <div className="flex flex-col gap-2">
           <div className="grid grid-cols-3 gap-10">
             {workshops.map((workshop) => ( 
-              <CardWorkshop 
-                key={workshop.link}
-                title={workshop.titulo}
-                date={workshop.fecha}
-                description={workshop.descripcion}
-                link={workshop.link}
-                setLoading={setLoading}
-                
+              <Card_Main
+                key={workshop.id}
+                item={workshop}
+                type="workshop"         
               />
             ))}
           </div>
