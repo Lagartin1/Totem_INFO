@@ -1,6 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import type {ReactNode} from 'react';
-
 
 
 interface User {
@@ -26,14 +25,16 @@ interface AuthContextType {
 
 }
 
+
+
 const AuthProviderContext = createContext<AuthContextType | undefined>(undefined);
 
 
-export const AuthProvider = ( {children}:{children: ReactNode}) => {
+function AuthProvider( {children}:{children: ReactNode}) {
   const [userData, setUserData] = useState<User | null>(null);
   const [user_id, setUser_id] = useState<string | null>(null);
   const [isAuthenticated, setAuthenticated] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [warningShown, setWarningShown] = useState(false);
 
   const mounted = useRef(true);
@@ -71,7 +72,9 @@ export const AuthProvider = ( {children}:{children: ReactNode}) => {
         setUserData(result.data.user as User);
         await handleSignedIn(result.data.user.id);
         setIsLoading(false);
+        localStorage.setItem('session', JSON.stringify("true"));
         return result;
+
       } else {
         showToast('Usuario o contraseña incorrectos.', 'error');
         setIsLoading(false);
@@ -96,8 +99,14 @@ export const AuthProvider = ( {children}:{children: ReactNode}) => {
     setUser_id(user_id);
   }
   async function handleSignOut(user_id: string) {
+    setIsLoading(true);
+    localStorage.removeItem('session');
+    await logout();
     setAuthenticated(false);
     setUser_id(null);
+    setUserData(null);
+    setIsLoading(false);
+    window.location.href = '/';
   }
 
   const logout = async () => {
@@ -116,14 +125,9 @@ export const AuthProvider = ( {children}:{children: ReactNode}) => {
       console.error('Error during logout:', error);
     }
   }
-  // dentro de AuthProvider
   useEffect(() => {
-    // Removed automatic session refresh on mount.
-    // Just mark loading as finished.
-    if (mounted.current) setIsLoading(false);
+    return () => { mounted.current = false; };
   }, []);
-
-
 
   const value = {
     userData,
@@ -137,12 +141,14 @@ export const AuthProvider = ( {children}:{children: ReactNode}) => {
   };
 
   return <AuthProviderContext.Provider value={value}>{children}</AuthProviderContext.Provider>;
-};
+}
 
-export const useAuth = (): AuthContextType => {
+function useAuth(): AuthContextType {
   const context = useContext(AuthProviderContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 }
+
+export { AuthProvider, useAuth };

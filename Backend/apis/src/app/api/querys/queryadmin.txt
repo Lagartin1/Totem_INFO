@@ -12,10 +12,10 @@ docker exec -it docker-database_mongo-1 mongosh \
     { username: 'admin' },
     {
       \$setOnInsert: {
-        nombre: 'Syncronizer',
+        nombre: 'admin',
         apellido: 'system',
         email: 'sync@example.com',
-        username: 'syncronizer',
+        username: 'admin',
         authoriced: true,
         password: '\$2b\$10\$rD9O4AsOI86kzAJNb0sDo.qKkwuyo13N00JSwH8AimBgsZ1SRCZKa',
         createdAt: new Date(),
