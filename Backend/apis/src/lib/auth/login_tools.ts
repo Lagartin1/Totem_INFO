@@ -221,3 +221,10 @@ export async function getUserIdFromSessionToken(oldToken: string): Promise<strin
   }
   return null;
 }
+
+
+export function getSyncronizerJwtSecret() {
+  const secret = process.env.SYNCRONIZER_JWT_SECRET;
+  if (!secret) throw new Error('Falta SYNCRONIZER_JWT_SECRET');
+  return secret ;
+}

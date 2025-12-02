@@ -112,10 +112,10 @@ export async function insertNewPractica(data: any, userId: string): Promise<Prac
 }
 
 
-export async function insertCsvPracticas(dataArray: any[]): Promise<PracticaCSV> {
+export async function insertCsvPracticas(dataArray: any[],userID: string): Promise<PracticaCSV> {
     // ELIMINADO: const lastID = await GetLastPracticaId();
     // Pasamos directamente el array de datos limpios
-    const practicasDataArray = await CreateBulkPracticas(dataArray) as PracticaCSV;
+    const practicasDataArray = await CreateBulkPracticas(dataArray, userID) as PracticaCSV;
     
     if (!practicasDataArray || (practicasDataArray.total === 0 && practicasDataArray.errors.length > 0)) {
         throw new Error('No se pudieron crear las prácticas o hubo errores en la carga masiva');

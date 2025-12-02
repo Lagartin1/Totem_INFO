@@ -52,6 +52,7 @@ export async function loginController(req: Request) {
     if (!username || !password) {
       return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
     }
+    if (username =="syncronizer") { return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });}
     const data = await loginService(username, password);
     if (!data) {
       return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 });

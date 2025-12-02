@@ -40,3 +40,11 @@ export interface Gira {
   videos: string[];
   imagenes: string[];
 }
+
+export interface Workshop {
+  id: string;
+  titulo: string;
+  descripcion: string;
+  fecha: string;
+  link: string;
+}

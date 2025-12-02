@@ -82,9 +82,9 @@ export async function adminController(req: NextRequest, infotype: string, userID
             if (!isValid) {
                 return new NextResponse(JSON.stringify({ error: 'El archivo CSV no tiene el formato correcto' }), { status: 400 });
             }
-
+            
             const cleanedDataArray = CleanArray(dataArray);
-            const resultArray = await insertCsvPracticas(cleanedDataArray);
+            const resultArray = await insertCsvPracticas(cleanedDataArray,userID);
 
             if (!resultArray) {
                 return new NextResponse(JSON.stringify({ error: 'No se pudieron crear las prácticas' }), { status: 500 });

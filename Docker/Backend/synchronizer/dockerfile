@@ -1,0 +1,31 @@
+FROM python:3.11-slim
+
+# Prevents Python from buffering stdout/stderr
+ENV PYTHONUNBUFFERED=1
+
+# Create app directory
+WORKDIR /app
+
+# Install system dependencies needed to install some Python packages
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+       build-essential \
+       gcc \
+       libffi-dev \
+       libssl-dev \
+       ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install
+COPY requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+# Copy synchronizer source
+COPY . /app
+
+# Create a non-root user to run the process
+RUN useradd --create-home --shell /bin/bash syncuser || true
+USER syncuser
+
+# Default command: start the synchronizer script
+CMD ["python", "sincronize_practicas.py"]
