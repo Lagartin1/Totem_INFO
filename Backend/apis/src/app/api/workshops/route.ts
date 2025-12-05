@@ -42,14 +42,9 @@ async function handleAuthenticatedRequest(
   controllerFunction: (req: NextRequest, userId: string) => Promise<any>
 ) {
   try {
+    // El middleware ya verificó el access_token
     const jar = await cookies();
-    const token = jar.get("access_token")?.value;
     const sessionToken = jar.get("refresh_token")?.value;
-
-    if (!token || !(await verifyAccessToken(token))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const userId = await getUserIdFromSessionToken(sessionToken || "");
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

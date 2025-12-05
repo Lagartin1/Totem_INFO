@@ -25,7 +25,7 @@ export default function CardWorkshop({ id, titulo, link, descripcion, onUpdate,s
 
   const saveChanges = async () => {
     const performUpdate = async () => {
-      const response = await fetch("/api/admin/administrar/workshops", {
+      const response = await fetch("/api/workshops", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -35,13 +35,13 @@ export default function CardWorkshop({ id, titulo, link, descripcion, onUpdate,s
       });
       
       if (response.status === 401) {
-        const refreshResponse = await fetch("/api/auth/refresh", {
+        const refreshResponse = await fetch("/api/admin/auth/refresh", {
           method: "POST",
           credentials: "include",
         });
         
         if (refreshResponse.ok) {
-          return await fetch("/api/admin/administrar/workshops", {
+          return await fetch("/api/workshops", {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -74,7 +74,7 @@ export default function CardWorkshop({ id, titulo, link, descripcion, onUpdate,s
 
   const deleteWorkshop = async () => {
     const performDelete = async () => {
-      const response = await fetch("/api/admin/administrar/workshops", {
+      const response = await fetch("/api/workshops", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -84,13 +84,13 @@ export default function CardWorkshop({ id, titulo, link, descripcion, onUpdate,s
       });
       
       if (response.status === 401) {
-        const refreshResponse = await fetch("/api/auth/refresh", {
+        const refreshResponse = await fetch("/api/admin/auth/refresh", {
           method: "POST",
           credentials: "include",
         });
         
         if (refreshResponse.ok) {
-          return await fetch("/api/admin/administrar/workshops", {
+          return await fetch("/api/workshops", {
             method: "DELETE",
             headers: {
               "Content-Type": "application/json",

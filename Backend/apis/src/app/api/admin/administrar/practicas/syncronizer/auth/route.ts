@@ -11,7 +11,7 @@ function createAccessCookie(token: string) {
     value: token,
     httpOnly: true,
     secure: false,  // HTTP interno entre contenedores
-    sameSite: 'lax' as const,
+    sameSite: 'none' as const,
     path: '/',
     maxAge: 60 * 60 * 24, // 1 day
   };

@@ -1,5 +1,9 @@
-import React from "react";
+import React, { useRef } from "react";
 import type { Noticia } from "../types/index";
+import type { OutputData } from '@editorjs/editorjs';
+import EditorComponent from "./Editor";
+import { blocksToHtml } from "../lib/renderEditorContent";
+import type EditorJS from '@editorjs/editorjs';
 
 interface EdicionModalProps {
   isOpen: boolean;
@@ -10,7 +14,7 @@ interface EdicionModalProps {
   setSelectedFile: React.Dispatch<React.SetStateAction<File | null>>;
   removeImage: boolean;
   setRemoveImage: React.Dispatch<React.SetStateAction<boolean>>;
-  handleEdit: (e: React.MouseEvent) => Promise<void>;
+  handleEdit: (e: React.MouseEvent, overrides?: Record<string, string>) => Promise<void>;
   editing: boolean;
 }
 
@@ -39,11 +43,50 @@ export default function EdicionModal({
     setRemoveImage(true);
   };
 
+  const handleEditorChange = (data: OutputData) => {
+    setEditData({ ...editData, contenido: JSON.stringify(data) });
+  };
+
+  const handleEditorHtmlChange = (html: string) => {
+    setEditData((prev) => ({ ...(prev as any), contenido_html: html }));
+  };
+
+  const editorInstance = useRef<EditorJS | null>(null);
+
+  const saveEditorThenHandleEdit = async (e: React.MouseEvent) => {
+    // Intentar esperar brevemente a que la instancia del editor esté disponible
+    let attempts = 0;
+    while (!editorInstance.current && attempts < 10) {
+      // esperar 50ms
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise((res) => setTimeout(res, 50));
+      attempts += 1;
+    }
+
+    if (editorInstance.current) {
+      try {
+        const saved = await editorInstance.current.save();
+        const savedJson = JSON.stringify(saved);
+        const savedHtml = blocksToHtml(saved);
+        setEditData((prev) => ({ ...(prev as any), contenido: savedJson, contenido_html: savedHtml }));
+        await handleEdit(e, { contenido: savedJson, contenido_html: savedHtml });
+        return;
+      } catch (err) {
+        console.warn('No se pudo obtener contenido desde editor instance:', err);
+      }
+    }
+
+    
+    const fallbackContenido = editData.contenido ? String(editData.contenido) : '';
+    const fallbackHtml = (editData as any).contenido_html ? String((editData as any).contenido_html) : '';
+    await handleEdit(e, { contenido: fallbackContenido, contenido_html: fallbackHtml });
+  };
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-md"
       onClick={onClose}>
-      <div
+      <form
         className="bg-white p-6 rounded-xl shadow-lg w-[400px] max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}>
         <h2 className="text-xl font-semibold mb-4">Editar Noticia</h2>
@@ -63,15 +106,16 @@ export default function EdicionModal({
           className="border p-2 w-full mb-2 rounded"
           placeholder="Autor"
         />
-
-        <textarea
-          value={editData.contenido || ""}
-          onChange={(e) =>
-            setEditData({ ...editData, contenido: e.target.value })
-          }
-          className="border p-2 w-full mb-2 rounded min-h-[120px]"
-          placeholder="Contenido"
-        />
+        
+        <div className="mb-4">
+          <label className="block font-medium mb-1">Contenido:</label>
+          <EditorComponent
+            initialData={editData.contenido || ""}
+            onChangeData={handleEditorChange}
+            onChangeHtml={handleEditorHtmlChange}
+            onReady={(ed) => (editorInstance.current = ed)}
+          />
+        </div>
 
         {/* Imagen */}
         <div className="mt-4">
@@ -115,13 +159,13 @@ export default function EdicionModal({
             Cancelar
           </button>
           <button
-            onClick={handleEdit}
+            onClick={saveEditorThenHandleEdit}
             disabled={editing}
             className="px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50">
             {editing ? "Guardando..." : "Guardar"}
           </button>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

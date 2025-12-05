@@ -6,6 +6,7 @@ import Loader from '../components/Loader';
 export default function ProtectedRoute() {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
+  
 
   if (isLoading) return <Loader frase='Cargando...' />;
   if (!isAuthenticated) {

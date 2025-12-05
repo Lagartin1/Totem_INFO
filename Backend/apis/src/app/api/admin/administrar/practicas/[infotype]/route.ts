@@ -9,12 +9,8 @@ import { cookies } from "next/headers";
 export  async function POST(req: NextRequest, { params }: { params: Promise<{ infotype: string }> }) {
   try{
     const { infotype } = await params;
+    // El middleware ya verificó el access_token
     const jar = await cookies();
-    const token = jar.get('access_token')?.value;
-    if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (!(await verifyAccessToken(token))) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
     const refreshToken = jar.get('refresh_token')?.value;
     const userID = await getUserIdFromSessionToken(refreshToken || '');
     if (!userID) {

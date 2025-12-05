@@ -82,13 +82,14 @@ export default function Card_Proyectos({
   };
 
   // Maneja la edición del proyecto
-  const handleEdit = async (e: React.MouseEvent) => {
+  const handleEdit = async (e: React.MouseEvent, overrides?: Record<string, string>) => {
     e.stopPropagation();
     if (!confirm("¿Deseas guardar los cambios?")) return;
 
     try {
       setEditing(true);
       const formData = new FormData();
+      
 
       [
         "titulo",
@@ -98,11 +99,25 @@ export default function Card_Proyectos({
         "correo_contacto",
         "area_desarrollo",
       ].forEach((key) => {
-        const value = editData[key as keyof Proyecto];
+        const overrideVal = overrides && overrides[key];
+        const value = overrideVal !== undefined ? overrideVal : editData[key as keyof Proyecto];
         if (typeof value === "string" && value.trim() !== "") {
           formData.append(key, value);
         }
       });
+
+      // Log FormData entries for debugging
+      try {
+        Array.from(formData.entries());
+      } catch (err) {
+      }
+
+      // Añadir descripcion_html si viene por overrides
+      if (overrides && overrides.descripcion_html) {
+        formData.append('descripcion_html', overrides.descripcion_html);
+      } else if ((editData as any).descripcion_html) {
+        formData.append('descripcion_html', (editData as any).descripcion_html as string);
+      }
 
       if (editData.autores) {
         if (Array.isArray(editData.autores)) {

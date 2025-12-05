@@ -24,19 +24,9 @@ export async function GET(request: NextRequest) {
 // ✅ Crear una noticia
 export async function POST(request: NextRequest) {
   try {
+    // Obtención del User ID (el middleware ya verificó el access_token)
     const jar = await cookies();
-    const token = jar.get("access_token")?.value;
     const sessionToken = jar.get("refresh_token")?.value;
-
-    // 1. Verificaciones de Seguridad
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    if (!(await verifyAccessToken(token))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // 2. Obtención del User ID (como String para MongoDB)
     const userId = await getUserIdFromSessionToken(sessionToken || "");
     
     if (!userId) {

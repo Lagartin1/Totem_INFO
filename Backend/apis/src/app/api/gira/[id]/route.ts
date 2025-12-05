@@ -15,16 +15,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // 1. Autenticación
+    // El middleware ya verificó el access_token
     const jar = await cookies();  
-    const token = jar.get("access_token")?.value;
     const sessionToken = jar.get("refresh_token")?.value;
-
-    if (!token || !(await verifyAccessToken(token))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // 2. Obtener User ID (String)
     const userId = await getUserIdFromSessionToken(sessionToken || "");
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -56,16 +49,9 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // 1. Autenticación
+    // El middleware ya verificó el access_token
     const jar = await cookies();  
-    const token = jar.get("access_token")?.value;
     const sessionToken = jar.get("refresh_token")?.value;
-
-    if (!token || !(await verifyAccessToken(token))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // 2. Obtener User ID (String)
     const userId = await getUserIdFromSessionToken(sessionToken || "");
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

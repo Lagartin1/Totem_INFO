@@ -1,3 +1,9 @@
+import { useState, useRef } from "react";
+import type { OutputData } from '@editorjs/editorjs';
+import EditorComponent from "./Editor";
+import { blocksToHtml } from "../lib/renderEditorContent";
+import type EditorJS from '@editorjs/editorjs';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 
@@ -10,6 +16,10 @@ export default function Modal_Agregar_Noticias({
   closeModal: () => void;
   onAdded: () => void;
 }) {
+  const [editorData, setEditorData] = useState<OutputData | null>(null);
+  const [editorHtml, setEditorHtml] = useState<string>("");
+  const editorInstance = useRef<EditorJS | null>(null);
+
   if (!isOpen) return null;
 
   const baseUrl = BUILD_MODE ? API_BASE_URL : "http://localhost:3000";
@@ -18,33 +28,58 @@ export default function Modal_Agregar_Noticias({
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
-    const perferomPost = async () => {
+
+    // Si tenemos la instancia del editor, obtener el contenido más reciente directamente
+    if (editorInstance.current) {
       try {
-        const res = await fetch(`${baseUrl}/api/noticias`, {
-          method: "POST",
-          credentials: "include",
-          body: formData,
-        });
-        if (res.status === 401) {
-          const refreshRes = await fetch(`${baseUrl}/api/admin/auth/refresh`, {
-            method: "GET",
-            credentials: "include",
-          });
-          if (refreshRes.ok) {
-            const retryRes = await fetch(`${baseUrl}/api/noticias`, {
-              method: "POST",
-              credentials: "include",
-              body: formData,
-            });
-            return retryRes;
-          } else {
-            throw new Error("No autorizado");
-          }
+        const saved = await editorInstance.current.save();
+        formData.set('contenido', JSON.stringify(saved));
+        formData.set('contenido_html', blocksToHtml(saved));
+      } catch (err) {
+        console.warn('No se pudo obtener contenido desde editor instance:', err);
+        // fallback a estado
+        if (editorData) {
+          formData.set('contenido', JSON.stringify(editorData));
+        } else if (editorHtml) {
+          formData.set('contenido', editorHtml);
         }
-        return res;
-      } catch (error) {
-        throw error;
+        if (editorHtml) formData.set('contenido_html', editorHtml);
       }
+    } else {
+      // Adjuntar contenido del editor: JSON y HTML para vistas previas
+      if (editorData) {
+        formData.set('contenido', JSON.stringify(editorData));
+      } else if (editorHtml) {
+        // fallback si no hay JSON
+        formData.set('contenido', editorHtml);
+      }
+      if (editorHtml) formData.set('contenido_html', editorHtml);
+    }
+
+    const perferomPost = async () => {
+      const res = await fetch(`${baseUrl}/api/noticias`, {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
+      console.log("Respuesta del servidor:", res.status);
+      if (res.status === 401) {
+        const refreshRes = await fetch(`${baseUrl}/api/admin/auth/refresh`, {
+          method: "GET",
+          credentials: "include",
+        });
+        if (refreshRes.ok) {
+          const retryRes = await fetch(`${baseUrl}/api/noticias`, {
+            method: "POST",
+            credentials: "include",
+            body: formData,
+          });
+          return retryRes;
+        } else {
+          throw new Error("No autorizado");
+        }
+      }
+      return res;
     };
 
     try {
@@ -92,12 +127,15 @@ export default function Modal_Agregar_Noticias({
             className="border p-2 rounded"
           />
 
-          <textarea
-            name="contenido"
-            placeholder="Contenido"
-            className="border p-2 rounded"
-            required
-          />
+          <div>
+            <label className="block font-medium mb-1">Contenido:</label>
+            <EditorComponent
+              initialData={undefined}
+              onChangeData={(d: OutputData) => setEditorData(d)}
+              onChangeHtml={(h: string) => setEditorHtml(h)}
+              onReady={(ed) => (editorInstance.current = ed)}
+            />
+          </div>
 
           <label className="text-sm text-gray-600">Imagen (opcional)</label>
           <input

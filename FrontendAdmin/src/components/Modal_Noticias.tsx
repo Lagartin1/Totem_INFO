@@ -1,5 +1,6 @@
 import { createPortal } from "react-dom";
 import type { Noticia } from "../types/index";
+import EditorViewer from "./EditorViewer";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
@@ -58,10 +59,16 @@ export default function NoticiaModal({
           {new Date(noticia.fecha_publicacion).toLocaleDateString()}
         </p>
 
-        {/* Contenido */}
-        <p className="mt-2 text-lg text-gray-700 whitespace-pre-line">
-          {noticia.contenido}
-        </p>
+        {/* Contenido (renderizado como EditorJS en modo sólo lectura) */}
+        <div className="mt-2 text-lg text-gray-700">
+          { (noticia as any).contenido_html ? (
+            // Preferimos el HTML pre-generado si existe
+            <EditorViewer initialData={(noticia as any).contenido_html} />
+          ) : (
+            // Si no hay HTML, montamos EditorJS en modo readOnly para renderizar exactamente igual
+            <EditorViewer initialData={noticia.contenido || ''} />
+          )}
+        </div>
 
         {/* Botón de volver */}
         <div className="flex justify-end mt-6">

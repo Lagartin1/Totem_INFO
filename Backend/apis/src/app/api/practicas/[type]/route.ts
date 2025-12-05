@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchPracticas } from "@/controllers/practicas/practicasController";
+import { cookies } from "next/headers";
+import { verifyAccessToken, getUserIdFromSessionToken } from "@/lib/auth/login_tools";
 
 // 1. Fíjate que ahora 'params' está envuelto en Promise<...>
 export async function GET(_req: NextRequest,{ params }: { params: Promise<{ type: string }> } ) {
@@ -30,10 +32,28 @@ export async function GET(_req: NextRequest,{ params }: { params: Promise<{ type
   }
 }
 
-export async function POST(req: Request) {
-  const body = await req.json();
-  // guardar body...
-  return Response.json({ creado: body }, { status: 201 });
+export async function POST(req: NextRequest) {
+  try {
+    // El middleware ya verificó el access_token
+    const jar = await cookies();
+    const sessionToken = jar.get("refresh_token")?.value;
+    const userId = await getUserIdFromSessionToken(sessionToken || "");
+    
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    
+    // 3. Procesar la solicitud
+    const body = await req.json();
+    // TODO: Implementar lógica de guardado
+    return NextResponse.json({ creado: body }, { status: 201 });
+  } catch (error) {
+    console.error("Error en POST /practicas/[type]:", error);
+    return NextResponse.json(
+      { error: "Error al crear la práctica" },
+      { status: 500 }
+    );
+  }
 }
 
 
