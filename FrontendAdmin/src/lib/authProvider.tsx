@@ -33,9 +33,15 @@ const AuthProviderContext = createContext<AuthContextType | undefined>(undefined
 function AuthProvider( {children}:{children: ReactNode}) {
   const [userData, setUserData] = useState<User | null>(null);
   const [user_id, setUser_id] = useState<string | null>(null);
-  const [isAuthenticated, setAuthenticated] = useState<boolean>(false);
+  const [isAuthenticated, setAuthenticated] = useState<boolean>(() => {
+    try {
+      return typeof window !== 'undefined' && localStorage.getItem('session') === 'true';
+    } catch (e) {
+      return false;
+    }
+  });
   const [isLoading, setIsLoading] = useState(false);
-  const [warningShown, setWarningShown] = useState(false);
+  
 
   const mounted = useRef(true);
 
@@ -72,7 +78,7 @@ function AuthProvider( {children}:{children: ReactNode}) {
         setUserData(result.data.user as User);
         await handleSignedIn(result.data.user.id);
         setIsLoading(false);
-        localStorage.setItem('session', JSON.stringify("true"));
+        // session flag set inside handleSignedIn
         return result;
 
       } else {
@@ -97,11 +103,19 @@ function AuthProvider( {children}:{children: ReactNode}) {
   async function handleSignedIn(user_id: string) {
     setAuthenticated(true);
     setUser_id(user_id);
+    try {
+      localStorage.setItem('session', 'true');
+    } catch (e) {
+      // ignore storage errors
+    }
   }
-  async function handleSignOut(user_id: string) {
+  async function handleSignOut() {
     setIsLoading(true);
-    localStorage.removeItem('session');
-    await logout();
+    try {
+      localStorage.removeItem('session');
+    } catch (e) {
+      // ignore
+    }
     setAuthenticated(false);
     setUser_id(null);
     setUserData(null);
@@ -116,7 +130,8 @@ function AuthProvider( {children}:{children: ReactNode}) {
         credentials: 'include'
       });
       if (response.ok) {
-        handleSignOut(  user_id || '');
+        // server-side logout successful, perform client cleanup
+        handleSignOut();
         console.log("Logout successful");
       } else {
         console.error("Logout failed");
