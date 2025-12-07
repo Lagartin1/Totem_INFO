@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = request.nextUrl;
     const searchTerm = searchParams.get("search");
     const pagina = parseInt(searchParams.get("pagina") || "1");
-    const indice = (pagina - 1) * 10; // 10 items por página
+    const indice = (pagina - 1) * 6; // 6 items por página
     
     const response = await fetchBecados(searchTerm || false, indice);
 

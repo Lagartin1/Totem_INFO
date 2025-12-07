@@ -11,7 +11,8 @@ export async function GET(_req: NextRequest,{ params }: { params: Promise<{ type
   const searchParams = _req.nextUrl.searchParams;
   const pagina = searchParams.get('pagina') || '1';
   const year = searchParams.get('year') || false;
-  const indice = Number(pagina) > 1 ? (Number(pagina) - 1)*10: 0;
+  const PAGE_SIZE = 6; // Coincide con el frontend
+  const indice = Number(pagina) > 1 ? (Number(pagina) - 1) * PAGE_SIZE : 0;
   
   try {
     let tipo_practica: any;

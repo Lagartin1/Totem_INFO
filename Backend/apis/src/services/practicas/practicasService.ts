@@ -20,7 +20,7 @@ const requiredHeaders = [
     'requisitos_especiales'
 ];
 
-const PAGE_SIZE = 10; // Definimos un tamaño de página por defecto para el servicio
+const PAGE_SIZE = 6; // Definimos un tamaño de página por defecto para el servicio (coincide con frontend)
 
 export async function listPracticas(year: string | false, indice: number, type: string): Promise<PracticasResult> {
     console.log("listPracticas params:", { year, indice, type });

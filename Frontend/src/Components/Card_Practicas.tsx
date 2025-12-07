@@ -19,7 +19,9 @@ export interface CardPracticasProps {
   modalidad: string;
   beneficios: string;
   nombre_empresa: string;
+  fecha?: string;
   baseUrl: string;
+  state: boolean;
 }
 
 export default function Card_Practicas({
@@ -35,6 +37,8 @@ export default function Card_Practicas({
   modalidad,
   beneficios,
   nombre_empresa,
+  fecha,
+  state,
   baseUrl,
 }: CardPracticasProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,11 +53,11 @@ export default function Card_Practicas({
   return (
     <>
       <div className="w-100 h-80 bg-white rounded-lg shadow-md p-4 flex flex-col">
-        <Indicador_Card value={true} />
+        <Indicador_Card value={state} />
         <div className="h-30 bg-gray-200 rounded-md mb-4 flex items-center justify-center">
           logo
         </div>
-        <h3 className="text-lg font-semibold mb-2">{Titulo}</h3>
+        <h3 className="text-lg font-semibold mb-2 overflow-ellipsis overflow-hidden whitespace-nowrap">{Titulo}</h3>
         <div className="flex flex-row">
           <h3 className=" font-light">Ubicacion:</h3>
           <p className="ml-2 font-stretch-semi-condensed">{lugar}</p>
@@ -75,6 +79,10 @@ export default function Card_Practicas({
             <h2 className="p-10 text-2xl font-sansfont font-semibold">
               {Titulo}{" "}
             </h2>
+            {/* Fecha de la práctica (si está disponible) */}
+            {fecha && (
+              <p className="text-xl text-gray-500 -mt-4 mb-4">Fecha: {fecha}</p>
+            )}
             <div className="flex flex-col gap-3 w-[50vw]">
               <div className="pr-6 border-b border-gray-500 items-start">
                 <h3 className="font-semibold">Características</h3>
@@ -91,6 +99,7 @@ export default function Card_Practicas({
                 )}
               </div>
             </div>
+            {requisitos != "" &&(
             <div className="flex flex-col gap-3 w-[50vw] mt-5 ">
               <div className="pr-6 border-b border-gray-500 items-start">
                 <h3 className="font-semibold">Requisitos</h3>
@@ -99,6 +108,8 @@ export default function Card_Practicas({
                 <p>{requisitos}</p>
               </div>
             </div>
+            ) }
+            { beneficios != "" &&(
             <div className="flex flex-col gap-3 w-[50vw] mt-5 ">
               <div className="pr-6 border-b border-gray-500 items-start">
                 <h3 className="font-semibold">Beneficios</h3>
@@ -107,6 +118,7 @@ export default function Card_Practicas({
                 <p>{beneficios}</p>
               </div>
             </div>
+            ) }
             <div className="py-10 items-start flex flex-row">
               <div className="flex flex-col ">
                 <div className="flex flex-row gap-3 items-center font-sans ">
