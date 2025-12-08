@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { Noticia } from "../types/index.ts";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -165,28 +165,20 @@ export default function Carousel_Main({ noticias }: CarouselMainProps) {
   };
 
   // Auto Slide
-  /*   useEffect(() => {
+    useEffect(() => {
     const interval = setInterval(next, 3000);
     return () => clearInterval(interval);
-  }, [currentIndex]); */
+  }, [currentIndex]);
 
   return (
-    /* Botones */
-    <div className="flex flex-col items-center gap-4">
-      <div className="space-x-4">
-        <button
-          onClick={prev}
-          className="w-12 h-12 py-2 bg-gray-300 rounded-full">
-          ←
-        </button>
-        <button
-          onClick={next}
-          className="w-12 h-12 py-2 bg-gray-300 rounded-full">
-          →
-        </button>
-      </div>
+    <div className="flex flex-col items-center gap-6">
 
-      <div className="w-screen h-full overflow-hidden">
+      <div className="w-screen h-full overflow-hidden relative">
+    
+        {/* Gradientes en los bordes para indicar deslizamiento */}
+        <div className="absolute left-0 top-0 w-20 h-full bg-gradient-to-r from-black/20 to-transparent z-20 pointer-events-none" />
+        <div className="absolute right-0 top-0 w-20 h-full bg-gradient-to-l from-black/20 to-transparent z-20 pointer-events-none" />
+        
         <div className="relative w-full mx-auto">
           <div
             className="flex gap-4 select-none cursor-grab active:cursor-grabbing min-w-[615px] flex-shrink-0"
@@ -237,24 +229,35 @@ export default function Carousel_Main({ noticias }: CarouselMainProps) {
         </div>
       </div>
 
-      {/* Indicadores de slide */}
-      <div className="flex space-x-2 mt-4">
-        {noticias.map((_, index) => (
-          <button
-            key={index}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
-              getRealIndex() === index
-                ? "bg-white shadow-lg scale-110"
-                : "bg-gray-400 hover:bg-gray-300"
-            }`}
-            onClick={() => {
-              // Calcular el índice real con offset para los clones
-              const targetIndex = index + 2;
-              setCurrentIndex(targetIndex);
-              setTranslateX(-700 - index * slideDistance);
-            }}
+      {/* Indicadores de slide mejorados */}
+      <div className="flex items-center gap-4 bg-black/30 backdrop-blur-sm rounded-full px-6 py-3">
+        <div className="flex space-x-3">
+          {noticias.map((_, index) => (
+            <button
+              key={index}
+              className={`transition-all duration-300 touch-manipulation active:scale-110 ${
+                getRealIndex() === index
+                  ? "w-8 h-4 bg-white rounded-full shadow-lg" 
+                  : "w-4 h-4 bg-white/50 hover:bg-white/70 rounded-full"
+              }`}
+              onClick={() => {
+                // Calcular el índice real con offset para los clones
+                const targetIndex = index + 2;
+                setCurrentIndex(targetIndex);
+                setTranslateX(-700 - index * slideDistance);
+              }}
+              aria-label={`Ir a la noticia ${index + 1}`}
+            />
+          ))}
+        </div>
+        
+        {/* Barra de progreso */}
+        <div className="w-20 h-1 bg-white/30 rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-white transition-all duration-500 rounded-full"
+            style={{ width: `${((getRealIndex() + 1) / noticias.length) * 100}%` }}
           />
-        ))}
+        </div>
       </div>
     </div>
   );

@@ -24,17 +24,16 @@ export default function Noticias_Section() {
       .finally(() => setLoading(false));
   }, []);
 
-  const onClick = (noticia: Noticia) => {
-    setSelectedNoticia(noticia);
-    selectedNoticia && console.log("Noticia seleccionada:", selectedNoticia);
-  }
+    const onClick = (noticia: Noticia) => {
+      setSelectedNoticia(noticia);
+      selectedNoticia && console.log("Noticia seleccionada:", selectedNoticia);
+    }
 
-  return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">Noticias</h2>
+    return (
+      <div className="p-6 mt-20">
 
-      {/* Loading Spinner */}
-      {loading && (
+        {/* Loading Spinner */}
+        {loading && (
         <div className="flex flex-col items-center justify-center mt-20">
           <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
           <p className="mt-4 text-lg text-gray-600">Cargando...</p>
@@ -49,17 +48,6 @@ export default function Noticias_Section() {
         <Carousel_Main
         noticias={noticias}
         />
-{/*       <div className="relative">
-        <div ref={carouselRef} className="flex gap-4 overflow-x-auto pb-4">
-          {noticias.map((n) => (
-            <Card_Noticias
-              key={n.id}
-              noticia={n}
-              onClick={() => onClick(n)}
-            />
-          ))}
-        </div>
-      </div> */}
     </div>
   );
 }
