@@ -1,5 +1,5 @@
 import React from "react";
-import type { Gira, Becado, Workshop } from "../types/index";
+import type { Gira, Becado, Workshop, Proyecto } from "../types/index";
 import Carousel from "./Carousel";
 import VideoYoutube from "./VideoYoutube";
 
@@ -7,10 +7,10 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 
 // Tipos de contenido soportados
-export type CardType = "gira" | "becado" | "workshop";
+export type CardType = "gira" | "becado" | "workshop" | "proyecto";
 
 // Union type para todos los tipos de contenido
-type ContentItem = Gira | Becado | Workshop;
+type ContentItem = Gira | Becado | Workshop | Proyecto;
 
 // Configuraciones específicas por tipo
 interface CardConfig {
@@ -115,6 +115,35 @@ export default function Card_Main({ item, type }: CardMainProps) {
           emptyStateText: "Workshop",
           badgeText: "Taller",
         };
+      case "proyecto":
+        return {
+          type: cardType,
+          icon: (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+              className="w-12 h-12 mx-auto mb-2">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9.75 3.104v5.714a2.25 2.25 0 0 1-2.25 2.25H3.104c-.684 0-1.104-.576-1.104-1.104V3.104c0-.528.42-1.104 1.104-1.104h5.714c.684 0 1.104.576 1.104 1.104Z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M20.25 3.104v5.714a2.25 2.25 0 0 1-2.25 2.25h-5.714a2.25 2.25 0 0 1-2.25-2.25V3.104m0 0a2.25 2.25 0 0 1 2.25-2.25h5.714c1.24 0 2.25 1.01 2.25 2.25m0 0v5.714c0 1.24-1.01 2.25-2.25 2.25h-5.714m0 0a2.25 2.25 0 0 1-2.25-2.25v-5.714m0 0a2.25 2.25 0 0 1 2.25-2.25h5.714a2.25 2.25 0 0 1 2.25 2.25M3.75 15.75h16.5"
+              />
+            </svg>
+          ),
+          defaultGradient: "bg-gradient-to-br from-indigo-400 to-pink-600",
+          badgeColor: "text-indigo-600",
+          modalGradient: "bg-gradient-to-br from-indigo-50 to-pink-50",
+          emptyStateText: "Proyecto",
+          badgeText: "Proyecto",
+        };
       default:
         return {
           type: "gira",
@@ -191,6 +220,14 @@ export default function Card_Main({ item, type }: CardMainProps) {
           titulo: workshop.titulo,
           descripcion: workshop.descripcion,
           badgeText: new Date(workshop.fecha).getFullYear().toString(),
+          extraInfo: null,
+        };
+      case "proyecto":
+        const proyecto = item as Proyecto;
+        return {
+          titulo: proyecto.titulo,
+          descripcion: proyecto.descripcion,
+          badgeText: proyecto.area_desarrollo || config.badgeText,
           extraInfo: null,
         };
       default:

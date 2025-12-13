@@ -3,6 +3,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Deshabilitar zoom y escalado */
+html,
+body {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
 
 body {
     @apply bg-gradient-to-b from-[#C9F5BC] to-[#B8D6F2];

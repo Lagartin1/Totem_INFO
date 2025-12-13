@@ -112,7 +112,9 @@ model Proyecto {
   correo_contacto       String?    
   telefono_contacto     String?    
   fecha_publicacion     DateTime? 
-  videos                String[]   
+  videos                String[]
+  portada               String?
+  imagenes              String[]   
 
   autorId               String    @db.ObjectId
   autor                 Usuario   @relation(fields: [autorId], references: [id])
