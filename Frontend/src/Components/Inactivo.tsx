@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import Screensaver from "./Screen_Saver";
 
-const INACTIVITY_TIME_MS = 10_000; // 30 segundos
+const INACTIVITY_TIME_MS = 30_000; // 30 segundos
 
 export default function InactivityProvider({
   children,
