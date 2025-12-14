@@ -53,7 +53,7 @@ export default function Workshop() {
     setLoading(true);
     try {
       // ✅ URL CORREGIDA: Apunta a la ruta estándar
-      const response = await fetch(`/api/workshop?pagina=${page}`, {
+      const response = await fetch(`/api/workshops?pagina=${page}`, {
         method: "GET",
       });
       
@@ -87,7 +87,7 @@ export default function Workshop() {
     setLoading(true);
     try {
       // ✅ URL CORREGIDA: Usamos la misma ruta base con método POST
-      const response = await fetch("/api/workshop", {
+      const response = await fetch("/api/workshops", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newWorkshopData),

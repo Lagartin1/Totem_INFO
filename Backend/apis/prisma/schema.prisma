@@ -132,6 +132,7 @@ model Workshop {
   descripcion           String?
   fecha                 DateTime?
   link                  String?
+  visitas               Int?      @default(0)
 
   autorId               String    @db.ObjectId
   autor                 Usuario   @relation(fields: [autorId], references: [id])

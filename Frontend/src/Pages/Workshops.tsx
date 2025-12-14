@@ -23,6 +23,7 @@ export default function Workshops() {
       })
       .catch(error => {
         console.error('Error al obtener los workshops:', error);
+        setLoadingPage(false);
       });
 
   }, [page]);
@@ -49,14 +50,29 @@ export default function Workshops() {
       <div className="mt-20 flex flex-row gap-20 justify-center">
         <div className="flex flex-col gap-2">
           <div className="grid grid-cols-3 gap-10">
-            {workshops.map((workshop) => ( 
-              <Card_Main
-                key={workshop.id}
-                item={workshop}
-                type="workshop"         
-              />
-            ))}
+            {workshops.length === 0 && !loadingPage ? (
+              <div className="col-span-3 flex flex-col items-center justify-center p-12 text-center">
+                <div className="text-6xl mb-4">📍</div>
+                <h3 className="text-2xl font-semibold text-gray-700 mb-2">
+                  No hay workshops disponibles
+                </h3>
+                <p className="text-gray-500 text-lg">
+                  Por el momento no hay workshops programados.
+                  <br />
+                  Vuelve pronto para conocer las próximas charlas y actividades.
+                </p>
+              </div>
+            ) : (
+              workshops.map((workshop) => (
+                <Card_Main
+                  key={workshop.id}
+                  item={workshop}
+                  type="workshop"
+                />
+              ))
+            )}
           </div>
+          { workshops.length > 0 &&(
           <div className="flex items-center justify-center mt-4 space-x-2">
             <button
               type="button"
@@ -101,6 +117,7 @@ export default function Workshops() {
               ›
             </button>
           </div>
+          )}
         </div>
         <div className="flex flex-col bg-slate-500 rounded-lg w-1/4 items-center" >
           <h1 className="text-white text-4xl font-bold justify-center p-10 mt-20 ">Workshops</h1>

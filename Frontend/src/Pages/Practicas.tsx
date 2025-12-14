@@ -116,7 +116,7 @@ export default function Practicas() {
         <NavBar />
         <div className="mt-20 flex flex-row gap-20 justify-center">
           <div className="flex flex-col gap-2">
-            {!loading && (
+            {!loading && data.practicas.length > 0 && (
                 
               <div className="flex flex-row gap-2 mb-4 items-center bg-white/95 p-2 rounded-2xl justify-center w-1/3 ">
                 <label htmlFor="years" className="font-semibold">Filtrar por Año:</label>
@@ -203,9 +203,20 @@ export default function Practicas() {
               })
             )}
             {!loading && data.practicas.length === 0 && (
-              <p className="text-center col-span-3">No se encontraron prácticas.</p>
+              <div className="col-span-3 flex flex-col items-center justify-center p-12 text-center">
+                  <div className="text-6xl mb-4">📍</div>
+                  <h3 className="text-2xl font-semibold text-gray-700 mb-2">
+                    No hay practicas disponibles
+                  </h3>
+                  <p className="text-gray-500 text-lg">
+                    Por el momento no hay prácticas disponibles. 
+                    <br />
+                    Vuelve pronto para conocer las próximas experiencias educativas.
+                  </p>
+                </div>
             )}
               </div>
+              { data.practicas.length > 0 &&(
               <div className="flex justify-center mt-6 gap-4">
                 <button
                   className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-300"
@@ -225,7 +236,7 @@ export default function Practicas() {
                   Siguiente
                 </button> 
               </div>
-
+              )}
         </div>
           <div className="flex flex-col bg-slate-500 rounded-lg w-1/4 items-center" >
             <h1 className="text-white text-4xl font-bold justify-center p-10 mt-20 ">Práctica {type==="inicial"? "Inicial": "Profesional"}</h1>

@@ -65,8 +65,16 @@ export default function ProyectosDocentes() {
               />
             ))
           ) : (
-            <div className="col-span-full text-center text-gray-500 py-10">
-              <p className="text-xl">No hay proyectos disponibles</p>
+            <div className="col-span-full flex flex-col items-center justify-center p-12 text-center">
+              <div className="text-6xl mb-4">📍</div>
+              <h3 className="text-2xl font-semibold text-gray-700 mb-2">
+                No hay proyectos disponibles
+              </h3>
+              <p className="text-gray-500 text-lg">
+                Por el momento no hay proyectos registrados.
+                <br />
+                Vuelve pronto para conocer los trabajos desarrollados por estudiantes y profesores.
+              </p>
             </div>
           )}
         </div>
