@@ -39,10 +39,7 @@ export default function Dashboard() {
     setToastmsg(message);
     setToastStatus(status);
     setToast(true);
-<<<<<<< HEAD
     // ⬇️ antes estabas dejando el toast en true
-=======
->>>>>>> refs/remotes/origin/develop
     setTimeout(() => setToast(false), 3000);
   };
 
