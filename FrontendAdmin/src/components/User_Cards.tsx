@@ -31,7 +31,7 @@ export default function UserCard({
     try {
       let response = await tryAuth();
       if (response.status === 401) {
-        await fetch("/api/auth/refresh", {
+        await fetch("/api/admin/auth/refresh", {
           method: "GET",
           credentials: "include",
         });

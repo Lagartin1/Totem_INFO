@@ -124,7 +124,7 @@ export default function AdminPracticas() {
   };
 
   const refresh = async () => {
-    const response = await fetch("/api/auth/refresh", {
+    const response = await fetch("/api/admin/auth/refresh", {
       method: "GET",
       credentials: "include",
     });

@@ -8,6 +8,8 @@ export interface Proyecto {
   correo_contacto: string;
   area_desarrollo: string;
   videos: string[];
+  portada?: string;
+  imagenes?: string[];
 }
 
 export interface Noticia {

@@ -22,7 +22,6 @@ export default function Becados() {
       .then(data => {
         setBecados(data.becados || data.data || []);
         setTotalPages(Math.ceil((data.total || 0) / 6)); // Asumiendo un pageSize de 6
-        console.log(data);
         setLoadingPage(false);
       })
       .catch(error => {
@@ -53,14 +52,29 @@ export default function Becados() {
       <div className="mt-20 flex flex-row gap-20 justify-center">
         <div className="flex flex-col gap-2">
           <div className="grid grid-cols-3 gap-10">
-            {becados.map((becado) => ( 
-              <Card_Main 
-                key={becado.id}
-                item={becado}
-                type="becado"
-              />
-            ))}
+            {becados.length === 0 && !loadingPage ? (
+              <div className="col-span-3 flex flex-col items-center justify-center p-12 text-center">
+                <div className="text-6xl mb-4">📍</div>
+                <h3 className="text-2xl font-semibold text-gray-700 mb-2">
+                  No hay becados disponibles
+                </h3>
+                <p className="text-gray-500 text-lg">
+                  Por el momento no hay estudiantes becados registrados.
+                  <br />
+                  Vuelve pronto para conocer a los beneficiarios de nuestras becas y sus historias.
+                </p>
+              </div>
+            ) : (
+              becados.map((becado) => (
+                <Card_Main
+                  key={becado.id}
+                  item={becado}
+                  type="becado"
+                />
+              ))
+            )}
           </div>
+          { becados.length > 0 &&(
           <div className="flex items-center justify-center mt-4 space-x-2">
             <button
               type="button"
@@ -94,7 +108,7 @@ export default function Becados() {
               );
               }
             )}
-
+            
             <button
               type="button"
               onClick={() => fetchNewPage(Math.min(Math.max(1, Math.ceil(totalPages || 1)), page + 1))}
@@ -104,7 +118,9 @@ export default function Becados() {
             >
               ›
             </button>
+        
           </div>
+          )}
         </div>
         <div className="flex flex-col bg-slate-500 rounded-lg w-1/4 items-center" >
           <h1 className="text-white text-4xl font-bold justify-center p-10 mt-20 ">Becados</h1>

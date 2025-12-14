@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+// @ts-ignore: no declaration file for '@heroicons/react/24/outline'
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 
 function nav_button({ Title, Link }: { Title: string; Link: string }) {

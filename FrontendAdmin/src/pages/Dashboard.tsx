@@ -39,7 +39,10 @@ export default function Dashboard() {
     setToastmsg(message);
     setToastStatus(status);
     setToast(true);
+<<<<<<< HEAD
     // ⬇️ antes estabas dejando el toast en true
+=======
+>>>>>>> refs/remotes/origin/develop
     setTimeout(() => setToast(false), 3000);
   };
 
@@ -48,10 +51,8 @@ export default function Dashboard() {
     const performFetch = async () => {
       const response = await fetch(`/api/admin/registered?pagina=${pagina}`, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          credentials: "include",
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
       });
       if (response.status === 401) {
         const refresh = await fetch(`/api/admin/auth/refresh`, {
@@ -63,10 +64,8 @@ export default function Dashboard() {
             `/api/admin/registered?pagina=${pagina}`,
             {
               method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-                credentials: "include",
-              },
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
             }
           );
           if (!retryResponse.ok) {
@@ -83,9 +82,10 @@ export default function Dashboard() {
     try {
       const res = await performFetch();
       if (res === null) return;
-      const data = await res.json();
-      setData(data.users);
-      setPages(data.total);
+      const resData = await res.json();
+      const users = Array.isArray(resData?.users) ? resData.users : [];
+      setData(users);
+      setPages(typeof resData?.total === "number" ? resData.total : users.length);
     } catch (error) {
       console.error("Error al cargar los usuarios registrados:", error);
     } finally {

@@ -1,6 +1,10 @@
-import React from "react";
+import React, { useRef } from "react";
 import type { Proyecto } from "../types/index";
 import { createPortal } from "react-dom";
+import type { OutputData } from '@editorjs/editorjs';
+import EditorComponent from "./Editor";
+import { blocksToHtml } from "../lib/renderEditorContent";
+import type EditorJS from '@editorjs/editorjs';
 
 interface EdicionModalProps {
   isOpen: boolean;
@@ -11,7 +15,7 @@ interface EdicionModalProps {
   setSelectedVideos: React.Dispatch<React.SetStateAction<File[] | null>>;
   removeVideos: boolean;
   setRemoveVideos: React.Dispatch<React.SetStateAction<boolean>>;
-  handleEdit: (e: React.MouseEvent) => Promise<void>;
+  handleEdit: (e: React.MouseEvent, overrides?: Record<string, string>) => Promise<void>;
   editing: boolean;
 }
 
@@ -67,6 +71,28 @@ export default function Modal_Edicion_Proyecto({
     setRemoveVideos(true);
   };
 
+  const editorInstance = useRef<EditorJS | null>(null);
+
+  const saveEditorThenHandleEdit = async (e: React.MouseEvent) => {
+    if (editorInstance.current) {
+      try {
+        const saved = await editorInstance.current.save();
+        const savedJson = JSON.stringify(saved);
+        const savedHtml = blocksToHtml(saved);
+        
+        setEditData((prev) => ({ ...(prev as any), contenido: savedJson, contenido_html: savedHtml }));
+        await handleEdit(e, { contenido: savedJson, contenido_html: savedHtml });
+        return;
+      } catch (err) {
+        console.warn('No se pudo obtener contenido desde editor instance:', err);
+      }
+    }
+    
+    const fallbackContenido = (editData as any).descripcion ? String((editData as any).descripcion) : '';
+    const fallbackHtml = (editData as any).descripcion_html ? String((editData as any).descripcion_html) : '';
+    await handleEdit(e, { contenido: fallbackContenido, contenido_html: fallbackHtml });
+  };
+
   return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-md"
@@ -85,15 +111,20 @@ export default function Modal_Edicion_Proyecto({
           placeholder="Título del proyecto"
         />
 
-        {/* Descripción */}
-        <textarea
-          value={editData.descripcion || ""}
-          onChange={(e) =>
-            setEditData({ ...editData, descripcion: e.target.value })
-          }
-          className="border p-2 w-full mb-2 rounded min-h-[100px]"
-          placeholder="Descripción"
-        />
+        {/* Descripción (Editor) */}
+        <div className="mb-3">
+          <label className="block font-medium mb-1">Descripción:</label>
+          <EditorComponent
+            initialData={editData.descripcion || ""}
+            onChangeData={(d: OutputData) =>
+              setEditData({ ...editData, descripcion: JSON.stringify(d) })
+            }
+            onChangeHtml={(h: string) =>
+              setEditData((prev) => ({ ...(prev as any), descripcion_html: h }))
+            }
+            onReady={(ed) => (editorInstance.current = ed)}
+          />
+        </div>
 
         {/* Autores */}
         <div className="mb-3">
@@ -205,7 +236,7 @@ export default function Modal_Edicion_Proyecto({
             Cancelar
           </button>
           <button
-            onClick={handleEdit}
+            onClick={saveEditorThenHandleEdit}
             disabled={editing}
             className="px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50">
             {editing ? "Guardando..." : "Guardar"}

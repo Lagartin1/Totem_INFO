@@ -52,12 +52,14 @@ export async function setCookie(name: string, value: string, opts?: Partial<{
   maxAge: number; path: string; sameSite: 'lax'|'strict'|'none'; secure: boolean; httpOnly: boolean;
 }>) {
   const jar = await cookies();
+  const isProd = process.env.NODE_ENV === 'production';
+  
   jar.set({
     name,
     value,
     httpOnly: opts?.httpOnly ?? true,
-    secure: opts?.secure ?? (process.env.NODE_ENV === 'production'),
-    sameSite: opts?.sameSite ?? 'lax',
+    secure: opts?.secure ?? !isProd, // En desarrollo también true para sameSite=none
+    sameSite: opts?.sameSite ?? 'none',
     path: opts?.path ?? '/',
     maxAge: opts?.maxAge ?? undefined
   });
@@ -89,8 +91,8 @@ export async function setCsrfCookies(token: string) {
     name: CSRF_COOKIE_HTTPONLY,
     value: token,
     httpOnly: true,
-    secure: isProd,
-    sameSite: 'lax',
+    secure: !isProd, // true en desarrollo para sameSite=none
+    sameSite: 'none',
     path: '/',
     maxAge: 60 * 15, // 15 minutos
   });
@@ -100,8 +102,8 @@ export async function setCsrfCookies(token: string) {
     name: CSRF_COOKIE_PUBLIC,
     value: token,
     httpOnly: false, // ← SIN HttpOnly
-    secure: isProd,
-    sameSite: 'lax',
+    secure: !isProd, // true en desarrollo para sameSite=none
+    sameSite: 'none',
     path: '/',
     maxAge: 60 * 15,
   });

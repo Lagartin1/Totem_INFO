@@ -1,8 +1,5 @@
 import {listBecados,BuscarBecados,createBecadoService,DeleteBecadoService,PutBecadoService,} from "@/services/becados/becadosService";
 
-// Importamos los tipos y funciones correctas del nuevo modelo
-import { BecadosResult, GetBecados } from "@/models/becados/becadosModel"; 
-
 export async function fetchBecados(searchTerm: string | false, indice: number = 0) {
   try {
     if (searchTerm) {
@@ -10,7 +7,7 @@ export async function fetchBecados(searchTerm: string | false, indice: number = 
       return await BuscarBecados(searchTerm, indice);
     } else {
       // Si no, listamos normal usando el servicio
-      return await GetBecados(indice);
+      return await listBecados(indice);
     }
   } catch (error) {
     console.error("Error en el controlador fetchBecados:", error);
@@ -32,7 +29,7 @@ export async function createBecadoController(formData: FormData, userID: string)
 
 export async function GetBecadosController() {
   // Usamos GetBecados del modelo refactorizado
-  const becadosData = await GetBecados(); 
+  const becadosData = await listBecados(); 
   if (!becadosData) {
     throw new Error("No se pudieron obtener los becados");
   }

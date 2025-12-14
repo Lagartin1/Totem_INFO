@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { useAuth } from "../lib/authProvider";
 import { useNavigate } from "react-router-dom";
 import Loader from "../components/Loader";
@@ -14,6 +14,13 @@ export default function Home() {
   const [toast, setToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState<"success" | "error">("success");
+ 
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, navigate]);
+
 
   const makeToast = (message: string, type: "success" | "error") => {
     setToastMessage(message);

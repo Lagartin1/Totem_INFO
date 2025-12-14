@@ -3,7 +3,7 @@ import { PracticasResult, GetPracticasByID, incrementPracticasVisits, SearchTerm
 import { listPracticas, insertNewPractica, insertCsvPracticas, csvToJson, CleanArray, validatePracticaData, deletePractica, togglePracticaState,GetAvailablePracticaYears } from "@/services/practicas/practicasService";
 import { addLogEntry } from "@/models/admin/logModel";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 6;
 
 export async function fetchPracticas(
   year: string | false,

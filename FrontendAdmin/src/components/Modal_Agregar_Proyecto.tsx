@@ -1,4 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
+import type { OutputData } from '@editorjs/editorjs';
+import EditorComponent from "./Editor";
+import { blocksToHtml } from "../lib/renderEditorContent";
+import type EditorJS from '@editorjs/editorjs';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
@@ -16,6 +20,9 @@ export default function Modal_Agregar_Proyecto({
 
   const baseUrl = BUILD_MODE ? API_BASE_URL : "http://localhost:3000";
   const [autores, setAutores] = useState<string[]>([""]);
+  const [editorData, setEditorData] = useState<OutputData | null>(null);
+  const [editorHtml, setEditorHtml] = useState<string>("");
+  const editorInstance = useRef<EditorJS | null>(null);
 
   const handleAddAutor = () => setAutores([...autores, ""]);
   const handleChangeAutor = (index: number, value: string) => {
@@ -27,6 +34,30 @@ export default function Modal_Agregar_Proyecto({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+
+    // Obtener contenido reciente desde la instancia si existe
+    if (editorInstance.current) {
+      try {
+        const saved = await editorInstance.current.save();
+        formData.set('descripcion', JSON.stringify(saved));
+        formData.set('descripcion_html', blocksToHtml(saved));
+      } catch (err) {
+        console.warn('No se pudo obtener contenido desde editor instance:', err);
+        if (editorData) {
+          formData.set('descripcion', JSON.stringify(editorData));
+        } else if (editorHtml) {
+          formData.set('descripcion', editorHtml);
+        }
+        if (editorHtml) formData.set('descripcion_html', editorHtml);
+      }
+    } else {
+      if (editorData) {
+        formData.set('descripcion', JSON.stringify(editorData));
+      } else if (editorHtml) {
+        formData.set('descripcion', editorHtml);
+      }
+      if (editorHtml) formData.set('descripcion_html', editorHtml);
+    }
 
     autores.forEach((autor) => {
       if (autor.trim() !== "") formData.append("autor", autor);
@@ -100,12 +131,15 @@ export default function Modal_Agregar_Proyecto({
             required
           />
 
-          <textarea
-            name="descripcion"
-            placeholder="Descripción"
-            className="border p-2 rounded"
-            required
-          />
+          <div>
+            <label className="block font-medium mb-1">Descripción:</label>
+            <EditorComponent
+              initialData={undefined}
+              onChangeData={(d: OutputData) => setEditorData(d)}
+              onChangeHtml={(h: string) => setEditorHtml(h)}
+              onReady={(ed) => (editorInstance.current = ed)}
+            />
+          </div>
 
           <label className="text-sm text-gray-600">Autores</label>
           {autores.map((autor, index) => (

@@ -73,10 +73,29 @@ export async function createProyectoService(formData: FormData, autorId: string)
         const correo_contacto = (formData.get("correo_contacto") as string) || "";
         const area_desarrollo = (formData.get("area_desarrollo") as string) || "general";
         const videosRaw = formData.getAll("videos") as (string | File)[];
+        const portadaRaw = formData.get("portada") as File | string | null;
+        const imagenesRaw = formData.getAll("imagenes") as (string | File)[];
         const fecha_publicacion = new Date();
 
         let videoUrls: string[] = [];
+        let portadaUrl: string | undefined = undefined;
+        let imagenesUrls: string[] = [];
 
+        // Procesar portada
+        if (portadaRaw) {
+            if (portadaRaw instanceof File && portadaRaw.size > 0) {
+                const bytes = await portadaRaw.arrayBuffer();
+                const buffer = Buffer.from(bytes);
+                const fileName = `${randomUUID()}_${portadaRaw.name}`;
+                const filePath = path.join(process.cwd(), "public", "uploads", fileName);
+                await writeFile(filePath, buffer);
+                portadaUrl = `/uploads/${fileName}`;
+            } else if (typeof portadaRaw === "string" && portadaRaw.startsWith("http")) {
+                portadaUrl = portadaRaw;
+            }
+        }
+
+        // Procesar videos
         for (const video of videosRaw) {
             if (video instanceof File && video.size > 0) {
                 const bytes = await video.arrayBuffer();
@@ -90,6 +109,20 @@ export async function createProyectoService(formData: FormData, autorId: string)
             }
         }
 
+        // Procesar imágenes
+        for (const imagen of imagenesRaw) {
+            if (imagen instanceof File && imagen.size > 0) {
+                const bytes = await imagen.arrayBuffer();
+                const buffer = Buffer.from(bytes);
+                const fileName = `${randomUUID()}_${imagen.name}`;
+                const filePath = path.join(process.cwd(), "public", "uploads", fileName);
+                await writeFile(filePath, buffer);
+                imagenesUrls.push(`/uploads/${fileName}`);
+            } else if (typeof imagen === "string" && imagen.startsWith("http")) {
+                imagenesUrls.push(imagen);
+            }
+        }
+
         // Llamamos a la función de creación de Prisma con datos limpios
         const nuevoProyecto = await CreateProyecto({
             titulo,
@@ -100,6 +133,8 @@ export async function createProyectoService(formData: FormData, autorId: string)
             correo_contacto,
             area_desarrollo,
             videos: videoUrls,
+            portada: portadaUrl,
+            imagenes: imagenesUrls,
             autorId // Campo requerido por Prisma
         });
 
@@ -157,11 +192,13 @@ export async function PutProyectosService(id: string, formData: FormData): Promi
     if (!hasData) throw new Error("No se recibieron datos para actualizar");
 
     try {
-        // 1. Obtener proyecto actual para gestionar videos
+        // 1. Obtener proyecto actual para gestionar archivos
         const proyectoActual = await GetProyectoByID(id);
         if (!proyectoActual) throw new Error("Proyecto no encontrado");
 
         let videoUrls: string[] = proyectoActual.videos || [];
+        let portadaUrl: string | undefined = proyectoActual.portada;
+        let imagenesUrls: string[] = proyectoActual.imagenes || [];
 
         // 2. Eliminar videos existentes si se indica
         if (formData.get("eliminarVideos") === "true") {
@@ -174,7 +211,42 @@ export async function PutProyectosService(id: string, formData: FormData): Promi
             videoUrls = [];
         }
 
-        // 3. Subir/añadir nuevos videos
+        // 3. Eliminar portada existente si se indica
+        if (formData.get("eliminarPortada") === "true") {
+            if (portadaUrl && portadaUrl.startsWith('/uploads/')) {
+                const oldPath = path.join(process.cwd(), "public", portadaUrl);
+                await unlink(oldPath).catch(() => {});
+            }
+            portadaUrl = undefined;
+        }
+
+        // 4. Eliminar imágenes existentes si se indica
+        if (formData.get("eliminarImagenes") === "true") {
+            for (const url of imagenesUrls) {
+                if (url.startsWith('/uploads/')) {
+                    const oldPath = path.join(process.cwd(), "public", url);
+                    await unlink(oldPath).catch(() => {});
+                }
+            }
+            imagenesUrls = [];
+        }
+
+        // 5. Subir/añadir nueva portada
+        const nuevaPortada = formData.get("portada") as File | string | null;
+        if (nuevaPortada) {
+            if (nuevaPortada instanceof File && nuevaPortada.size > 0) {
+                const bytes = await nuevaPortada.arrayBuffer();
+                const buffer = Buffer.from(bytes);
+                const fileName = `${randomUUID()}_${nuevaPortada.name}`;
+                const filePath = path.join(process.cwd(), "public", "uploads", fileName);
+                await writeFile(filePath, buffer);
+                portadaUrl = `/uploads/${fileName}`;
+            } else if (typeof nuevaPortada === "string" && nuevaPortada.startsWith("http")) {
+                portadaUrl = nuevaPortada;
+            }
+        }
+
+        // 6. Subir/añadir nuevos videos
         const nuevosVideos = formData.getAll("videos") as (string | File)[];
         for (const video of nuevosVideos) {
             if (video instanceof File && video.size > 0) {
@@ -189,10 +261,29 @@ export async function PutProyectosService(id: string, formData: FormData): Promi
             }
         }
 
-        // 4. Construir objeto de actualización
+        // 7. Subir/añadir nuevas imágenes
+        const nuevasImagenes = formData.getAll("imagenes") as (string | File)[];
+        for (const imagen of nuevasImagenes) {
+            if (imagen instanceof File && imagen.size > 0) {
+                const bytes = await imagen.arrayBuffer();
+                const buffer = Buffer.from(bytes);
+                const fileName = `${randomUUID()}_${imagen.name}`;
+                const filePath = path.join(process.cwd(), "public", "uploads", fileName);
+                await writeFile(filePath, buffer);
+                imagenesUrls.push(`/uploads/${fileName}`);
+            } else if (typeof imagen === "string" && imagen.startsWith("http")) {
+                imagenesUrls.push(imagen);
+            }
+        }
+
+        // 8. Construir objeto de actualización
         // Nota: usamos 'any' para autores aquí para evitar conflictos de tipo con la definición de Proyecto
         // (por ejemplo si Proyecto declara un tipo incompatible como 'string & string[]').
-        const updateDoc: Partial<Proyecto> & { videos: string[], autores?: any } = { videos: videoUrls };
+        const updateDoc: Partial<Proyecto> & { videos: string[], imagenes: string[], autores?: any } = { 
+            videos: videoUrls,
+            imagenes: imagenesUrls,
+            portada: portadaUrl
+        };
 
         // Mapeo de campos simples
         ["titulo", "descripcion", "correo_contacto", "telefono_contacto", "area_desarrollo"].forEach((key) => {
@@ -208,8 +299,7 @@ export async function PutProyectosService(id: string, formData: FormData): Promi
             updateDoc.autores = autoresForm;
         }
 
-
-        // 5. Llamar a la función de actualización de Prisma
+        // 9. Llamar a la función de actualización de Prisma
         const result = await UpdateProyecto(id, updateDoc);
         return result;
 

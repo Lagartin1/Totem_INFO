@@ -22,10 +22,12 @@ export async function CreateNewPractica(
   data: any,
   userId: string
 ): Promise<PracticasResult> {
+  const state: boolean = true; // Asumimos que la práctica nueva está activa
   const practica = await mongoClient.practica.create({
     data: {
       ...data,
       visitas: 0, // Asumimos que inicializa en 0
+      state: state,
       autorId: new ObjectId(userId).toString(),
     },
   });
@@ -39,11 +41,13 @@ export async function CreateNewPractica(
 export async function CreateBulkPracticas(
   dataArray: any[], userID: string
 ): Promise<PracticaCSV> {
+  const state: boolean = true; // Asumimos que todas las prácticas nuevas están activas
   const creationPromises = dataArray.map((data) =>
     mongoClient.practica.create({
       data: {
         ...data,
         visitas: 0,
+        state: state,
         autorId: userID,
       },
     })

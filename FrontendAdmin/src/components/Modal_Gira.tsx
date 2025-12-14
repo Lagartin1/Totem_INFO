@@ -1,5 +1,6 @@
 import type { Gira } from "../types/index";
 import { createPortal } from "react-dom";
+import EditorViewer from "./EditorViewer";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
@@ -43,7 +44,12 @@ export default function Modal_Gira({
               {gira.descripcion && (
                 <div>
                   <span className="font-semibold">Descripción:</span>
-                  <p className="mt-1">{gira.descripcion}</p>
+                  <div className="mt-1 text-gray-700">
+                    <EditorViewer
+                      initialData={(gira as any).descripcion_html ? (gira as any).descripcion_html : (gira.descripcion || '')}
+                      className="prose mt-1 text-gray-700"
+                    />
+                  </div>
                 </div>
               )}
               {gira.lugares && gira.lugares.length > 0 && (

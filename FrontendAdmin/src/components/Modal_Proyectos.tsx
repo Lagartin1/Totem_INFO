@@ -1,5 +1,6 @@
 import type { Proyecto } from "../types/index";
 import { createPortal } from "react-dom";
+import EditorViewer from "./EditorViewer";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
@@ -75,7 +76,12 @@ export default function Modal_Proyectos({
           <div>
             <span className="font-semibold">Descripción:</span>
             {proyecto.descripcion && (
-              <p className="mt-1">{proyecto.descripcion}</p>
+              <div className="mt-1 text-gray-700">
+                <EditorViewer
+                  initialData={(proyecto as any).descripcion_html ? (proyecto as any).descripcion_html : (proyecto.descripcion || '')}
+                  className="prose mt-1 text-gray-700"
+                />
+              </div>
             )}
           </div>
         </div>

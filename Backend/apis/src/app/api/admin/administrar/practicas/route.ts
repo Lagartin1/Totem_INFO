@@ -5,12 +5,8 @@ import { getUserIdFromSessionToken, verifyAccessToken } from '@/lib/auth/login_t
 
 export async function DELETE(req: NextRequest) {
   try{
+    // El middleware ya verificó el access_token
     const jar = await cookies();
-    const token = jar.get('access_token')?.value;
-    if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    if (!(await verifyAccessToken(token))) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
     const refreshToken = jar.get('refresh_token')?.value;
     const userID = await getUserIdFromSessionToken(refreshToken || '');
     if (!userID) {

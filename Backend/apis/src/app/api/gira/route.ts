@@ -31,16 +31,9 @@ export async function GET(request: NextRequest) {
 // ✅ POST: Crear una nueva gira
 export async function POST(req: NextRequest) {
   try {
+    // El middleware ya verificó el access_token
     const jar = await cookies();
-    const token = jar.get("access_token")?.value;
     const sessionToken = jar.get("refresh_token")?.value;
-
-    // 1. Verificación de Auth
-    if (!token || !(await verifyAccessToken(token))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // 2. Obtener User ID (String para MongoDB/Prisma)
     const userId = await getUserIdFromSessionToken(sessionToken || "");
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

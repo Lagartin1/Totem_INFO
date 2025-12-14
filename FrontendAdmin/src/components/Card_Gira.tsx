@@ -79,20 +79,35 @@ export default function Card_Gira({ gira, onDelete, onAdded }: CardGiraProps) {
     }
   };
 
-  const handleEdit = async (e: React.MouseEvent) => {
+  const handleEdit = async (e: React.MouseEvent, overrides?: Record<string, string>) => {
     e.stopPropagation();
     if (!confirm("¿Deseas guardar los cambios?")) return;
 
     try {
       setEditing(true);
       const formData = new FormData();
+      
 
       ["titulo", "descripcion", "anio"].forEach((key) => {
-        const value = editData[key as keyof Gira];
+        const overrideVal = overrides && overrides[key];
+        const value = overrideVal !== undefined ? overrideVal : editData[key as keyof Gira];
         if (typeof value === "string" && value.trim() !== "") {
           formData.append(key, value);
         }
       });
+
+      // Añadir log de FormData
+      try {
+        Array.from(formData.entries());
+      } catch (err) {
+      }
+
+      // Añadir descripción HTML si llegó como override
+      if (overrides && overrides.descripcion_html) {
+        formData.append('descripcion_html', overrides.descripcion_html);
+      } else if ((editData as any).descripcion_html) {
+        formData.append('descripcion_html', (editData as any).descripcion_html as string);
+      }
 
       // Lugares
       if (Array.isArray(editData.lugares) && editData.lugares.length > 0) {

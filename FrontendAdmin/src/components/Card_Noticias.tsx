@@ -2,6 +2,7 @@ import { useState } from "react";
 import NoticiaModal from "./Modal_Noticias";
 import EdicionModal from "./Modal_Edicion_Noticias";
 import type { Noticia } from "../types/index";
+import renderEditorContent from "../lib/renderEditorContent";
 
 interface NoticiaCardProps {
   noticia: Noticia;
@@ -89,18 +90,40 @@ export default function NoticiaCard({
   };
 
   // Función para editar una noticia
-  const handleEdit = async (e: React.MouseEvent) => {
+  // acepta overrides para campos que vienen directamente del editor (por ejemplo contenido)
+  const handleEdit = async (e: React.MouseEvent, overrides?: Record<string, string>) => {
     e.stopPropagation();
     if (!confirm("¿Deseas guardar los cambios?")) return;
 
     try {
       setEditing(true);
       const formData = new FormData();
+      
 
       ["titulo", "descripcion", "contenido", "autor"].forEach((key) => {
-        const value = editData[key as keyof Noticia];
-        if (value !== undefined) formData.append(key, value);
+        const overrideVal = overrides && overrides[key];
+        const value = overrideVal !== undefined ? overrideVal : editData[key as keyof Noticia];
+        if (value !== undefined && value !== null) {
+          if (typeof value === 'string') {
+            if (value.trim() !== '') formData.append(key, value as any);
+          } else {
+            formData.append(key, value as any);
+          }
+        }
       });
+
+      // log FormData entries for debugging
+      try {
+        Array.from(formData.entries());
+      } catch (err) {
+      }
+
+      // Si el editor pasó HTML separado, también anexarlo
+      if (overrides && overrides.contenido_html) {
+        formData.append('contenido_html', overrides.contenido_html);
+      } else if ((editData as any).contenido_html) {
+        formData.append('contenido_html', (editData as any).contenido_html as string);
+      }
 
       if (selectedFile) formData.append("imagen", selectedFile);
 
@@ -131,6 +154,7 @@ export default function NoticiaCard({
                 }
               );
               if (!retryRes.ok) {
+                console.error("Error al actualizar noticia después de refrescar token:", retryRes);
                 throw new Error(
                   "Error al actualizar noticia después de refrescar token"
                 );
@@ -189,6 +213,15 @@ export default function NoticiaCard({
 
         <div className="p-4">
           <h3 className="font-semibold text-lg">{noticia.titulo}</h3>
+          <div
+            className="mt-2 text-sm text-gray-600 max-h-24 overflow-hidden"
+            // mostrar preview formateado (no editable)
+            dangerouslySetInnerHTML={{
+              __html: (noticia as any).contenido_html
+                ? (noticia as any).contenido_html
+                : renderEditorContent(noticia.contenido),
+            }}
+          />
         </div>
         <button
           onClick={(e) => {
@@ -213,6 +246,7 @@ export default function NoticiaCard({
       />
 
       <EdicionModal
+        key={noticia.id}
         isOpen={editOpen}
         onClose={() => setEditOpen(false)}
         editData={editData}

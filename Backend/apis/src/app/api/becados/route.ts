@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = request.nextUrl;
     const searchTerm = searchParams.get("search");
     const pagina = parseInt(searchParams.get("pagina") || "1");
-    const indice = (pagina - 1) * 10; // 10 items por página
+    const indice = (pagina - 1) * 6; // 6 items por página
     
     const response = await fetchBecados(searchTerm || false, indice);
 
@@ -27,15 +27,9 @@ export async function GET(request: NextRequest) {
 // --- POST: Crear un Becado ---
 export async function POST(req: NextRequest) {
   try {
-    // 1. Verificación de Sesión y Auth
+    // El middleware ya verificó el access_token
     const jar = await cookies();
-    const token = jar.get("access_token")?.value;
     const sessionToken = jar.get("refresh_token")?.value;
-
-    if (!token || !(await verifyAccessToken(token))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const userId = await getUserIdFromSessionToken(sessionToken || "");
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

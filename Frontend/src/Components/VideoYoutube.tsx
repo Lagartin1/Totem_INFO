@@ -36,6 +36,9 @@ export default function YouTubePlayer({
   const [seeking, setSeeking] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [retryCount, setRetryCount] = useState(0);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Cargar YouTube IFrame API
   useEffect(() => {
@@ -66,69 +69,152 @@ export default function YouTubePlayer({
 
   // Inicializar reproductor
   useEffect(() => {
-    if (!apiReady || !videoId || playerRef.current) return;
+    if (!apiReady || !videoId) return;
+    
+    // Limpiar reproductor anterior si existe
+    if (playerRef.current) {
+      try {
+        playerRef.current.destroy();
+      } catch (error) {
+        console.warn('Error al destruir reproductor anterior:', error);
+      }
+      playerRef.current = null;
+    }
 
     const initializePlayer = () => {
-      playerRef.current = new window.YT.Player('youtube-player', {
-        host: 'https://www.youtube-nocookie.com',
-        videoId: videoId,
-        playerVars: {
-          rel: 0,
-          modestbranding: 1,
-          iv_load_policy: 3,
-          disablekb: 1,
-          autoplay: 0,
-          controls: 0,
-          fs:0,
-          playsinline: 1,
-          fullscreen: 0,
-          enablejsapi: 1,
-        },
-        events: {
-          onReady: (event: any) => {
-            setPlayer(event.target);
-            setDuration(event.target.getDuration());
-            trackTime();
-            setLoading(false);
+      try {
+        // Crear un ID único para cada instancia del reproductor
+        const playerId = `youtube-player-${Date.now()}`;
+        const existingPlayer = document.getElementById('youtube-player');
+        if (existingPlayer) {
+          existingPlayer.id = playerId;
+        }
+
+        playerRef.current = new window.YT.Player(playerId || 'youtube-player', {
+          host: 'https://www.youtube-nocookie.com',
+          videoId: videoId,
+          playerVars: {
+            rel: 0,
+            modestbranding: 1,
+            iv_load_policy: 3,
+            disablekb: 1,
+            autoplay: 0,
+            controls: 0,
+            fs: 0,
+            playsinline: 1,
+            fullscreen: 0,
+            enablejsapi: 1,
+            origin: window.location.origin,
+            widget_referrer: window.location.origin,
+            cc_load_policy: 0,
+            hl: 'es',
+            showinfo: 0,
+            end: 1,
+            loop: 1
           },
-          onStateChange: (event: any) => {
-            const state = event.data;                      
-            if (state === 2) {
-              setStatePlayer('paused');
-              setIsPaused(true);
-            } else if (state === 1) {
-              setStatePlayer('playing');
-              setIsPaused(false);
-            } else if (state === 0) {
-              setStatePlayer('ended');
-              setIsPaused(false);
-              event.target.stopVideo();
-            } else if (state === -1) {
-              setIsPaused(false);
-            } else if (state === 5) {
-              setStatePlayer('ended');
-              setIsPaused(true);
-            }else{
-              setIsPaused(false);
+          events: {
+            onReady: (event: any) => {
+              console.log('Reproductor de YouTube listo para:', videoId);
+              setPlayer(event.target);
+              setDuration(event.target.getDuration());
+              setIsInitialized(true);
+              setIsError(false);
+              setErrorMessage('');
+              setRetryCount(0);
+              trackTime();
+              setLoading(false);
+            },
+            onStateChange: (event: any) => {
+              const state = event.data;                      
+              if (state === 2) {
+                setStatePlayer('paused');
+                setIsPaused(true);
+              } else if (state === 1) {
+                setStatePlayer('playing');
+                setIsPaused(false);
+              } else if (state === 0) {
+                setStatePlayer('ended');
+                setIsPaused(false);
+                event.target.stopVideo();
+              } else if (state === -1) {
+                setIsPaused(false);
+              } else if (state === 5) {
+                setStatePlayer('ended');
+                setIsPaused(true);
+              } else {
+                setIsPaused(false);
+              }
+            },
+            onError:(event: any)=>{
+              console.error('Error del reproductor de YouTube:', event.data);
+              let errorMsg = 'Error desconocido al cargar el video';
+              
+              switch(event.data) {
+                case 2:
+                  errorMsg = 'El ID del video es inválido';
+                  break;
+                case 5:
+                  errorMsg = 'El video no está disponible en HTML5';
+                  break;
+                case 100:
+                  errorMsg = 'Video no encontrado o privado';
+                  break;
+                case 101:
+                case 150:
+                  errorMsg = 'Video restringido o no disponible para reproducción embebida';
+                  break;
+                default:
+                  errorMsg = 'Error al cargar el video de YouTube';
+              }
+              
+              setErrorMessage(errorMsg);
+              setIsError(true);
+              setLoading(false);
+              
+              // Intentar reinicializar si no se ha superado el límite de reintentos
+              if (retryCount < 2) {
+                console.log(`Reintentando cargar video... Intento ${retryCount + 1}/2`);
+                setTimeout(() => {
+                  setRetryCount(prev => prev + 1);
+                  setIsError(false);
+                  initializePlayer();
+                }, 2000);
+              }
             }
-          },onError:()=>{
-            setIsError(true);
-            setLoading(false)
-          }
-        },  
+          },  
+        });
+      } catch (error) {
+        console.error('Error al inicializar reproductor de YouTube:', error);
+        setErrorMessage('Error al inicializar el reproductor');
+        setIsError(true);
+        setLoading(false);
       }
-      );
     };
 
-    initializePlayer();
-  }, [apiReady, videoId]);
+    // Pequeño delay para asegurar que el DOM esté listo
+    const timeoutId = setTimeout(() => {
+      initializePlayer();
+    }, 100);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [apiReady, videoId, retryCount]);
   
   // Cambiar video cuando videoId cambia
   useEffect(() => {
-    if (playerRef.current && videoId) {
-      playerRef.current.loadVideoById(videoId);
+    if (playerRef.current && videoId && isInitialized) {
+      try {
+        playerRef.current.loadVideoById(videoId);
+        setIsError(false);
+        setErrorMessage('');
+      } catch (error) {
+        console.error('Error al cargar nuevo video:', error);
+        setErrorMessage('Error al cambiar video');
+        setIsError(true);
+      }
     }
-  }, [videoId]);
+  }, [videoId, isInitialized]);
 
   const trackTime = () => {
     if (intervalRef.current) {
@@ -207,6 +293,20 @@ export default function YouTubePlayer({
     
     if (isPaused && player) {
       player.playVideo();
+    }
+  }, [isPaused, player]);
+
+  // Manejar clics en toda el área del video para pausar/reproducir
+  const handleVideoClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!player) return;
+    
+    if (isPaused) {
+      player.playVideo();
+    } else {
+      player.pauseVideo();
     }
   }, [isPaused, player]);
 
@@ -312,33 +412,73 @@ export default function YouTubePlayer({
           className="absolute top-0 left-0 w-full h-full"
         />
         
+        {/* Overlay clickeable para pausar/reproducir */}
+        <div 
+          className="absolute inset-0 z-10 cursor-pointer"
+          onClick={handleVideoClick}
+        />
+        
+        {/* Overlay para bloquear sugerencias de "Más videos" */}
+        <div 
+          className="absolute bottom-0 right-0 w-full h-24 z-25 pointer-events-none"
+        />
+        
         {/* Overlays transparentes para bloquear áreas no deseadas */}
         
         {/* Logo YouTube / título del video (overlay) - ocultable en modo `clean` */}
         {!clean && (
-          <div 
-            className="absolute top-0 right-0 w-full h-16 z-20 cursor-not-allowed"
-            onClick={handleBlockedClick}
-          />
+          <>
+            <div 
+              className="absolute top-0 right-0 w-full h-16 z-30 cursor-not-allowed"
+              onClick={handleBlockedClick}
+            />
+            {/* Overlay adicional para cubrir área de sugerencias */}
+            <div 
+              className="absolute bottom-0 left-0 w-full h-20 z-30 pointer-events-none bg-transparent"
+            />
+          </>
         )}
         
         {/* Overlay Error */}
         <div 
-            className={`absolute inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-10 cursor-pointer   ${isError ? "block" : "hidden"}`}
+            className={`absolute inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-40 cursor-pointer   ${isError ? "block" : "hidden"}`}
           >
-            <div className="bg-white/90 rounded-lg p-6 flex flex-col items-center justify-center">  
-              <h2 className="text-2xl font-bold mb-4 text-red-600">Error al cargar el video</h2>
-              <p className="text-center mb-4">Lo sentimos, ha ocurrido un error al reproducir este video de YouTube. Por favor, reintente más tarde o utilize el codigo Qr propocionado para visualizar el contenido.</p>
+            <div className="bg-white/90 rounded-lg p-6 flex flex-col items-center justify-center max-w-md mx-4">  
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-16 h-16 text-red-600 mb-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+              </svg>
+              <h2 className="text-2xl font-bold mb-2 text-red-600">Error al cargar el video</h2>
+              <p className="text-center mb-4 text-gray-700">
+                {errorMessage || 'Lo sentimos, ha ocurrido un error al reproducir este video de YouTube.'}
+              </p>
+              {videoId && (
+                <div className="space-y-3 w-full">
+                  {retryCount < 2 && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setRetryCount(prev => prev + 1);
+                        setIsError(false);
+                        setErrorMessage('');
+                      }}
+                      className="inline-flex items-center justify-center w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 mr-2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                      </svg>
+                      Reintentar
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
         </div>
 
 
 
         {/* OVERLAY blur con boton play */}
-
-        
           <div 
-            className={`absolute inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-10 cursor-pointer   ${isPaused ? "block" : "hidden"}`}
+            className={`absolute inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-20 cursor-pointer   ${isPaused ? "block" : "hidden"}`}
             onClick={handleBlockedClick}
           >
             <button className="bg-white/30 hover:bg-white/50 text-white rounded-full p-4">
@@ -349,7 +489,7 @@ export default function YouTubePlayer({
           </div>
 
         {/* OVERLAY con actions de los botones */}
-        <div className={`absolute inset-0 bg-transparent flex items-center justify-center z-10 cursor-pointer   ${!action ? "hidden" : "block"}`}> 
+        <div className={`absolute inset-0 bg-transparent flex items-center justify-center z-30 cursor-pointer   ${!action ? "hidden" : "block"}`}> 
           
           { action === '5-' && (
             <div className="bg-black/20 rounded-full p-6 flex gap-2 items-center justify-center">

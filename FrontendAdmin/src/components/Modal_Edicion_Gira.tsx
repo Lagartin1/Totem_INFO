@@ -1,6 +1,9 @@
-import React from "react";
+import React, { useRef } from "react";
 import type { Gira } from "../types/index";
 import { createPortal } from "react-dom";
+import EditorComponent from "./Editor";
+import { blocksToHtml } from "../lib/renderEditorContent";
+import type EditorJS from '@editorjs/editorjs';
 
 interface EdicionModalProps {
   isOpen: boolean;
@@ -19,7 +22,7 @@ interface EdicionModalProps {
   setRemoveImagenes: React.Dispatch<React.SetStateAction<boolean>>;
   removePortada: boolean;
   setRemovePortada: React.Dispatch<React.SetStateAction<boolean>>;
-  handleEdit: (e: React.MouseEvent) => Promise<void>;
+  handleEdit: (e: React.MouseEvent, overrides?: Record<string, string>) => Promise<void>;
   editing: boolean;
 }
 
@@ -46,6 +49,35 @@ export default function Modal_Edicion_Gira({
   if (!open) return null;
 
   const baseUrl = import.meta.env.VITE_BUILD_MODE ? import.meta.env.VITE_API_BASE_URL : "http://localhost:3000";
+
+  const editorInstance = useRef<EditorJS | null>(null);
+
+  const saveEditorThenHandleEdit = async (e: React.MouseEvent) => {
+    // Esperar un poco a que la instancia del editor esté disponible
+    let attempts = 0;
+    while (!editorInstance.current && attempts < 10) {
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise((res) => setTimeout(res, 50));
+      attempts += 1;
+    }
+
+    if (editorInstance.current) {
+      try {
+        const saved = await editorInstance.current.save();
+        const savedJson = JSON.stringify(saved);
+        const savedHtml = blocksToHtml(saved);
+        setEditData((prev) => ({ ...(prev as any), contenido: savedJson, contenido_html: savedHtml }));
+        await handleEdit(e, { contenido: savedJson, contenido_html: savedHtml });
+        return;
+      } catch (err) {
+        console.warn('No se pudo obtener contenido desde editor instance:', err);
+      }
+    }
+    
+    const fallbackContenido = (editData as any).descripcion ? String((editData as any).descripcion) : '';
+    const fallbackHtml = (editData as any).descripcion_html ? String((editData as any).descripcion_html) : '';
+    await handleEdit(e, { contenido: fallbackContenido, contenido_html: fallbackHtml });
+  };
 
   // Manejo de videos
   const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,14 +140,15 @@ export default function Modal_Edicion_Gira({
         />
 
         {/* Descripción */}
-        <textarea
-          value={editData.descripcion || ""}
-          onChange={(e) =>
-            setEditData({ ...editData, descripcion: e.target.value })
-          }
-          className="border p-2 w-full mb-2 rounded min-h-[100px]"
-          placeholder="Descripción"
-        />
+        <div className="mb-3">
+          <label className="block font-medium mb-1">Descripción:</label>
+          <EditorComponent
+            initialData={editData.descripcion || ""}
+            onChangeData={(d) => setEditData((prev) => ({ ...(prev as any), descripcion: JSON.stringify(d) }))}
+            onChangeHtml={(h) => setEditData((prev) => ({ ...(prev as any), descripcion_html: h }))}
+            onReady={(ed) => (editorInstance.current = ed)}
+          />
+        </div>
 
         {/* Año */}
         <input
@@ -264,7 +297,7 @@ export default function Modal_Edicion_Gira({
             Cancelar
           </button>
           <button
-            onClick={handleEdit}
+            onClick={saveEditorThenHandleEdit}
             disabled={editing}
             className="px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50">
             {editing ? "Guardando..." : "Guardar"}

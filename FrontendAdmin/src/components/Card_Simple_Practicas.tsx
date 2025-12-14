@@ -38,7 +38,7 @@ export default function cardPracticas({
       });
 
       if (response.status === 401) {
-        const refreshResponse = await fetch("/api/auth/refresh", {
+        const refreshResponse = await fetch("/api/admin/auth/refresh", {
           method: "POST",
           credentials: "include",
         });
@@ -91,7 +91,7 @@ export default function cardPracticas({
       });
 
       if (response.status === 401) {
-        const refreshResponse = await fetch("/api/auth/refresh", {
+        const refreshResponse = await fetch("/api/admin/auth/refresh", {
           method: "POST",
           credentials: "include",
         });
