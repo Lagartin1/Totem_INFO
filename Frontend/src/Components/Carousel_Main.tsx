@@ -6,11 +6,12 @@ const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
 
 interface CarouselMainProps {
   noticias: Noticia[];
+  onSelect?: (noticia: Noticia) => void;
 }
 
-export default function Carousel_Main({ noticias }: CarouselMainProps) {
+export default function Carousel_Main({ noticias, onSelect }: CarouselMainProps) {
   const [currentIndex, setCurrentIndex] = useState(2);
-  const [translateX, setTranslateX] = useState(-700);
+  const [translateX, setTranslateX] = useState(-730);
   const slideDistance = 615; // Píxeles que se mueve cada slide
 
   // Estados para drag/swipe
@@ -103,11 +104,9 @@ export default function Carousel_Main({ noticias }: CarouselMainProps) {
     setCurrentIndex((prev) => (prev === items.length - 1 ? 0 : prev + 1));
     setTranslateX((prev) => prev - slideDistance); // Mueve hacia la izquierda
     handleTransitionEndRight();
-    console.log("TranslateX:", translateX);
   };
 
   const handleTransitionEndRight = () => {
-    console.log("Transition ended at index:", currentIndex);
     // Si estamos en el ultimo
     if (currentIndex === items.length - 3) {
       // En clon del primero → saltar al primero real SIN animación
@@ -129,11 +128,9 @@ export default function Carousel_Main({ noticias }: CarouselMainProps) {
     setCurrentIndex((prev) => (prev === 0 ? items.length - 1 : prev - 1));
     setTranslateX((prev) => prev + slideDistance); // Mueve hacia la derecha
     handleTransitionEndLeft();
-    console.log("TranslateX:", translateX);
   };
 
   const handleTransitionEndLeft = () => {
-    console.log("Transition ended at index:", currentIndex);
     // Si estamos en el primer
     if (currentIndex === 2) {
       setEnableTransition(false);
@@ -175,9 +172,7 @@ export default function Carousel_Main({ noticias }: CarouselMainProps) {
 
       <div className="w-screen h-full overflow-hidden relative">
     
-        {/* Gradientes en los bordes para indicar deslizamiento */}
-        <div className="absolute left-0 top-0 w-20 h-full bg-gradient-to-r from-black/20 to-transparent z-20 pointer-events-none" />
-        <div className="absolute right-0 top-0 w-20 h-full bg-gradient-to-l from-black/20 to-transparent z-20 pointer-events-none" />
+        {/* Gradientes en los bordes eliminados */}
         
         <div className="relative w-full mx-auto">
           <div
@@ -205,7 +200,7 @@ export default function Carousel_Main({ noticias }: CarouselMainProps) {
                   key={index}
                   className={`${
                     isCenter ? "w-[900px] h-[500px]" : "w-[600px] h-80"
-                  } rounded-full relative overflow-hidden flex-shrink-0 transition-all duration-500`}
+                  } rounded-full relative overflow-hidden flex-shrink-0 transition-all duration-500 ${isCenter ? "cursor-pointer" : "cursor-default"}`}
                   style={{
                     backgroundImage: n.imagen
                       ? `url(${baseUrl}${n.imagen})`
@@ -213,7 +208,12 @@ export default function Carousel_Main({ noticias }: CarouselMainProps) {
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     backgroundColor: "#30e99cff",
-                  }}>
+                  }}
+                  onClick={() => {
+                    if (!onSelect) return;
+                    if (isCenter) onSelect(n);
+                  }}
+                >
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
                     <h2
                       className={`${
@@ -230,15 +230,15 @@ export default function Carousel_Main({ noticias }: CarouselMainProps) {
       </div>
 
       {/* Indicadores de slide mejorados */}
-      <div className="flex items-center gap-4 bg-black/30 backdrop-blur-sm rounded-full px-6 py-3">
+      <div className="flex items-center gap-4 bg-black/30 rounded-full px-6 py-3">
         <div className="flex space-x-3">
           {noticias.map((_, index) => (
             <button
               key={index}
               className={`transition-all duration-300 touch-manipulation active:scale-110 ${
                 getRealIndex() === index
-                  ? "w-8 h-4 bg-white rounded-full shadow-lg" 
-                  : "w-4 h-4 bg-white/50 hover:bg-white/70 rounded-full"
+                    ? "w-8 h-4 bg-white rounded-full" 
+                    : "w-4 h-4 bg-white/50 hover:bg-white/70 rounded-full"
               }`}
               onClick={() => {
                 // Calcular el índice real con offset para los clones

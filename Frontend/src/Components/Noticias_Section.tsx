@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import Card_Noticias from "./Card_Noticias";
 import type { Noticia } from "../types/index";
 import Carousel_Main from "../Components/Carousel_Main";
+import Modal_Noticias from "./Modal_Noticias";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
@@ -24,10 +25,9 @@ export default function Noticias_Section() {
       .finally(() => setLoading(false));
   }, []);
 
-    const onClick = (noticia: Noticia) => {
+    const handleSelectNoticia = (noticia: Noticia) => {
       setSelectedNoticia(noticia);
-      selectedNoticia && console.log("Noticia seleccionada:", selectedNoticia);
-    }
+    };
 
     return (
       <div className="p-6 mt-20">
@@ -45,9 +45,19 @@ export default function Noticias_Section() {
       )}
 
       {/* Carrusel de noticias */}
-        <Carousel_Main
-        noticias={noticias}
-        />
+        <div className="mt-15">
+          <Carousel_Main
+            noticias={noticias}
+            onSelect={handleSelectNoticia}
+          />
+        </div>
+
+      {/* Modal de noticia */}
+      <Modal_Noticias
+        isOpen={!!selectedNoticia}
+        onClose={() => setSelectedNoticia(null)}
+        noticia={selectedNoticia}
+      />
     </div>
   );
 }
