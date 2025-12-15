@@ -152,3 +152,6 @@ Docker/*.tar
 # Python evn
 
 Backend/synchronizer/venv*
+# Synchronizer secrets and state
+Backend/synchronizer/token.json
+Backend/synchronizer/.last_fetch.json

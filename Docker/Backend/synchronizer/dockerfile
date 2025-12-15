@@ -19,12 +19,22 @@ RUN apt-get update \
 # Copy requirements and install
 COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
-
-# Copy synchronizer source
-COPY . /app
-
-# Create a non-root user to run the process
+# Create a non-root user to run the process early so files can be owned correctly
 RUN useradd --create-home --shell /bin/bash syncuser || true
+
+# Copy synchronizer source and set ownership to the non-root user
+# The build context used by docker-compose is ../Backend/synchronizer so
+# this will include totem_keys.json when present.
+COPY --chown=syncuser:syncuser . /app
+
+# If the service account file exists, restrict its permissions
+RUN if [ -f /app/totem_keys.json ]; then chmod 600 /app/totem_keys.json || true; fi
+
+# Remove the local state file if present so the image does not embed it.
+# This keeps all other .json files (e.g. client_secret.json, token.json)
+# while excluding .last_fetch.json from the built image.
+RUN rm -f /app/.last_fetch.json || true
+
 USER syncuser
 
 # Default command: start the synchronizer script
