@@ -18,7 +18,7 @@ async function setAccessCookie(token: string) {
     value: token,
     httpOnly: true,
     secure: !isProd, // true en desarrollo para sameSite=none
-    sameSite: 'none',
+    sameSite: 'lax',
     path: '/',
     maxAge: ACCESS_TTL_SEC,
   });
@@ -31,7 +31,7 @@ async function setRefreshCookie(token: string) {
     value: token,
     httpOnly: true,
     secure: !isProd, // true en desarrollo para sameSite=none
-    sameSite: 'none',
+    sameSite: 'lax',
     path: '/',
     maxAge: REFRESH_TTL_SEC,
   });
