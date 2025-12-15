@@ -109,12 +109,14 @@ export default function EdicionModal({
         
         <div className="mb-4">
           <label className="block font-medium mb-1">Contenido:</label>
-          <EditorComponent
-            initialData={editData.contenido || ""}
-            onChangeData={handleEditorChange}
-            onChangeHtml={handleEditorHtmlChange}
-            onReady={(ed) => (editorInstance.current = ed)}
-          />
+          <div className="border p-2 rounded max-h-60 overflow-auto">
+            <EditorComponent
+              initialData={editData.contenido || ""}
+              onChangeData={handleEditorChange}
+              onChangeHtml={handleEditorHtmlChange}
+              onReady={(ed) => (editorInstance.current = ed)}
+            />
+          </div>
         </div>
 
         {/* Imagen */}

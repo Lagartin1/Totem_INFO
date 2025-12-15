@@ -142,12 +142,14 @@ export default function Modal_Edicion_Gira({
         {/* Descripción */}
         <div className="mb-3">
           <label className="block font-medium mb-1">Descripción:</label>
-          <EditorComponent
-            initialData={editData.descripcion || ""}
-            onChangeData={(d) => setEditData((prev) => ({ ...(prev as any), descripcion: JSON.stringify(d) }))}
-            onChangeHtml={(h) => setEditData((prev) => ({ ...(prev as any), descripcion_html: h }))}
-            onReady={(ed) => (editorInstance.current = ed)}
-          />
+          <div className="border p-2 rounded max-h-60 overflow-auto">
+            <EditorComponent
+              initialData={editData.descripcion || ""}
+              onChangeData={(d) => setEditData((prev) => ({ ...(prev as any), descripcion: JSON.stringify(d) }))}
+              onChangeHtml={(h) => setEditData((prev) => ({ ...(prev as any), descripcion_html: h }))}
+              onReady={(ed) => (editorInstance.current = ed)}
+            />
+          </div>
         </div>
 
         {/* Año */}

@@ -130,12 +130,14 @@ export default function Modal_Agregar_Gira({
 
           <div>
             <label className="block font-medium mb-1">Descripción:</label>
-            <EditorComponent
-              initialData={undefined}
-              onChangeData={(d: OutputData) => setEditorData(d)}
-              onChangeHtml={(h: string) => setEditorHtml(h)}
-              onReady={(ed) => (editorInstance.current = ed)}
-            />
+            <div className="border p-2 rounded max-h-60 overflow-auto">
+              <EditorComponent
+                initialData={undefined}
+                onChangeData={(d: OutputData) => setEditorData(d)}
+                onChangeHtml={(h: string) => setEditorHtml(h)}
+                onReady={(ed) => (editorInstance.current = ed)}
+              />
+            </div>
           </div>
 
           <input

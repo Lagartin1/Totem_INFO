@@ -1,5 +1,6 @@
 import { createPortal } from "react-dom";
 import type { Noticia } from "../types/index";
+import EditorViewer from "./EditorViewer";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const BUILD_MODE = import.meta.env.VITE_BUILD_MODE;
@@ -49,9 +50,9 @@ export default function Modal_Noticias({
           {new Date(noticia.fecha_publicacion).toLocaleDateString()}
         </p>
 
-        {/* Contenido */}
-        <div className="mt-4 text-gray-800 leading-relaxed">
-          {noticia.contenido}
+        {/* Contenido (renderizado como EditorJS en modo sólo lectura) */}
+        <div className="mt-2 text-lg text-gray-700 overflow-y-auto max-h-[60vh] pr-4">
+          <EditorViewer initialData={noticia.contenido || ''} />
         </div>
 
         {/* Botón de volver */}
