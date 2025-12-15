@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from "react";
-import Card_Noticias from "./Card_Noticias";
 import type { Noticia } from "../types/index";
 import Carousel_Main from "../Components/Carousel_Main";
 import Modal_Noticias from "./Modal_Noticias";
@@ -11,8 +10,6 @@ export default function Noticias_Section() {
   const [noticias, setNoticias] = useState<Noticia[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedNoticia, setSelectedNoticia] = useState<Noticia | null>(null);
-
-  const carouselRef = useRef<HTMLDivElement>(null);
 
   const baseUrl = BUILD_MODE ? API_BASE_URL : "http://localhost:3000";
 

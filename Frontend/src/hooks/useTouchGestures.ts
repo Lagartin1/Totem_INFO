@@ -9,6 +9,11 @@ interface UseTouchGesturesOptions {
   onLongPress?: () => void;
   swipeThreshold?: number;
   longPressDelay?: number;
+  /**
+   * Selectores CSS para elementos interactivos dentro del contenedor
+   * sobre los que NO se deben iniciar gestos de arrastre.
+   */
+  interactiveSelector?: string;
 }
 
 interface TouchGestureHandlers {
@@ -31,7 +36,8 @@ export const useTouchGestures = ({
   onTap,
   onLongPress,
   swipeThreshold = 50,
-  longPressDelay = 500
+  longPressDelay = 500,
+  interactiveSelector = 'video, iframe, audio, button, input, textarea, [contenteditable], [data-interactive="true"]'
 }: UseTouchGesturesOptions): TouchGestureHandlers => {
   const [isDragging, setIsDragging] = useState(false);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
@@ -136,26 +142,39 @@ export const useTouchGestures = ({
 
   // Handlers para eventos
   const onTouchStart = useCallback((e: React.TouchEvent) => {
+    const target = e.target as HTMLElement | null;
+    if (target && target.closest(interactiveSelector)) {
+      // No interceptar eventos sobre elementos interactivos
+      return;
+    }
     e.preventDefault();
     const touch = e.touches[0];
     handleStart(touch.clientX, touch.clientY);
-  }, [handleStart]);
+  }, [handleStart, interactiveSelector]);
 
   const onTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!isDragging) return;
     e.preventDefault();
     const touch = e.touches[0];
     handleMove(touch.clientX, touch.clientY);
-  }, [handleMove]);
+  }, [handleMove, isDragging]);
 
   const onTouchEnd = useCallback((e: React.TouchEvent) => {
-    e.preventDefault();
+    if (isDragging) {
+      e.preventDefault();
+    }
     handleEnd();
-  }, [handleEnd]);
+  }, [handleEnd, isDragging]);
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
+    const target = e.target as HTMLElement | null;
+    if (target && target.closest(interactiveSelector)) {
+      // No interceptar eventos sobre elementos interactivos
+      return;
+    }
     e.preventDefault();
     handleStart(e.clientX, e.clientY);
-  }, [handleStart]);
+  }, [handleStart, interactiveSelector]);
 
   const onMouseMove = useCallback((e: React.MouseEvent) => {
     handleMove(e.clientX, e.clientY);

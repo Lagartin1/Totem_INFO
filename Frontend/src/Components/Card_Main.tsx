@@ -408,6 +408,7 @@ export default function Card_Main({ item, type }: CardMainProps) {
                   disablePictureInPicture
                   loop
                   className="max-w-full max-h-full rounded-lg object-contain cursor-pointer"
+                  data-interactive
                   onClick={(e) => {
                     const target = e.target as HTMLVideoElement;
                     if (target.paused) {

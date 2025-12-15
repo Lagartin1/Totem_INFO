@@ -9,10 +9,13 @@ interface CarouselMainProps {
   onSelect?: (noticia: Noticia) => void;
 }
 
-export default function Carousel_Main({ noticias, onSelect }: CarouselMainProps) {
+export default function Carousel_Main({
+  noticias,
+  onSelect,
+}: CarouselMainProps) {
   const [currentIndex, setCurrentIndex] = useState(2);
   const [translateX, setTranslateX] = useState(-730);
-  const slideDistance = 615; // Píxeles que se mueve cada slide
+  const slideDistance = 617; // Píxeles que se mueve cada slide
 
   // Estados para drag/swipe
   const [isDragging, setIsDragging] = useState(false);
@@ -32,8 +35,6 @@ export default function Carousel_Main({ noticias, onSelect }: CarouselMainProps)
       : [];
 
   const baseUrl = BUILD_MODE ? API_BASE_URL : "http://localhost:3000";
-
-  const trackRef = useRef<HTMLDivElement>(null);
 
   // Funciones para drag/swipe
   const handleDragStart = (clientX: number) => {
@@ -113,7 +114,7 @@ export default function Carousel_Main({ noticias, onSelect }: CarouselMainProps)
       setEnableTransition(false);
       setCurrentIndex(2);
       // Calcular la posición correcta del primer elemento real
-      const newPosition = -700; 
+      const newPosition = -730;
       setTranslateX(newPosition);
 
       // Reactivar transiciones después de un frame
@@ -137,7 +138,7 @@ export default function Carousel_Main({ noticias, onSelect }: CarouselMainProps)
       // En clon del último → saltar al último real
       setCurrentIndex(items.length - 3);
       // Calcular la posición correcta del último elemento real
-      const newPosition = - (700 + ((noticias.length - 1) * slideDistance));
+      const newPosition = -(730 + (noticias.length - 1) * slideDistance);
       setTranslateX(newPosition);
 
       // Reactivar transiciones después de un frame
@@ -162,18 +163,26 @@ export default function Carousel_Main({ noticias, onSelect }: CarouselMainProps)
   };
 
   // Auto Slide
-    useEffect(() => {
+  useEffect(() => {
     const interval = setInterval(next, 3000);
     return () => clearInterval(interval);
   }, [currentIndex]);
 
+  // Log de depuración: mostrar translateX cada vez que cambia (cuando cambia la slide)
+  const didMountRef = useRef(false);
+  useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+    console.log("[Carousel_Main] translateX:", translateX, "currentIndex:", currentIndex);
+  }, [translateX]);
+
   return (
     <div className="flex flex-col items-center gap-6">
-
       <div className="w-screen h-full overflow-hidden relative">
-    
         {/* Gradientes en los bordes eliminados */}
-        
+
         <div className="relative w-full mx-auto">
           <div
             className="flex gap-4 select-none cursor-grab active:cursor-grabbing min-w-[615px] flex-shrink-0"
@@ -200,7 +209,9 @@ export default function Carousel_Main({ noticias, onSelect }: CarouselMainProps)
                   key={index}
                   className={`${
                     isCenter ? "w-[900px] h-[500px]" : "w-[600px] h-80"
-                  } rounded-full relative overflow-hidden flex-shrink-0 transition-all duration-500 ${isCenter ? "cursor-pointer" : "cursor-default"}`}
+                  } rounded-full relative overflow-hidden flex-shrink-0 transition-all duration-500 ${
+                    isCenter ? "cursor-pointer" : "cursor-default"
+                  }`}
                   style={{
                     backgroundImage: n.imagen
                       ? `url(${baseUrl}${n.imagen})`
@@ -212,8 +223,7 @@ export default function Carousel_Main({ noticias, onSelect }: CarouselMainProps)
                   onClick={() => {
                     if (!onSelect) return;
                     if (isCenter) onSelect(n);
-                  }}
-                >
+                  }}>
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
                     <h2
                       className={`${
@@ -227,37 +237,77 @@ export default function Carousel_Main({ noticias, onSelect }: CarouselMainProps)
             })}
           </div>
         </div>
+
       </div>
 
-      {/* Indicadores de slide mejorados */}
-      <div className="flex items-center gap-4 bg-black/30 rounded-full px-6 py-3">
-        <div className="flex space-x-3">
-          {noticias.map((_, index) => (
-            <button
-              key={index}
-              className={`transition-all duration-300 touch-manipulation active:scale-110 ${
-                getRealIndex() === index
-                    ? "w-8 h-4 bg-white rounded-full" 
+      {/* Controles + indicadores */}
+      <div className="flex items-center gap-3">
+        {/* Botón anterior junto a la barra */}
+        <button
+          aria-label="Anterior"
+          onClick={prev}
+          className="w-10 h-10 rounded-full bg-black/30 hover:bg-black/40 text-white flex items-center justify-center shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/60 touch-manipulation"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="2.5"
+            stroke="currentColor"
+            className="w-5 h-5"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+        </button>
+
+        {/* Indicadores de slide + barra */}
+        <div className="flex items-center gap-4 bg-black/30 rounded-full px-6 py-3">
+          <div className="flex space-x-3">
+            {noticias.map((_, index) => (
+              <button
+                key={index}
+                className={`transition-all duration-300 touch-manipulation active:scale-110 ${
+                  getRealIndex() === index
+                    ? "w-8 h-4 bg-white rounded-full"
                     : "w-4 h-4 bg-white/50 hover:bg-white/70 rounded-full"
-              }`}
-              onClick={() => {
-                // Calcular el índice real con offset para los clones
-                const targetIndex = index + 2;
-                setCurrentIndex(targetIndex);
-                setTranslateX(-700 - index * slideDistance);
+                }`}
+                onClick={() => {
+                  const targetIndex = index + 2;
+                  setCurrentIndex(targetIndex);
+                  setTranslateX(-700 - index * slideDistance);
+                }}
+                aria-label={`Ir a la noticia ${index + 1}`}
+              />
+            ))}
+          </div>
+
+          <div className="w-20 h-1 bg-white/30 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-white transition-all duration-500 rounded-full"
+              style={{
+                width: `${((getRealIndex() + 1) / noticias.length) * 100}%`,
               }}
-              aria-label={`Ir a la noticia ${index + 1}`}
             />
-          ))}
+          </div>
         </div>
-        
-        {/* Barra de progreso */}
-        <div className="w-20 h-1 bg-white/30 rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-white transition-all duration-500 rounded-full"
-            style={{ width: `${((getRealIndex() + 1) / noticias.length) * 100}%` }}
-          />
-        </div>
+
+        {/* Botón siguiente junto a la barra */}
+        <button
+          aria-label="Siguiente"
+          onClick={next}
+          className="w-10 h-10 rounded-full bg-black/30 hover:bg-black/40 text-white flex items-center justify-center shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/60 touch-manipulation"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="2.5"
+            stroke="currentColor"
+            className="w-5 h-5"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+        </button>
       </div>
     </div>
   );

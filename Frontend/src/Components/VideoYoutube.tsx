@@ -401,7 +401,7 @@ export default function YouTubePlayer({
 
 
   return (
-    <div className={`rounded-lg overflow-hidden ${className}`}>
+    <div className={`rounded-lg overflow-hidden ${className}`} data-interactive="true">
       <div 
         className="relative"
         style={{ paddingTop: '56.25%' }} // 16:9 Aspect Ratio
