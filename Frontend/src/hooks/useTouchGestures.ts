@@ -9,10 +9,6 @@ interface UseTouchGesturesOptions {
   onLongPress?: () => void;
   swipeThreshold?: number;
   longPressDelay?: number;
-  /**
-   * Selectores CSS para elementos interactivos dentro del contenedor
-   * sobre los que NO se deben iniciar gestos de arrastre.
-   */
   interactiveSelector?: string;
 }
 
