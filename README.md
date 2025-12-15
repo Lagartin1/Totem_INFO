@@ -1,11 +1,13 @@
 # Totem_INFO
 
-## 📌 Descripción
+## Descripción
 
 Esta aplicación web centraliza la información académica y profesional de la carrera **Ingeniería Civil en Informática (UACh)**:
 
 * Prácticas (Profesionales e Iniciales)
-* Tesis
+* Workshops
+* Noticas
+* Giras de estudio
 * Proyectos
 * Becas
 
@@ -22,150 +24,131 @@ git clone   https://github.com/lagarin1/Totem_INFO.git
 3. Instalar [Node.js](https://nodejs.org/) (versión 14 o superior).
 
 ## Configuración del proyecto
-1. Navegar a la carpeta del proyecto clonado:
+# Totem_INFO — Guía rápida para ejecutar localmente
+
+Esta guía está pensada exclusivamente para la persona que quiere ejecutar el proyecto en su máquina local. Contiene sólo los pasos mínimos para poner la aplicación en marcha.
+
+- ## Requisitos mínimos
+- Docker & Docker Compose (opcional)
+- Node.js 14+ (frontend & backend)
+- Python 3.11 (opcional: para el synchronizer)
+
+## Clonar
 
 ```bash
+git clone https://github.com/Lagartin1/Totem_INFO.git
 cd Totem_INFO
-``` 
-2. Instalar las dependencias del backend:
+```
+
+## Instalación rápida
+
+Backend (APIs):
 
 ```bash
-cd Backend/api
+cd Backend/apis
 npm ci
 ```
 
-3. Instalar las dependencias del frontend:
+Frontend:
 
 ```bash
-cd ../../Frontend
+cd Frontend
 npm ci
 ```
 
-4. Volver agregar el archivo `.env` en la carpeta `Backend/apis/src/config` con las variables de entorno necesarias. Puedes basarte en el archivo proporcionado `.env.example`, aqui se ve el estracto de este archivo:
+## Variables de entorno
+Coloca tus variables en `Backend/apis/.env` (puedes basarte en `Backend/apis/.env.example`). Mínimos típicos:
+
+
+- `MONGODB_URL` (conexión MongoDB)
+- `API_UPLOAD_URL` (opcional: URL que recibe datos desde el synchronizer)
+
+Credenciales Mongo (para entorno local)
+
+Para facilitar el arranque local, el proyecto incluye configuración de Mongo en los ficheros Docker.
+Las credenciales utilizadas en local son:
+
+- Usuario: `admin`
+- Contraseña: `test123`
+- Base de datos: `totem_admins`
+- Host (compose): `database_mongo:27017`
+
+Ejemplo de `MONGODB_URL` que puedes copiar en `Backend/apis/.env` y en `Backend/apis/src/config/.env`:
 
 ```env
-ELASTIC_NODE=changeme
-ELASTIC_USERNAME=changeme
-ELASTIC_PASSWORD=changeme
+MONGODB_URL="mongodb://admin:test123@database_mongo:27017/totem_admins?authSource=admin&replicaSet=rs0"
 ```
-## Ejecución para desarrollo
-Para ejecutar el proyecto en modo desarrollo, sigue estos pasos:
-1. Levantar los servicios de producción local (Elasticsearch) usando Docker Compose (ver sección siguiente).
-2. En una terminal, navegar a la carpeta del backend y ejecutar:
-    ```bash
-    cd Backend/api
-    npm run dev
-    ```
-3. En otra terminal, navegar a la carpeta del frontend y ejecutar:
-    ```bash
-    cd Frontend
-    npm run dev
-    ```
-## Levantar Elasticsearch localmente con docker de pruebas
 
-1. en la carpeta dentro de `Docker` existe una carpeta `Database` hay otra la carpeta llamada `backup` , aqui se encuentran un snapshot de elasticsearch con los indices necesarios para que la aplicacion funcione.
+Si ejecutas Mongo localmente en tu máquina (puerto 27017), usa esta variante:
 
-2. descomprimir el archivo `es_snapshots.tar.gz` en la carpeta `./Database/backup/es_snapshots` del proyecto. Puedes hacerlo con el siguiente comando estando en la carpeta `Docker` del proyecto:
+```env
+MONGODB_URL="mongodb://admin:test123@localhost:27017/totem_admins?authSource=admin&replicaSet=rs0"
+```
 
-    ```bash
-    tar -xvzf ./Database/backup/es_snapshots.tar.gz -C ./Database/backup/
-    ```
-    y luego darle permisos pertinentes con:
-    ```bash
-    sudo chown -R 1000:0 ./Database/backup/es_snapshots
-    sudo chmod -R 775 ./Database/backup/es_snapshots
-    ```
-3. Navegar a la carpeta `Docker` del proyecto y subir el servicio de Elasticsearch con:
+## Ejecutar localmente
 
-    ```bash
-    cd Docker
-    docker-compose -f compose.dev.yml up database -d  
-    ```
+1) (Opcional) Levanta servicios dependientes con Docker Compose si los necesitas.
 
-4.  Crea dentro del contenedor la ruta donde se encuentran los snapshots. En este caso, la ruta es `/snapshots`, que está mapeada a `./Database/backup/es_snapshots` en el host.
-    ```bash
-    curl -u USERNAME:PASSWORD \  -H 'Content-Type: application/    json' \              
-            -X PUT http://localhost:PUERTO/_snapshot/local_backup
-            \
-            -d '{
-                "type": "fs",
-                "settings": {
-                "location": "/snapshots",
-                "compress": true
-                }
-            }'
-    ```
-5. Verifica que el snapshot se haya registrado correctamente:
-
-    ```bash
-    curl -u USERNAME:PASSWORD -X GET "localhost:9200/_snapshot/local_backup/_all?pretty"
-    ```
-    se mostrara una lista de snapshots disponibles en el repositorio `local_backup`. ejemplo:
-    ```json
-        {
-          "snapshots" : [
-            {
-              "snapshot" : "snapshot_1",
-              "uuid" : "some-uuid
-                "version_id" : 8140399,
-                "version" : "8.14.3",
-                "indices" : [
-                  "index1",
-                  "index2"
-                ],
-                "data_streams" : [ ],
-                "state" : "SUCCESS",
-                "start_time" : "2024-06-20T12:00:00
-                "end_time" : "2024-06-20T12:05:00.000Z",
-                "duration_in_millis" : 300000,
-                "failures" : [ ],
-                "shards" : {
-                    "total" : 10,
-                    "failed" : 0,
-                    "successful" : 10
-                }
-            }
-          ]
-        }
-    ``` 
-
-
-6. Ahora Restaura el snapshot deseado (reemplaza `snapshot_1` con el nombre de tu snapshot):
-
-    ```bash
-    curl -u elastic:test123 \  -H 'Content-Type: application/json' \             
-    -X POST http://localhost:PUERTO/_snapshot/local_backup/snapshot_1/_restore \
-    -d '{
-        "indices": "*",
-        "include_global_state": true
-    }'
-    ``` 
-
-## Servicios de producción local
-
-### Requisitos previos
-- Tener Docker y Docker Compose instalados.
-- Tener los snapshots de Elasticsearch descomprimidos en `./Database/backup/es_snapshots` dentro de la carpeta `Docker`.
-
-### Levantar servicios
-estando en la raíz del proyecto, ejecutar:
+2) Inicia el backend API:
 
 ```bash
-docker-compose -f docker/docker-compose.dev.yml up --build
+cd Backend/apis
+npm run dev
 ```
 
-### Agregar datos iniciales
-
-Para agregar los datos iniciales, sigue los pasos de la sección **"Levantar Elasticsearch localmente con docker de pruebas"**, específicamente los pasos **4, 5 y 6**.
-
-### Detener servicios
-Para detener los servicios, ejecutar:
+3) Inicia el frontend:
 
 ```bash
-docker-compose -f docker/docker-compose.dev.yml down
+cd Frontend
+npm run dev
 ```
-# Acceder
-Frontend → http://localhost:3004
-Backend  → http://localhost:4004
-Elasticsearch → http://localhost:5004
 
+URLs por defecto:
+
+- Frontend → http://localhost:3004
+- Backend  → http://localhost:4004
+
+### MongoDB (requerido)
+
+La aplicación requiere MongoDB en ejecución. Puedes usar el servicio ya definido en los archivos Docker del repo:
+
+```bash
+# Desde la raíz del proyecto levanta solo el servicio mongo
+docker-compose -f Docker/compose.prod.yml up -d database_mongo
+```
+
+El servicio se llama `database_mongo` y monta los datos desde `Docker/Database/backup/mongo_data`.
+
+### Poblar datos de ejemplo (seed)
+
+Para insertar datos dummy usando el seed de Prisma:
+
+```bash
+cd Backend/apis
+# Asegúrate de que MONGODB_URL apunta al mongo levantado
+npx prisma db push
+npx prisma db seed
+```
+
+Si `npx prisma db seed` falla, instala dependencias de desarrollo en `Backend/apis` con `npm ci`.
+
+## Synchronizer (Google Sheets → API)
+
+El componente `Backend/synchronizer/sincronize_practicas.py` es opcional y sirve para leer filas desde una Google Sheet y enviarlas a la API.
+
+Condiciones para ejecutar el synchronizer:
+
+- Debes tener acceso en Google Cloud Console y credenciales OAuth (tipo "Desktop") — descarga `client_secret.json` y colócalo en `Backend/synchronizer` localmente.
+- La Google Sheet debe tener la estructura esperada (columnas A–P con headers: `marca_temporal`, `tipo_practica`, `nombre_contacto`, ..., `requisitos_especiales`). El script ignora columnas vacías o extras.
+- El script genera un `token.json` local tras autorizar; **no** lo subas al repositorio.
+
+Cómo ejecutarlo:
+
+```bash
+cd Backend/synchronizer
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+# Asegúrate de tener client_secret.json y exportar SHEET_URL (y API_UPLOAD_URL si procede)
+python sincronize_practicas.py
+```
