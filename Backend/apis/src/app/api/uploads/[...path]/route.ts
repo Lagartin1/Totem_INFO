@@ -32,19 +32,15 @@ function getContentType(filePath: string) {
   }
 }
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { path?: string[] } }
-) {
+export async function GET(req: NextRequest, { params }: any) {
   try {
-    const awaitedParams = await params;
-    const parts = awaitedParams?.path || [];
+    const parts: string[] = (params?.path as string[] | undefined) || [];
     if (parts.length === 0) {
       return new Response("No file specified", { status: 400 });
     }
 
     // Prevent directory traversal
-    const safeParts = parts.map((p) => p.replace(/\.\.+/g, ""));
+    const safeParts = parts.map((p: string) => p.replace(/\.\.+/g, ""));
     const relPath = path.join(...safeParts);
     const uploadsDir = path.join(process.cwd(), "public", "uploads");
     const filePath = path.join(uploadsDir, relPath);

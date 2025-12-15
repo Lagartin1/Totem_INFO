@@ -197,7 +197,7 @@ export async function PutProyectosService(id: string, formData: FormData): Promi
         if (!proyectoActual) throw new Error("Proyecto no encontrado");
 
         let videoUrls: string[] = proyectoActual.videos || [];
-        let portadaUrl: string | undefined = proyectoActual.portada;
+        let portadaUrl: string | null | undefined = proyectoActual.portada;
         let imagenesUrls: string[] = proyectoActual.imagenes || [];
 
         // 2. Eliminar videos existentes si se indica

@@ -58,8 +58,8 @@ export async function setCookie(name: string, value: string, opts?: Partial<{
     name,
     value,
     httpOnly: opts?.httpOnly ?? true,
-    secure: opts?.secure ?? !isProd, // En desarrollo también true para sameSite=none
-    sameSite: opts?.sameSite ?? 'none',
+    secure: opts?.secure ?? isProd,
+    sameSite: opts?.sameSite ?? 'lax',
     path: opts?.path ?? '/',
     maxAge: opts?.maxAge ?? undefined
   });
@@ -91,8 +91,8 @@ export async function setCsrfCookies(token: string) {
     name: CSRF_COOKIE_HTTPONLY,
     value: token,
     httpOnly: true,
-    secure: !isProd, // true en desarrollo para sameSite=none
-    sameSite: 'none',
+    secure: isProd,
+    sameSite: 'lax',
     path: '/',
     maxAge: 60 * 15, // 15 minutos
   });
@@ -102,8 +102,8 @@ export async function setCsrfCookies(token: string) {
     name: CSRF_COOKIE_PUBLIC,
     value: token,
     httpOnly: false, // ← SIN HttpOnly
-    secure: !isProd, // true en desarrollo para sameSite=none
-    sameSite: 'none',
+    secure: isProd,
+    sameSite: 'lax',
     path: '/',
     maxAge: 60 * 15,
   });
