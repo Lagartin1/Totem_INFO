@@ -33,7 +33,7 @@ export const useTouchGestures = ({
   onLongPress,
   swipeThreshold = 50,
   longPressDelay = 500,
-  interactiveSelector = 'video, iframe, audio, button, input, textarea, [contenteditable], [data-interactive="true"]'
+  interactiveSelector = 'video, iframe, audio, button, input, textarea, a, [role="button"], [contenteditable], [data-interactive="true"]'
 }: UseTouchGesturesOptions): TouchGestureHandlers => {
   const [isDragging, setIsDragging] = useState(false);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });

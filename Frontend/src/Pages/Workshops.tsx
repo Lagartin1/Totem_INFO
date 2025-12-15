@@ -29,21 +29,15 @@ export default function Workshops() {
   }, [page]);
 
   const fetchNewPage = (newPage: number) => {
-    setLoading(true);
-    fetch(`/api/workshops?pagina=${newPage}`)  // Ajusta pageSize según sea necesario
-      .then(response => response.json())
-      .then(data => {
-        setWorkshops(data.data);
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error('Error al obtener los workshops:', error);
-        setLoading(false);
-      });
+    // Unificar flujo de paginación usando setPage para que el useEffect gestione el fetch
+    if (newPage === page) return;
+    setPage(newPage);
   }
 
   return (
-    <main className="min-h-screen min-w-screen w-full flex flex-col items-center bg-white-500">
+    <main
+      className="min-h-screen min-w-screen w-full flex flex-col items-center bg-white-500"
+    >
       {loading && <Loader frase="Cargando video..." />}
       {loadingPage && <Loader frase="Cargando página..." />}
       <NavBar />

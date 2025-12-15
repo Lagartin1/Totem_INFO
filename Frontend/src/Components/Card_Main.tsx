@@ -488,15 +488,16 @@ export default function Card_Main({ item, type }: CardMainProps) {
       <div
         role="button"
         onClick={performClick}
-        className={`rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow ease-out 
-          transition-colors ease-out duration-300 h-90 w-80 flex flex-col justify-end 
-          items-center cursor-pointer relative overflow-hidden`}
+        className={`relative w-80 max-w-xs aspect-[4/5] rounded-lg p-4 shadow-md hover:shadow-lg
+          transition-shadow ease-out transition-colors ease-out duration-300 flex flex-col justify-end
+          items-center cursor-pointer overflow-hidden`}
         style={
           imageUrl
             ? {
                 backgroundImage: `url(${imageUrl})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
               }
             : { backgroundColor: "#f3f4f6" }
         }>
