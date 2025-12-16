@@ -1,5 +1,5 @@
 // Importaciones de utilidades para manejo de archivos (MOVIDO DEL ANTIGUO MODELO)
-import { writeFile, unlink } from "fs/promises";
+import { writeFile, unlink, mkdir } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
 
@@ -57,9 +57,11 @@ export async function createNoticiaService(formData: FormData, autorId: string):
       const bytes = await imagenRaw.arrayBuffer();
       const buffer = Buffer.from(bytes);
       const fileName = `${randomUUID()}_${imagenRaw.name}`;
-      const filePath = path.join(process.cwd(), "public", "uploads", fileName);
+      const dirPath = path.join(process.cwd(), "public", "api", "uploads");
+      await mkdir(dirPath, { recursive: true });
+      const filePath = path.join(dirPath, fileName);
       await writeFile(filePath, buffer);
-      imagenUrl = `/uploads/${fileName}`;
+      imagenUrl = `/api/uploads/${fileName}`;
     } else if (typeof imagenRaw === "string" && imagenRaw.startsWith("http")) {
       imagenUrl = imagenRaw;
     }
@@ -106,28 +108,30 @@ export async function updateNoticiaService(id: string, formData: FormData): Prom
     }
 
     // 2. Gestionar la eliminación o reemplazo de la imagen
-    if (eliminarImagen && imagenUrl && imagenUrl.startsWith('/uploads/')) {
-        await unlink(path.join(process.cwd(), "public", imagenUrl)).catch(() => {});
+    if (eliminarImagen && imagenUrl && imagenUrl.startsWith('/api/uploads/')) {
+      await unlink(path.join(process.cwd(), "public", imagenUrl)).catch(() => {});
         imagenUrl = null;
     }
     
     // 3. Subir o reemplazar la imagen
     if (imagenRaw instanceof File && imagenRaw.size > 0) {
         // Borrar imagen vieja local antes de subir la nueva
-        if (imagenUrl && imagenUrl.startsWith('/uploads/')) {
+      if (imagenUrl && imagenUrl.startsWith('/api/uploads/')) {
              await unlink(path.join(process.cwd(), "public", imagenUrl)).catch(() => {});
         }
         
         const bytes = await imagenRaw.arrayBuffer();
         const buffer = Buffer.from(bytes);
         const fileName = `${randomUUID()}_${imagenRaw.name}`;
-        const filePath = path.join(process.cwd(), "public", "uploads", fileName);
-        await writeFile(filePath, buffer);
-        imagenUrl = `/uploads/${fileName}`;
+      const dirPath = path.join(process.cwd(), "public", "api", "uploads");
+      await mkdir(dirPath, { recursive: true });
+      const filePath = path.join(dirPath, fileName);
+      await writeFile(filePath, buffer);
+      imagenUrl = `/api/uploads/${fileName}`;
         
     } else if (typeof imagenRaw === "string" && imagenRaw.startsWith("http")) {
         // Si es una URL, la guardamos, y borramos la imagen local anterior si existía
-        if (imagenUrl && imagenUrl.startsWith('/uploads/')) {
+      if (imagenUrl && imagenUrl.startsWith('/api/uploads/')) {
              await unlink(path.join(process.cwd(), "public", imagenUrl)).catch(() => {});
         }
         imagenUrl = imagenRaw;
@@ -164,7 +168,7 @@ export async function deleteNoticiaService(id: string) {
     // 1. Obtener noticia para borrar la imagen asociada
     const noticia = await GetNoticiaByID(id);
 
-    if (noticia?.imagen && noticia.imagen.startsWith('/uploads/')) {
+    if (noticia?.imagen && noticia.imagen.startsWith('/api/uploads/')) {
       const fullPath = path.join(process.cwd(), "public", noticia.imagen);
       await unlink(fullPath).catch((err) => {
           console.warn(`⚠️ No se pudo borrar la imagen o no existe: ${noticia.imagen}`, err);

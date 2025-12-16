@@ -77,20 +77,21 @@ export default function Modal_Edicion_Proyecto({
     if (editorInstance.current) {
       try {
         const saved = await editorInstance.current.save();
-        const savedJson = JSON.stringify(saved);
-        const savedHtml = blocksToHtml(saved);
-        
-        setEditData((prev) => ({ ...(prev as any), contenido: savedJson, contenido_html: savedHtml }));
-        await handleEdit(e, { contenido: savedJson, contenido_html: savedHtml });
+        console.log('Modal_Edicion: Editor saved:', saved);
+        // Guardamos JSON del editor para poder editarlo después
+        const jsonDescripcion = JSON.stringify(saved);
+        const htmlDescripcion = blocksToHtml(saved);
+
+        setEditData((prev) => ({ ...(prev as any), descripcion: jsonDescripcion, descripcion_html: htmlDescripcion }));
+        await handleEdit(e, { descripcion: jsonDescripcion, descripcion_html: htmlDescripcion });
         return;
       } catch (err) {
         console.warn('No se pudo obtener contenido desde editor instance:', err);
       }
     }
-    
-    const fallbackContenido = (editData as any).descripcion ? String((editData as any).descripcion) : '';
     const fallbackHtml = (editData as any).descripcion_html ? String((editData as any).descripcion_html) : '';
-    await handleEdit(e, { contenido: fallbackContenido, contenido_html: fallbackHtml });
+    const fallbackDescripcion = fallbackHtml || ((editData as any).descripcion ? String((editData as any).descripcion) : '');
+    await handleEdit(e, { descripcion: fallbackDescripcion, descripcion_html: fallbackHtml || fallbackDescripcion });
   };
 
   return createPortal(
@@ -117,11 +118,12 @@ export default function Modal_Edicion_Proyecto({
           <div className="border p-2 rounded max-h-60 overflow-auto">
             <EditorComponent
               initialData={editData.descripcion || ""}
-              onChangeData={(d: OutputData) =>
-                setEditData({ ...editData, descripcion: JSON.stringify(d) })
-              }
+              onChangeData={(d: OutputData) => {
+                const html = blocksToHtml(d);
+                setEditData((prev) => ({ ...(prev as any), descripcion: html, descripcion_html: html }));
+              }}
               onChangeHtml={(h: string) =>
-                setEditData((prev) => ({ ...(prev as any), descripcion_html: h }))
+                setEditData((prev) => ({ ...(prev as any), descripcion: h, descripcion_html: h }))
               }
               onReady={(ed) => (editorInstance.current = ed)}
             />

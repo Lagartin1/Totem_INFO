@@ -48,9 +48,10 @@ export default function ProyectosDocentes() {
         <div className="flex flex-col bg-slate-500 rounded-lg w-1/4 items-center h-fit sticky top-32">
           <h1 className="text-white text-4xl font-bold justify-center p-10 mt-20">Proyectos de {type === "profesores" ? "Profesores" : "Estudiantes"}</h1>
           <p className="text-white/90 text-lg font-semibold text-center justify-center p-5 mt-5 pb-10">
-            lorem ipsom dolor sit amet, consectetur adipiscing elit. Donec vehicula cursus vestibulum. 
-            Maecenas euismod, justo at consectetur congue, nisl nunc consectetur nisi, 
-            euismod aliquam nisl nunc euismod nisi.
+            Explora proyectos creados por docentes y estudiantes de Ingenieria Civil Informatica:
+            soluciones de software, investigaciones aplicadas y prototipos listos para escalar. Aqui
+            se concentra el trabajo colaborativo que conecta la sala de clases con desafios reales
+            de la industria tecnologica.
           </p>
         </div>
 

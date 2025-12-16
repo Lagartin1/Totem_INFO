@@ -94,13 +94,14 @@ export default function Card_Proyectos({
       [
         "titulo",
         "descripcion",
+        "descripcion_html",
         "fecha_publicacion",
         "telefono_contacto",
         "correo_contacto",
         "area_desarrollo",
       ].forEach((key) => {
         const overrideVal = overrides && overrides[key];
-        const value = overrideVal !== undefined ? overrideVal : editData[key as keyof Proyecto];
+        const value = overrideVal !== undefined ? overrideVal : (editData as any)[key];
         if (typeof value === "string" && value.trim() !== "") {
           formData.append(key, value);
         }

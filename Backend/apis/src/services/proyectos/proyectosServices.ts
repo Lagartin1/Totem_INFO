@@ -67,8 +67,35 @@ export async function createProyectoService(formData: FormData, autorId: string)
     try {
         // Lógica de manejo de archivos movida del antiguo modelo
         const titulo = formData.get("titulo") as string;
-        const descripcion = (formData.get("descripcion") as string) || "Sin descripción disponible.";
-        const autores = formData.getAll("autores").filter(a => typeof a === "string" && a.trim() !== "") as string[];
+
+        // Prioriza HTML plano; acepta claves heredadas (descripcion_html, descripcion, contenido_html, contenido)
+        let rawDescripcion =
+            (formData.get("descripcion_html") as string)
+            || (formData.get("descripcion") as string)
+            || (formData.get("contenido_html") as string)
+            || (formData.get("contenido") as string);
+        
+        // Si descripcion es JSON (del editor), intenta parsear y renderizar a HTML
+        if (rawDescripcion && rawDescripcion.trim().startsWith('{')) {
+          try {
+            const parsed = JSON.parse(rawDescripcion);
+            // Si tiene blocks, es OutputData del editor; sino, mantén como está
+            if ((parsed as any).blocks) {
+              rawDescripcion = (formData.get("descripcion_html") as string) || "";
+            }
+          } catch {
+            // No es JSON válido, mantener como está
+          }
+        }
+        
+        const descripcion = rawDescripcion && rawDescripcion.trim() !== "" ? rawDescripcion : "Sin descripcion disponible.";
+
+        // Acepta claves antiguas y nuevas para autores
+        const autores = [
+            ...formData.getAll("autores"),
+            ...formData.getAll("autores[]"),
+            ...formData.getAll("autor")
+        ].filter(a => typeof a === "string" && a.trim() !== "") as string[];
         const telefono_contacto = (formData.get("telefono_contacto") as string) || "";
         const correo_contacto = (formData.get("correo_contacto") as string) || "";
         const area_desarrollo = (formData.get("area_desarrollo") as string) || "general";
@@ -289,16 +316,54 @@ export async function PutProyectosService(id: string, formData: FormData): Promi
             portada: portadaUrl
         };
 
-        // Mapeo de campos simples
-        ["titulo", "descripcion", "correo_contacto", "telefono_contacto", "area_desarrollo"].forEach((key) => {
+        // Mapeo de campos simples, priorizando descripcion_html (HTML puro, sin etiquetas wrapper)
+        const rawDescripcion =
+            (formData.get("descripcion_html") as string)
+            || (formData.get("descripcion") as string)
+            || (formData.get("contenido_html") as string)
+            || (formData.get("contenido") as string);
+        
+        // Si descripcion es JSON, usa descripcion_html en su lugar
+        let descripcionLimpia: string | undefined;
+        if (rawDescripcion && rawDescripcion.trim().startsWith('{')) {
+          try {
+            const parsed = JSON.parse(rawDescripcion);
+            if ((parsed as any).blocks) {
+              // Es JSON del editor, usa descripcion_html
+              descripcionLimpia = (formData.get("descripcion_html") as string);
+            } else {
+              descripcionLimpia = rawDescripcion;
+            }
+          } catch {
+            descripcionLimpia = rawDescripcion;
+          }
+        } else {
+          descripcionLimpia = rawDescripcion;
+        }
+        
+        if (descripcionLimpia && descripcionLimpia.trim() !== "") {
+          // ok
+        } else {
+          descripcionLimpia = undefined;
+        }
+
+        ["titulo", "correo_contacto", "telefono_contacto", "area_desarrollo"].forEach((key) => {
             const value = formData.get(key);
             if (typeof value === "string" && value.trim() !== "") {
                 (updateDoc as any)[key] = value;
             }
         });
+
+        if (descripcionLimpia) {
+            (updateDoc as any).descripcion = descripcionLimpia;
+        }
         
         // Manejo de autores (array)
-        const autoresForm = formData.getAll("autores").filter(a => typeof a === "string" && a.trim() !== "") as string[];
+        const autoresForm = [
+            ...formData.getAll("autores"),
+            ...formData.getAll("autores[]"),
+            ...formData.getAll("autor")
+        ].filter(a => typeof a === "string" && a.trim() !== "") as string[];
         if (autoresForm.length > 0) {
             updateDoc.autores = autoresForm;
         }

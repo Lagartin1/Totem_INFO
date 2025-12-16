@@ -33,20 +33,18 @@ function EditorComponent({ initialData, onChangeData, onChangeHtml, onReady, rea
     if (!initialData) return undefined;
     if (typeof initialData === 'string') {
       try {
-        return JSON.parse(initialData) as OutputData;
+        const parsed = JSON.parse(initialData) as OutputData;
+        // Validar estructura básica
+        if (Array.isArray((parsed as any).blocks) && (parsed as any).blocks.length > 0) {
+          return parsed;
+        }
       } catch {
-        // Si no es JSON, asumimos que es HTML/texto y lo ponemos en un párrafo
-        return {
-          blocks: [
-            {
-              type: 'paragraph',
-              data: {
-                text: initialData,
-              },
-            },
-          ],
-        };
+        // No es JSON válido
       }
+      // Si es HTML puro o texto, retorna bloques vacíos (el usuario escribirá)
+      // Evitamos envolver en bloque porque EditorJS valida la estructura estrictamente
+      console.log('Initial data is HTML or plain text, starting with empty editor:', initialData.substring(0, 100));
+      return { blocks: [] };
     }
     return initialData;
   };

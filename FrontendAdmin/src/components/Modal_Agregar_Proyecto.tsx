@@ -39,24 +39,31 @@ export default function Modal_Agregar_Proyecto({
     if (editorInstance.current) {
       try {
         const saved = await editorInstance.current.save();
+        console.log('Modal_Agregar: Editor saved:', saved);
+        // Guardamos JSON del editor para poder editarlo después
         formData.set('descripcion', JSON.stringify(saved));
+        // Pero también guardamos HTML puro sin etiquetas wrapper para mostrar
         formData.set('descripcion_html', blocksToHtml(saved));
       } catch (err) {
         console.warn('No se pudo obtener contenido desde editor instance:', err);
-        if (editorData) {
-          formData.set('descripcion', JSON.stringify(editorData));
-        } else if (editorHtml) {
+        if (editorHtml) {
           formData.set('descripcion', editorHtml);
+          formData.set('descripcion_html', editorHtml);
+        } else if (editorData) {
+          const html = blocksToHtml(editorData) || "";
+          formData.set('descripcion', JSON.stringify(editorData));
+          formData.set('descripcion_html', html);
         }
-        if (editorHtml) formData.set('descripcion_html', editorHtml);
       }
     } else {
-      if (editorData) {
-        formData.set('descripcion', JSON.stringify(editorData));
-      } else if (editorHtml) {
+      if (editorHtml) {
         formData.set('descripcion', editorHtml);
+        formData.set('descripcion_html', editorHtml);
+      } else if (editorData) {
+        const html = blocksToHtml(editorData) || "";
+        formData.set('descripcion', JSON.stringify(editorData));
+        formData.set('descripcion_html', html);
       }
-      if (editorHtml) formData.set('descripcion_html', editorHtml);
     }
 
     autores.forEach((autor) => {
