@@ -13,6 +13,8 @@ const ALLOWED_ORIGINS = new Set([
   "http://127.0.0.1:5173",
   "http://localhost:5173",
   "http://localhost:5174",
+  "https://0.0.0.0:4004",
+  "https://totem.inf.uach.cl",
 ]);
 
 // Rutas públicas que no requieren autenticación
@@ -21,6 +23,7 @@ const PUBLIC_ROUTES = new Set([
   "/api/admin/auth/login",
   "/api/admin/auth/register",
   "/api/admin/auth/logout",
+  "/api/noticias",
 ]);
 
 // Función para verificar si una ruta es pública
@@ -41,11 +44,6 @@ export async function middleware(req: NextRequest) {
 
   // Si es preflight OPTIONS, responde aquí mismo
   if (req.method === 'OPTIONS') {
-    if (!isAllowed) {
-      return new NextResponse('CORS origin not allowed', { status: 403 });
-    }
-
-    // Reflejar lo que pide el navegador, pero garantizar valores seguros si vienen vacíos
     const reqHeaders = req.headers.get('access-control-request-headers') ?? '';
     console.log('Preflight request headers:', reqHeaders);
 
@@ -55,7 +53,7 @@ export async function middleware(req: NextRequest) {
 
     const res = new NextResponse(null, { status: 204 });
     // Nunca devolver '*' cuando se usan credenciales. Usar el origin explícito.
-    res.headers.set('Access-Control-Allow-Origin', origin);
+    res.headers.set('Access-Control-Allow-Origin', isAllowed ? origin : '*');
     res.headers.set('Access-Control-Allow-Credentials', 'true');
     res.headers.set('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
     res.headers.set('Access-Control-Allow-Headers', allowHeaders);
@@ -74,13 +72,8 @@ export async function middleware(req: NextRequest) {
     if (!accessToken) {
       console.log('No access token found for:', pathname);
       const res401 = NextResponse.json({ ok: false }, { status: 401 });
-      // Asegurar headers CORS en respuestas de error para que el navegador no las bloquee
-      if (isAllowed) {
-        res401.headers.set('Access-Control-Allow-Origin', origin);
-        res401.headers.set('Access-Control-Allow-Credentials', 'true');
-      } else {
-        res401.headers.set('Access-Control-Allow-Origin', origin || '*');
-      }
+      res401.headers.set('Access-Control-Allow-Origin', isAllowed ? origin : '*');
+      res401.headers.set('Access-Control-Allow-Credentials', 'true');
       res401.headers.set('Vary', 'Origin');
       return res401;
     }
@@ -91,12 +84,8 @@ export async function middleware(req: NextRequest) {
     } catch (error) {
       console.log('Invalid access token for:', pathname, error);
       const res401 = NextResponse.json({ error: 'Unauthorized - Invalid access token' }, { status: 401 });
-      if (isAllowed) {
-        res401.headers.set('Access-Control-Allow-Origin', origin);
-        res401.headers.set('Access-Control-Allow-Credentials', 'true');
-      } else {
-        res401.headers.set('Access-Control-Allow-Origin', origin || '*');
-      }
+      res401.headers.set('Access-Control-Allow-Origin', isAllowed ? origin : '*');
+      res401.headers.set('Access-Control-Allow-Credentials', 'true');
       res401.headers.set('Vary', 'Origin');
       return res401;
     }
@@ -104,14 +93,10 @@ export async function middleware(req: NextRequest) {
 
   // Para el resto de métodos, deja pasar y agrega headers CORS
   const res = NextResponse.next();
-  if (isAllowed) {
-    console.log("Permitiendo origen:", origin);
-    res.headers.set("Access-Control-Allow-Origin", origin);
-    res.headers.set('Access-Control-Allow-Credentials', 'true');
-    res.headers.set("Vary", "Origin");
-  }
+  res.headers.set("Access-Control-Allow-Origin", isAllowed ? origin : '*');
+  res.headers.set('Access-Control-Allow-Credentials', 'true');
+  res.headers.set("Vary", "Origin");
   return res;
-
 }
 
 export const config = {

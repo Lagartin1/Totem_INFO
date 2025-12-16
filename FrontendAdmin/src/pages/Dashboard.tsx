@@ -8,6 +8,7 @@ import IconNews from "../assets/icons/003-news.png";
 import IconStudent from "../assets/icons/004-student.png";
 import IconWorkshop from "../assets/icons/005-workshop.png";
 import IconEarth from "../assets/icons/006-earth.png";
+import { useAuth } from "../lib/authProvider";
 
 interface User {
   id: string;
@@ -20,6 +21,7 @@ interface User {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [data, setData] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<boolean>(false);
@@ -39,7 +41,6 @@ export default function Dashboard() {
     setToastmsg(message);
     setToastStatus(status);
     setToast(true);
-    // ⬇️ antes estabas dejando el toast en true
     setTimeout(() => setToast(false), 3000);
   };
 
@@ -68,7 +69,13 @@ export default function Dashboard() {
           if (!retryResponse.ok) {
             throw new Error("Error al cargar los usuarios registrados");
           }
-          return null;
+          return retryResponse;
+        } else {
+          // Refresh falló - tokens inválidos o expirados
+          await logout();
+          makeToast("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.", "error");
+          navigate("/");
+          throw new Error("Sesión expirada");
         }
       } else if (!response.ok) {
         throw new Error("Error al cargar los usuarios registrados");
@@ -78,17 +85,19 @@ export default function Dashboard() {
 
     try {
       const res = await performFetch();
-      if (res === null) return;
       const resData = await res.json();
       const users = Array.isArray(resData?.users) ? resData.users : [];
       setData(users);
       setPages(typeof resData?.total === "number" ? resData.total : users.length);
     } catch (error) {
       console.error("Error al cargar los usuarios registrados:", error);
+      if (error instanceof Error && error.message !== "Sesión expirada") {
+        makeToast("Error al cargar los usuarios registrados", "error");
+      }
     } finally {
       setLoading(false);
     }
-  }, [pagina]);
+  }, [pagina, logout, navigate]);
 
   useEffect(() => {
     cargar();

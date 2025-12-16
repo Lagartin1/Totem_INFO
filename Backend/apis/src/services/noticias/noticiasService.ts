@@ -28,6 +28,14 @@ export async function fetchNoticias(indice: number = 0): Promise<NoticiaResult> 
   return noticias;
 }
 
+export async function fetchNoticiaById(id: string): Promise<Noticia> {
+  const noticia = await GetNoticiaByID(id);
+  if (!noticia) {
+    throw new Error("Noticia no encontrada");
+  }
+  return noticia;
+}
+
 // --- CREACIÓN ---
 
 // Añadido: 'autorId' es obligatorio por el esquema de Prisma.

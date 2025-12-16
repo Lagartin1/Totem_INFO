@@ -1,6 +1,6 @@
 import { addLogEntry } from "@/models/admin/logModel";
 
-import {fetchNoticias,updateNoticiaService,createNoticiaService,deleteNoticiaService,} from "@/services/noticias/noticiasService";
+import {fetchNoticias,updateNoticiaService,createNoticiaService,deleteNoticiaService,fetchNoticiaById,} from "@/services/noticias/noticiasService";
 
 export async function listarNoticias(indice: number = 0) {
   // Añadimos 'indice' para la paginación
@@ -9,6 +9,19 @@ export async function listarNoticias(indice: number = 0) {
     throw new Error("No se pudieron obtener las noticias");
   }
   return noticiasData;
+}
+
+export async function obtenerNoticiaById(id: string) {
+  try {
+    const noticia = await fetchNoticiaById(id);
+    if (!noticia) {
+      throw new Error("Noticia no encontrada");
+    }
+    return noticia;
+  } catch (error) {
+    console.error("Error al obtener noticia:", error);
+    throw error;
+  }
 }
 
 // AÑADIDO: userID para registrar la acción y establecer la autoría

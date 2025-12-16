@@ -17,7 +17,7 @@ async function setAccessCookie(token: string) {
     name: ACCESS_COOKIE,
     value: token,
     httpOnly: true,
-    secure: !isProd, // true en desarrollo para sameSite=none
+    secure: isProd,
     sameSite: 'lax',
     path: '/',
     maxAge: ACCESS_TTL_SEC,
@@ -30,7 +30,7 @@ async function setRefreshCookie(token: string) {
     name: REFRESH_COOKIE,
     value: token,
     httpOnly: true,
-    secure: !isProd, // true en desarrollo para sameSite=none
+    secure: isProd,
     sameSite: 'lax',
     path: '/',
     maxAge: REFRESH_TTL_SEC,
