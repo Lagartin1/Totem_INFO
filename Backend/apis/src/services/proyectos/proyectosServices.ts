@@ -78,7 +78,7 @@ export async function createProyectoService(formData: FormData, autorId: string)
         const fecha_publicacion = new Date();
 
         let videoUrls: string[] = [];
-        let portadaUrl: string | undefined = undefined;
+        let portadaUrl: string | null = null;
         let imagenesUrls: string[] = [];
 
         // Procesar portada
@@ -197,7 +197,7 @@ export async function PutProyectosService(id: string, formData: FormData): Promi
         if (!proyectoActual) throw new Error("Proyecto no encontrado");
 
         let videoUrls: string[] = proyectoActual.videos || [];
-        let portadaUrl: string | null | undefined = proyectoActual.portada;
+        let portadaUrl: string | null = proyectoActual.portada || null;
         let imagenesUrls: string[] = proyectoActual.imagenes || [];
 
         // 2. Eliminar videos existentes si se indica
@@ -217,7 +217,7 @@ export async function PutProyectosService(id: string, formData: FormData): Promi
                 const oldPath = path.join(process.cwd(), "public", portadaUrl);
                 await unlink(oldPath).catch(() => {});
             }
-            portadaUrl = undefined;
+            portadaUrl = null;
         }
 
         // 4. Eliminar imágenes existentes si se indica
@@ -233,6 +233,10 @@ export async function PutProyectosService(id: string, formData: FormData): Promi
 
         // 5. Subir/añadir nueva portada
         const nuevaPortada = formData.get("portada") as File | string | null;
+        // Si la clave 'portada' no fue enviada en el FormData, forzamos a null
+        if (nuevaPortada === null) {
+            portadaUrl = null;
+        }
         if (nuevaPortada) {
             if (nuevaPortada instanceof File && nuevaPortada.size > 0) {
                 const bytes = await nuevaPortada.arrayBuffer();

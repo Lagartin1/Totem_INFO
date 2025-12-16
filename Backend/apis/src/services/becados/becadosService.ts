@@ -55,12 +55,12 @@ export async function createBecadoService(formData: FormData, autorId: string): 
     const descripcion = (formData.get("descripcion") as string) || "Sin descripción disponible.";
     const videosRaw = formData.getAll("videos") || [];
     const imagenesRaw = formData.getAll("imagenes") || [];
-    const portadaRaw = formData.get("portada") || "";
+    const portadaRaw = formData.get("portada") as File | string | null;
     const fecha_publicacion = new Date();
 
     let videoUrls: string[] = [];
     let imagenesUrls: string[] = [];
-    let portadaUrl: string | undefined;
+    let portadaUrl: string | null = null;
 
     // Procesar videos
     for (const video of videosRaw) {
@@ -222,6 +222,10 @@ export async function PutBecadoService(id: string, formData: FormData): Promise<
         }
         
         const nuevaPortada = formData.get("portada");
+        // Si la clave 'portada' NO fue enviada, forzamos null
+        if (nuevaPortada === null) {
+          portadaUrl = null;
+        }
         if (nuevaPortada instanceof File && nuevaPortada.size > 0) {
             // Si hay una nueva portada, eliminar la anterior
             if (portadaUrl && portadaUrl.startsWith('/uploads/')) {

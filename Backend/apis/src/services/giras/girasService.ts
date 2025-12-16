@@ -97,7 +97,7 @@ export async function createGiraService(
       }
     }
 
-    let portadaUrl: string | undefined;
+    let portadaUrl: string | null = null;
 
     if (portadaFile instanceof File && portadaFile.size > 0) {
       const bytes = await portadaFile.arrayBuffer();
@@ -133,7 +133,7 @@ export async function createGiraService(
       descripcion,
       anio,
       lugares: lugaresArray,
-      portada: portadaUrl || "",
+      portada: portadaUrl,
       videos: videoUrls,
       imagenes: imagenUrls,
       autorId: autorId, // Campo requerido por Prisma
@@ -175,7 +175,7 @@ export async function PutGirasService(
       ? [...giraActual.imagenes]
       : [];
 
-    let portadaUrl: string = giraActual.portada || "";
+    let portadaUrl: string | null = giraActual.portada || null;
 
     // 2. Manejar videos existentes
     const videosExistentes = formData.getAll("videosExistentes");
@@ -227,7 +227,7 @@ export async function PutGirasService(
         const oldPath = path.join(process.cwd(), "public", portadaUrl);
         await unlink(oldPath).catch(() => {});
       }
-      portadaUrl = "";
+      portadaUrl = null;
     }
 
     // 6. Subir/añadir nuevos videos
@@ -272,6 +272,10 @@ export async function PutGirasService(
 
     // 8. Subir/cambiar nueva portada
     const nuevaPortada = formData.get("portada");
+    // Si no se envió la clave 'portada', forzar null
+    if (nuevaPortada === null) {
+      portadaUrl = null;
+    }
     if (nuevaPortada instanceof File && nuevaPortada.size > 0) {
       // Eliminar portada anterior si existe
       if (portadaUrl && portadaUrl.startsWith("/uploads/")) {
@@ -296,7 +300,7 @@ export async function PutGirasService(
     }
 
     // 8. Construir objeto de actualización
-    const updateDoc: Partial<Gira> & { videos: string[]; imagenes: string[]; lugares?: string[]; portada?: string } =
+    const updateDoc: Partial<Gira> & { videos: string[]; imagenes: string[]; lugares?: string[]; portada?: string | null } =
       { videos: videoUrls, imagenes: imagenUrls, portada: portadaUrl };
 
     ["titulo", "descripcion", "anio"].forEach((key) => {

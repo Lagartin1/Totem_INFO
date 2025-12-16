@@ -42,7 +42,7 @@ export async function createNoticiaService(formData: FormData, autorId: string):
       throw new Error("Faltan campos obligatorios: título o contenido");
     }
     
-    let imagenUrl: string | undefined;
+    let imagenUrl: string | null = null;
 
     // Lógica de manejo de imagen (archivo o URL)
     if (imagenRaw instanceof File && imagenRaw.size > 0) {
@@ -61,7 +61,7 @@ export async function createNoticiaService(formData: FormData, autorId: string):
       titulo,
       contenido,
       categorias,
-      imagen: imagenUrl, // Se mapea a imagenUrl
+      imagen: imagenUrl, // Se mapea a imagenUrl (null si no se envió)
       fecha_publicacion,
       autorId: autorId // Campo requerido por Prisma
     });
@@ -88,9 +88,14 @@ export async function updateNoticiaService(id: string, formData: FormData): Prom
     const noticiaActual = await GetNoticiaByID(id);
     if (!noticiaActual) throw new Error("Noticia no encontrada");
 
-    let imagenUrl: string | null = noticiaActual.imagen || null;
     const imagenRaw = formData.get("imagen");
     const eliminarImagen = formData.get("eliminarImagen") === "true";
+
+    // Si no se envió la propiedad "imagen" en el FormData, la establecemos en null
+    let imagenUrl: string | null = noticiaActual.imagen || null;
+    if (imagenRaw === null) {
+      imagenUrl = null;
+    }
 
     // 2. Gestionar la eliminación o reemplazo de la imagen
     if (eliminarImagen && imagenUrl && imagenUrl.startsWith('/uploads/')) {
