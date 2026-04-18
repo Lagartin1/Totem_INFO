@@ -274,7 +274,8 @@ export default function Carousel_Main({
                 onClick={() => {
                   const targetIndex = index + 2;
                   setCurrentIndex(targetIndex);
-                  setTranslateX(-700 - index * slideDistance);
+                  // Keep the same base offset used everywhere else to avoid drift.
+                  setTranslateX(-730 - index * slideDistance);
                 }}
                 aria-label={`Ir a la noticia ${index + 1}`}
               />
