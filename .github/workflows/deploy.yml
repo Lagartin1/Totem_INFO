@@ -1,47 +1,51 @@
-name: Deploy
+name: Deploy con Rollback
 
 on:
   push:
-    branches:
-      - TOTEM_GRUPO2
-      - main
     tags:
       - 'v*'
-  workflow_dispatch:
-    inputs:
-      ref:
-        description: Branch, tag or commit to deploy
-        required: false
-        default: TOTEM_GRUPO2
 
 permissions:
   contents: read
-
-concurrency:
-  group: deploy-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.ref }}
 
-      - name: Prepare optional compose files
+      - name: Mostrar versión
         run: |
-          mkdir -p Backend/synchronizer
-          touch Backend/synchronizer/.env Backend/synchronizer/.last_fetch.json
- 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+          echo "Desplegando ${{ github.ref_name }}"
 
-      - name: Validate Compose file
-        run: docker compose -f Docker/compose.prod.yml config
+      - name: Preparar rollback
+        id: rollback
+        run: |
+          git fetch --tags --force
+          CURRENT_TAG="${{ github.ref_name }}"
+          PREVIOUS_TAG="$(git tag --sort=-creatordate | grep -vFx "$CURRENT_TAG" | head -n 1)"
 
-      - name: Build deployment stack
-        run: docker compose -f Docker/compose.prod.yml build --parallel
+          if [ -z "$PREVIOUS_TAG" ]; then
+            echo "No se encontró una versión previa para rollback" >&2
+            exit 1
+          fi
+
+          echo "ref=$PREVIOUS_TAG" >> "$GITHUB_OUTPUT"
+          echo "Rollback preparado a $PREVIOUS_TAG"
+
+      - name: Desplegar
+        run: |
+          ./deploy.sh "${{ github.ref_name }}"
+
+      - name: Health Check
+        run: |
+          curl --fail --retry 10 --retry-delay 5 http://localhost:4004/api/health
+
+      - name: Rollback
+        if: failure()
+        run: |
+          ./deploy.sh "${{ steps.rollback.outputs.ref }}"
