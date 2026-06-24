@@ -24,7 +24,6 @@ git clone   https://github.com/lagarin1/Totem_INFO.git
 3. Instalar [Node.js](https://nodejs.org/) (versión 14 o superior).
 
 ## Configuración del proyecto
-# Totem_INFO — Guía rápida para ejecutar localmente
 
 Esta guía está pensada exclusivamente para la persona que quiere ejecutar el proyecto en su máquina local. Contiene sólo los pasos mínimos para poner la aplicación en marcha.
 
