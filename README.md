@@ -118,6 +118,44 @@ docker-compose -f Docker/compose.prod.yml up -d database_mongo
 ```
 
 El servicio se llama `database_mongo` y monta los datos desde `Docker/Database/backup/mongo_data`.
+### Problemas comunes
+
+1. **Replicaset no iniciado**: 
+    pasos para iniciar el replicaset manualmente:
+
+    ```bash
+    # Conéctate al contenedor de Mongo
+    docker exec -it <nombre_contenedor_mongo> mongosh -u admin -p test123 --authenticationDatabase admin  
+    # Dentro de mongosh, ejecuta:
+    rs.initiate()
+    rs.status()  # Verifica que el replicaset esté activo
+    
+    ```
+2. **Error de conexión con replicaSet desde el backend**:
+    al ejecutar 
+    ```bash
+    npx prisma db push
+    npx prisma db seed
+    ```
+    si ves que dice algo como  ` Topology: { Type: ReplicaSetNoPrimary ...} `, es porque el replicaset no esta seteado y no se conectará dado un problema de autenticación.
+    Para solucionarlo, sigue los pasos siguientes:
+    - Conéctate al contenedor de Mongo:
+    ```bash
+    docker exec -it <nombre_contenedor_mongo> mongosh -u admin -
+    p test123 --authenticationDatabase admin  
+    ```
+    - Dentro de mongosh, ejecuta:
+    ```bash
+    rs.initiate()
+    rs.status()  # Verifica que el replicaset esté activo
+    cfg = rs.conf()
+    cfg.members[0].host = "localhost:27017"
+    rs.reconfig(cfg, { force: true })
+    ```
+
+    y finalmente vuelve a ejecutar el comando de seteo y seed del backend.
+
+
 
 ### Poblar datos de ejemplo (seed)
 
