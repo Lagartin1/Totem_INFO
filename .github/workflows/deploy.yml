@@ -1,9 +1,9 @@
-name: Deploy con Rollback( grupo 1)
+name: Deploy con Rollback
 
 on:
   push:
     tags:
-      - 'v*'
+      - 'v.*'
 
 permissions:
   contents: read
