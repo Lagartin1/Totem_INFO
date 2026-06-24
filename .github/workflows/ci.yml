@@ -2,7 +2,7 @@ name: Totem INFO CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, master, dev, develop ]
+    branches: [ main ]
   pull_request:
     branches: [ main, master ]
 
@@ -39,9 +39,17 @@ jobs:
       - name: Otorgar permisos de ejecución
         run: chmod +x ci/*.sh
 
-      # 5. COMPILAR (Build) todos los módulos
+    # 5. COMPILAR (Build) todos los módulos
       - name: Ejecutar script de Compilación
         run: ./ci/build.sh
+        env:
+          # Inyectamos variables 'dummy' para que Next.js pase el proceso de Build
+          MONGODB_URL: "mongodb://localhost:27017/dummy_db"
+          
+          # 💡 NOTA: Si después de arreglar MONGODB_URL te tira error por 
+          # otras variables de entorno que tu backend necesite, puedes agregarlas aquí:
+          # ELASTIC_URL: "http://localhost:9200"
+          # JWT_SECRET: "secreto_falso_para_compilar"
 
       # 6. (Opcional) Subir Frontend Build como artefacto
       - name: Subir Frontend Build

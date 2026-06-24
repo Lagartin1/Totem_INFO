@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "jsx": "react-jsx"
+  },
+  "include": [
+    "Frontend/src/**/*.ts",
+    "Frontend/src/**/*.tsx",
+    "FrontendAdmin/src/**/*.ts",
+    "FrontendAdmin/src/**/*.tsx",
+    "Backend/**/*.ts"
+  ]
+}

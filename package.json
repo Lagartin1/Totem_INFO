@@ -6,6 +6,11 @@
     "slick-carousel": "^1.8.1"
   },
   "devDependencies": {
+    "sonarqube-scanner": "^4.3.6",
     "ts-node": "^10.9.2"
+  },
+  "scripts": {
+    "sonar": "sonar-scanner"
   }
+
 }
