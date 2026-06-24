@@ -1,0 +1,52 @@
+name: Totem INFO CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master, dev, develop ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    name: Totem INFO Build
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Obtener el código fuente
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      # 2. Configurar Node.js (con caché múltiple)
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            Frontend/package-lock.json
+            FrontendAdmin/package-lock.json
+            Backend/apis/package-lock.json
+
+      # 3. Configurar Python
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'Backend/synchronizer/requirements.txt'
+
+      # 4. Otorgar permisos de ejecución a los scripts bash de CI/CD
+      - name: Otorgar permisos de ejecución
+        run: chmod +x ci/*.sh
+
+      # 5. COMPILAR (Build) todos los módulos
+      - name: Ejecutar script de Compilación
+        run: ./ci/build.sh
+
+      # 6. (Opcional) Subir Frontend Build como artefacto
+      - name: Subir Frontend Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-public-build
+          path: Frontend/dist/
+          retention-days: 5
