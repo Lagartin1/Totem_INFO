@@ -102,7 +102,5 @@ services:
     depends_on:
       - backend
 
-fkdskf fkdsf
-
 volumes:
   mongo_data:
