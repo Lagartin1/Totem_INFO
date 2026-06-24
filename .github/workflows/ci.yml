@@ -1,0 +1,55 @@
+name: CI Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verificar Docker
+        run: |
+          docker version
+          docker compose version
+
+      - name: Construir imágenes con Compose
+        run: |
+          docker compose -f Docker/compose.prod.yml build
+
+      - name: Exportar imágenes a TAR
+        run: |
+          mkdir -p artifacts/images
+
+          BACKEND_IMAGE_ID="$(docker compose -f Docker/compose.prod.yml images -q backend)"
+          FRONTEND_IMAGE_ID="$(docker compose -f Docker/compose.prod.yml images -q frontend)"
+          FRONTEND_ADMIN_IMAGE_ID="$(docker compose -f Docker/compose.prod.yml images -q frontend_admin)"
+          SYNCHRONIZER_IMAGE_ID="$(docker compose -f Docker/compose.prod.yml images -q synchronizer)"
+
+          test -n "$BACKEND_IMAGE_ID"
+          test -n "$FRONTEND_IMAGE_ID"
+          test -n "$FRONTEND_ADMIN_IMAGE_ID"
+          test -n "$SYNCHRONIZER_IMAGE_ID"
+
+          docker save -o artifacts/images/totem_backend.tar "$BACKEND_IMAGE_ID"
+          docker save -o artifacts/images/totem_frontend.tar "$FRONTEND_IMAGE_ID"
+          docker save -o artifacts/images/totem_frontend_admin.tar "$FRONTEND_ADMIN_IMAGE_ID"
+          docker save -o artifacts/images/totem_synchronizer.tar "$SYNCHRONIZER_IMAGE_ID"
+
+      - name: Subir artefactos
+        uses: actions/upload-artifact@v4
+        with:
+          name: totem-images
+          path: artifacts/images/*.tar
+          if-no-files-found: error
